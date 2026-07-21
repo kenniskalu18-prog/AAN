@@ -9,10 +9,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { background:#f4f6f9; font-family:'Segoe UI',Roboto,Arial,sans-serif; padding:1.5rem; color:#1e2a3a; }
+        body {
+            background-color:#f4f6f9;
+            background-image: linear-gradient(rgba(244,246,249,0.55), rgba(244,246,249,0.55)), url('https://i.ibb.co/S95rHh8/IMG-20260722-WA0000.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            font-family:'Segoe UI',Roboto,Arial,sans-serif; padding:1.5rem; color:#1e2a3a;
+        }
+        .logo-img { height:52px; width:auto; object-fit:contain; }
         .container { max-width:1400px; margin:0 auto; background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); padding:1.5rem 1.8rem 2rem; border:1px solid #e2e8f0; }
-        .header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; border-bottom:2px solid #eef2f6; padding-bottom:1rem; margin-bottom:1.5rem; }
-        .header h1 { font-size:1.5rem; font-weight:700; color:#0a2a44; letter-spacing:-0.3px; }
+        .header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; border-bottom:3px solid transparent; border-image:linear-gradient(90deg,#0a2a44,#2a7a4d) 1; padding-bottom:1rem; margin-bottom:1.5rem; }
+        .header h1 {
+            font-size:1.7rem;
+            font-weight:800;
+            letter-spacing:-0.4px;
+            display:flex; align-items:center; gap:0.7rem;
+            background: linear-gradient(100deg, #0a2a44 35%, #2a7a4d 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        }
         .header h1 i { color:#2a7a4d; margin-right:0.5rem; }
         .header-actions { display:flex; gap:0.8rem; flex-wrap:wrap; }
         .btn { background:white; border:1px solid #cbd5e0; padding:0.5rem 1rem; border-radius:6px; font-weight:500; font-size:0.8rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; transition:0.2s; font-family:inherit; color:#1e2a3a; }
@@ -63,7 +82,7 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1><i class="fas fa-users"></i> AMSUL Alumni Onboarding</h1>
+        <h1><img src="https://i.ibb.co/7JTvt1Zn/1002087198-removebg-preview.png" alt="AMSUL logo" class="logo-img"> AMSUL Alumni Onboarding</h1>
         <div class="header-actions">
             <button class="btn btn-primary" id="syncBtn"><i class="fas fa-cloud-upload-alt"></i> Sync to Database</button>
             <button class="btn btn-success" id="downloadCsv"><i class="fas fa-file-download"></i> Download CSV</button>
