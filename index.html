@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>AMSUL Alumni Onboarding Database</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
         body { background:#f4f6f9; font-family:'Segoe UI',Roboto,Arial,sans-serif; padding:1.5rem; color:#1e2a3a; }
@@ -35,6 +37,315 @@
         .editable-cell { background:transparent; border:none; width:100%; font-family:inherit; font-size:0.85rem; padding:0.2rem 0.3rem; border-radius:4px; color:#1e2a3a; }
         .editable-cell:focus { outline:2px solid #2a7a4d; background:white; }
         .editable-cell:hover { background:#f0f7ff; }
+        .add-row-btn { background:#eef6ff; border:1px dashed #99badd; color:#1a5f7a; padding:0.4rem 1rem; border-radius:6px; cursor:pointer; font-size:0.8rem; margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.4rem; font-family:inherit; }
+        .add-row-btn:hover { background:#dceaff; }
+        .delete-btn { background:none; border:none; color:#b91c1c; cursor:pointer; font-size:0.9rem; padding:0.2rem 0.4rem; border-radius:4px; }
+        .delete-btn:hover { background:#fee2e2; }
+        .footer { margin-top:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; font-size:0.8rem; color:#5b6f86; border-top:1px solid #e2e8f0; padding-top:1rem; }
+        .footer .count { font-weight:600; color:#0a2a44; }
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
+        .modal-overlay.active { display:flex; }
+        .modal-box { background:white; border-radius:12px; padding:2rem; max-width:420px; width:90%; box-shadow:0 20px 40px rgba(0,0,0,0.2); text-align:center; }
+        .modal-box h3 { font-size:1.1rem; margin-bottom:0.5rem; color:#0a2a44; }
+        .modal-box p { font-size:0.85rem; color:#4a5a6a; margin-bottom:1.2rem; }
+        .modal-box .code-hint { background:#f0f4f8; padding:0.4rem; border-radius:6px; font-family:monospace; font-size:1.1rem; font-weight:700; color:#0a2a44; margin:0.5rem 0 1rem 0; }
+        .modal-box input { width:100%; padding:0.6rem; border:1px solid #cbd5e0; border-radius:6px; font-size:0.9rem; font-family:inherit; text-align:center; letter-spacing:2px; margin-bottom:1rem; }
+        .modal-box input:focus { outline:2px solid #2a7a4d; border-color:transparent; }
+        .modal-actions { display:flex; gap:0.8rem; justify-content:center; }
+        .modal-actions .btn { min-width:100px; justify-content:center; }
+        .toast { position:fixed; bottom:25px; right:25px; background:#1f2f3f; color:white; padding:0.8rem 1.4rem; border-radius:10px; font-size:0.85rem; box-shadow:0 6px 18px rgba(0,0,0,0.15); opacity:0; transform:translateY(10px); transition:0.3s ease; pointer-events:none; max-width:350px; z-index:999; }
+        .toast.show { opacity:1; transform:translateY(0); }
+        .toast.success { background:#1a6e3a; }
+        .toast.error { background:#a1302a; }
+        @media (max-width:700px) { .header { flex-direction:column; align-items:start; gap:0.8rem; } .container { padding:1rem; } th,td { font-size:0.75rem; padding:0.4rem 0.4rem; } .search-box input { width:100%; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-users"></i> AMSUL Alumni Onboarding</h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" id="syncBtn"><i class="fas fa-cloud-upload-alt"></i> Sync to Database</button>
+            <button class="btn btn-success" id="downloadCsv"><i class="fas fa-file-download"></i> Download CSV</button>
+            <button class="btn btn-primary" id="downloadPdf"><i class="fas fa-file-pdf"></i> Download PDF</button>
+            <span class="status-badge" id="connectionStatus"><i class="fas fa-circle" style="color:#2a7a4d; font-size:0.5rem;"></i> Connected</span>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <i class="fas fa-search" style="color:#5b6f86;"></i>
+        <input type="text" id="searchInput" placeholder="Search by name...">
+        <button class="btn btn-outline" id="clearSearchBtn" style="font-size:0.75rem;"><i class="fas fa-times"></i> Clear</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="dataTable">
+            <thead><tr><th style="width:25px;">#</th><th>Full Name</th><th>Onboarded By</th><th style="width:60px;">Action</th></tr></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <button class="add-row-btn" id="addRowBtn"><i class="fas fa-plus-circle"></i> Add New Alumni</button>
+
+    <div class="footer">
+        <span><span class="count" id="rowCount">0</span> alumni onboarded</span>
+        <span><i class="fas fa-lock" style="font-size:0.7rem;"></i> Deletion requires code: <strong>AAN2026</strong></span>
+    </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Confirm Deletion</h3>
+        <p>You are about to delete <strong id="deleteNamePreview"></strong> from the database.</p>
+        <p style="font-size:0.8rem; color:#5b6f86;">Enter the security code to confirm:</p>
+        <div class="code-hint">AAN2026</div>
+        <input type="text" id="deleteCodeInput" placeholder="Enter code..." maxlength="7" autocomplete="off">
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelDeleteBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    (function() {
+        "use strict";
+
+        // ---------- SUPABASE CREDENTIALS ----------
+        // ⚠️ REPLACE the URL below with your actual Supabase project URL
+        const SUPABASE_URL = 'https://ndsvnwyzakvslxrtwaep.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kc3Zud3l6YWt2c2x4cnR3YWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NTkwMTEsImV4cCI6MjEwMDIzNTAxMX0.EdOt-E7xWRyxRN6KmBKl9tlR1TqOhjfk0EbPEmdbc-Y';
+        const TABLE_NAME = 'ammsul_alumni';
+        const DELETE_CODE = 'AAN2026';
+
+        // ---------- STATE ----------
+        let alumniData = [];
+        let filteredData = [];
+        let deleteTargetIndex = null;
+
+        // DOM refs
+        const tbody = document.getElementById('tableBody');
+        const rowCount = document.getElementById('rowCount');
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const addBtn = document.getElementById('addRowBtn');
+        const syncBtn = document.getElementById('syncBtn');
+        const downloadBtn = document.getElementById('downloadCsv');
+        const downloadPdfBtn = document.getElementById('downloadPdf');
+        const toastEl = document.getElementById('toast');
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteCodeInput = document.getElementById('deleteCodeInput');
+        const deleteNamePreview = document.getElementById('deleteNamePreview');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        // ---------- TOAST ----------
+        let toastTimer = null;
+        function showToast(msg, type = 'info') {
+            if (toastTimer) clearTimeout(toastTimer);
+            toastEl.textContent = msg;
+            toastEl.className = 'toast';
+            if (type === 'success') toastEl.classList.add('success');
+            else if (type === 'error') toastEl.classList.add('error');
+            toastEl.classList.add('show');
+            toastTimer = setTimeout(() => toastEl.classList.remove('show'), 4000);
+        }
+
+        // ---------- RENDER TABLE ----------
+        function renderTable(data) {
+            const source = data || (filteredData.length > 0 ? filteredData : alumniData);
+            tbody.innerHTML = '';
+            source.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const tdNum = document.createElement('td');
+                tdNum.textContent = index + 1;
+                tdNum.style.textAlign = 'center';
+                tdNum.style.fontWeight = '500';
+                tr.appendChild(tdNum);
+
+                // Name
+                const tdName = document.createElement('td');
+                const inputName = document.createElement('input');
+                inputName.type = 'text';
+                inputName.className = 'editable-cell';
+                inputName.value = item.name || '';
+                inputName.placeholder = 'Full name';
+                inputName.dataset.index = index;
+                inputName.addEventListener('input', function(e) {
+                    const idx = parseInt(this.dataset.index);
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    src[idx].name = this.value;
+                    if (filteredData.length > 0) {
+                        const masterIdx = alumniData.findIndex(d => d.id === src[idx].id);
+                        if (masterIdx !== -1) alumniData[masterIdx].name = this.value;
+                    }
+                });
+                tdName.appendChild(inputName);
+                tr.appendChild(tdName);
+
+                // Onboarded By
+                const tdOnboarded = document.createElement('td');
+                const inputOnboarded = document.createElement('input');
+                inputOnboarded.type = 'text';
+                inputOnboarded.className = 'editable-cell';
+                inputOnboarded.value = item.onboarded_by || '';
+                inputOnboarded.placeholder = 'Your name';
+                inputOnboarded.dataset.index = index;
+                inputOnboarded.addEventListener('input', function(e) {
+                    const idx = parseInt(this.dataset.index);
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    src[idx].onboarded_by = this.value;
+                    if (filteredData.length > 0) {
+                        const masterIdx = alumniData.findIndex(d => d.id === src[idx].id);
+                        if (masterIdx !== -1) alumniData[masterIdx].onboarded_by = this.value;
+                    }
+                });
+                tdOnboarded.appendChild(inputOnboarded);
+                tr.appendChild(tdOnboarded);
+
+                // Delete Action
+                const tdAction = document.createElement('td');
+                tdAction.style.textAlign = 'center';
+                const delBtn = document.createElement('button');
+                delBtn.className = 'delete-btn';
+                delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                const itemId = item.id || `temp_${index}`;
+                delBtn.dataset.id = itemId;
+                delBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        deleteTargetIndex = idx;
+                        deleteNamePreview.textContent = src[idx].name || 'Unnamed';
+                        deleteModal.classList.add('active');
+                        deleteCodeInput.value = '';
+                        deleteCodeInput.focus();
+                    }
+                });
+                tdAction.appendChild(delBtn);
+                tr.appendChild(tdAction);
+
+                tbody.appendChild(tr);
+            });
+            rowCount.textContent = source.length;
+        }
+
+        // ---------- ADD ROW ----------
+        function addRow() {
+            const newItem = {
+                id: `temp_${Date.now()}`,
+                name: '',
+                onboarded_by: ''
+            };
+            alumniData.push(newItem);
+            filteredData = [];
+            searchInput.value = '';
+            renderTable(alumniData);
+            const rows = tbody.querySelectorAll('tr');
+            if (rows.length > 0) {
+                const input = rows[rows.length - 1].querySelector('td:nth-child(2) input');
+                if (input) setTimeout(() => input.focus(), 50);
+            }
+            showToast('New row added. Fill in the name.', 'info');
+        }
+
+        function filterTable(query) {
+            const q = query.toLowerCase().trim();
+            if (!q) { filteredData = []; renderTable(alumniData); return; }
+            filteredData = alumniData.filter(item => (item.name || '').toLowerCase().includes(q));
+            renderTable(filteredData);
+        }
+
+        async function confirmDelete() {
+            if (deleteCodeInput.value.trim() !== DELETE_CODE) {
+                showToast('Invalid code. Enter AAN2026.', 'error');
+                deleteCodeInput.value = '';
+                deleteCodeInput.focus();
+                return;
+            }
+            const src = filteredData.length > 0 ? filteredData : alumniData;
+            if (deleteTargetIndex === null || deleteTargetIndex >= src.length) {
+                showToast('No record to delete.', 'error');
+                deleteModal.classList.remove('active');
+                return;
+            }
+            const itemToDelete = src[deleteTargetIndex];
+            const idToRemove = itemToDelete.id;
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.textContent = 'Deleting...';
+            try {
+                if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${idToRemove}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Delete failed: ${response.status} - ${errorText}`);
+                    }
+                    const masterIdx = alumniData.findIndex(d => d.id === idToRemove);
+                    if (masterIdx !== -1) alumniData.splice(masterIdx, 1);
+                } else {
+                    const idx = alumniData.indexOf(itemToDelete);
+                    if (idx !== -1) alumniData.splice(idx, 1);
+                }
+                filteredData = [];
+                searchInput.value = '';
+                deleteModal.classList.remove('active');
+                renderTable(alumniData);
+                showToast('Record deleted.', 'success');
+            } catch (error) {
+                console.error('Delete error:', error);
+                showToast(`Delete failed: ${error.message}`, 'error');
+            } finally {
+                confirmDeleteBtn.disabled = false;
+                confirmDeleteBtn.textContent = 'Delete';
+                deleteTargetIndex = null;
+            }
+        }
+
+        async function syncToSupabase() {
+            const validData = alumniData.filter(item => item.name && item.name.trim() !== '');
+            if (validData.length === 0) { showToast('No data to sync.', 'error'); return; }
+            syncBtn.disabled = true;
+            syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+            try {
+                const baseHeaders = {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                };
+
+                // Rows that already exist in Supabase (real id) -> update in place
+                const toUpdate = validData.filter(item => item.id && !item.id.toString().startsWith('temp_'));
+                if (toUpdate.length > 0) {
+                    const updatePayload = toUpdate.map(({ id, name, onboarded_by }) => ({
+                        id,
+                        name: name.trim(),
+                        onboarded_by: onboarded_by ? onboarded_by.trim() : ''
+                    }));
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?on_conflict=id`, {
+                        method: 'POST',
+                        headers: { ...baseHeaders, 'Prefer': 'resolution=merge-duplicates' },
+                        body: JSON.stringify(updatePayload)
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Update failed: ${response.status} - ${errorText}`);
+                    }
+                }
+
+                // Rows that don't exist yet (temp id) -> insert as new
+                const toInsert = validData.filter(item => !item.id || item.id.toString().startsWith('temp_'));
+                if (toInsert.length > 0) {
+              .editable-cell:hover { background:#f0f7ff; }
         .add-row-btn { background:#eef6ff; border:1px dashed #99badd; color:#1a5f7a; padding:0.4rem 1rem; border-radius:6px; cursor:pointer; font-size:0.8rem; margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.4rem; font-family:inherit; }
         .add-row-btn:hover { background:#dceaff; }
         .delete-btn { background:none; border:none; color:#b91c1c; cursor:pointer; font-size:0.9rem; padding:0.2rem 0.4rem; border-radius:4px; }
