@@ -98,15 +98,15 @@
         .nav-menu-item.active { background:#0a2a44; color:white; }
         .nav-menu-item.active i { color:#7fd6a0; }
 
-        /* ---------- SCROLL FABS ---------- */
-        .scroll-fabs { position:fixed; bottom:20px; right:20px; z-index:900; display:flex; flex-direction:column; gap:0.6rem; }
-        .scroll-fabs button {
-            width:42px; height:42px; border-radius:50%; border:1px solid rgba(255,255,255,0.25);
-            background:rgba(10,42,68,0.55); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
-            color:white; font-size:0.9rem; cursor:pointer; box-shadow:0 3px 10px rgba(0,0,0,0.15);
-            display:flex; align-items:center; justify-content:center; transition:0.2s;
+        /* ---------- TAB SWITCHER ---------- */
+        .tab-switcher { display:flex; gap:0.4rem; background:#eef2f6; border-radius:10px; padding:0.3rem; margin-bottom:1.2rem; }
+        .tab-switcher button {
+            flex:1; border:none; background:none; padding:0.6rem 0.5rem; border-radius:8px;
+            font-size:0.85rem; font-weight:600; color:#5b6f86; cursor:pointer; font-family:inherit;
+            display:flex; align-items:center; justify-content:center; gap:0.4rem; transition:0.2s;
         }
-        .scroll-fabs button:hover { background:rgba(26,58,90,0.85); }
+        .tab-switcher button.active { background:#0a2a44; color:white; box-shadow:0 2px 6px rgba(10,42,68,0.3); }
+        .tab-switcher button i { font-size:0.85rem; }
         .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
         .modal-overlay.active { display:flex; }
         .modal-box { background:white; border-radius:12px; padding:2rem; max-width:420px; width:90%; box-shadow:0 20px 40px rgba(0,0,0,0.2); text-align:center; }
@@ -147,6 +147,11 @@
         </div>
     </div>
 
+    <div class="tab-switcher" id="tabSwitcher">
+        <button class="active" data-target="alumniSection"><i class="fas fa-user-graduate"></i> Onboarded</button>
+        <button data-target="pendingSection"><i class="fas fa-hourglass-half"></i> Pending</button>
+    </div>
+
     <div class="page-section active" id="alumniSection">
     <div class="search-box">
         <i class="fas fa-search" style="color:#5b6f86;"></i>
@@ -183,7 +188,7 @@
 
     <div class="table-wrapper">
         <table id="pendingTable">
-            <thead><tr><th style="width:25px;">#</th><th>Full Name</th><th>Being Onboarded By</th><th style="width:60px;">Action</th></tr></thead>
+            <thead><tr><th style="width:25px;">#</th><th>Full Name</th><th>Being Onboarded By</th><th style="width:80px;">Action</th></tr></thead>
             <tbody id="pendingTableBody"></tbody>
         </table>
     </div>
@@ -197,11 +202,6 @@
     </div>
 </div>
 
-<div class="scroll-fabs">
-    <button id="scrollTopBtn" title="Scroll to top"><i class="fas fa-chevron-up"></i></button>
-    <button id="scrollBottomBtn" title="Scroll to bottom"><i class="fas fa-chevron-down"></i></button>
-</div>
-
 <!-- DELETE MODAL -->
 <div class="modal-overlay" id="deleteModal">
     <div class="modal-box">
@@ -213,6 +213,18 @@
         <div class="modal-actions">
             <button class="btn btn-outline" id="cancelDeleteBtn">Cancel</button>
             <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- ONBOARD CONFIRM MODAL -->
+<div class="modal-overlay" id="onboardModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-check-circle" style="color:#2a7a4d;"></i> Confirm Onboarding</h3>
+        <p>Mark <strong id="onboardNamePreview"></strong> as fully onboarded and move them to the Onboarded list?</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelOnboardBtn">Cancel</button>
+            <button class="btn btn-success" id="confirmOnboardBtn"><i class="fas fa-check"></i> Yes, Onboarded</button>
         </div>
     </div>
 </div>
@@ -238,6 +250,7 @@
         let filteredPendingData = [];
         let deleteTargetIndex = null;
         let deleteContext = 'alumni'; // 'alumni' or 'pending'
+        let onboardTargetIndex = null;
 
         // DOM refs
         const tbody = document.getElementById('tableBody');
@@ -259,6 +272,10 @@
         const deleteNamePreview = document.getElementById('deleteNamePreview');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const onboardModal = document.getElementById('onboardModal');
+        const onboardNamePreview = document.getElementById('onboardNamePreview');
+        const cancelOnboardBtn = document.getElementById('cancelOnboardBtn');
+        const confirmOnboardBtn = document.getElementById('confirmOnboardBtn');
 
         // ---------- TOAST ----------
         let toastTimer = null;
@@ -419,9 +436,30 @@
                 tdOnboarding.appendChild(inputOnboarding);
                 tr.appendChild(tdOnboarding);
 
-                // Delete Action
+                // Onboard + Delete Actions
                 const tdAction = document.createElement('td');
                 tdAction.style.textAlign = 'center';
+                tdAction.style.whiteSpace = 'nowrap';
+
+                const onboardBtn = document.createElement('button');
+                onboardBtn.className = 'delete-btn';
+                onboardBtn.style.color = '#2a7a4d';
+                onboardBtn.title = 'Mark as onboarded';
+                onboardBtn.innerHTML = '<i class="fas fa-check-circle"></i>';
+                const itemIdForOnboard = item.id || `temp_${index}`;
+                onboardBtn.dataset.id = itemIdForOnboard;
+                onboardBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        onboardTargetIndex = idx;
+                        onboardNamePreview.textContent = src[idx].name || 'Unnamed';
+                        onboardModal.classList.add('active');
+                    }
+                });
+                tdAction.appendChild(onboardBtn);
+
                 const delBtn = document.createElement('button');
                 delBtn.className = 'delete-btn';
                 delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
@@ -558,6 +596,60 @@
                 confirmDeleteBtn.disabled = false;
                 confirmDeleteBtn.textContent = 'Delete';
                 deleteTargetIndex = null;
+            }
+        }
+
+        async function confirmOnboard() {
+            const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
+            if (onboardTargetIndex === null || onboardTargetIndex >= src.length) {
+                showToast('No record found.', 'error');
+                onboardModal.classList.remove('active');
+                return;
+            }
+            const itemToMove = src[onboardTargetIndex];
+            const idToRemove = itemToMove.id;
+            confirmOnboardBtn.disabled = true;
+            confirmOnboardBtn.textContent = 'Moving...';
+            try {
+                if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}?id=eq.${idToRemove}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Move failed: ${response.status} - ${errorText}`);
+                    }
+                    const masterIdx = pendingData.findIndex(d => d.id === idToRemove);
+                    if (masterIdx !== -1) pendingData.splice(masterIdx, 1);
+                } else {
+                    const idx = pendingData.indexOf(itemToMove);
+                    if (idx !== -1) pendingData.splice(idx, 1);
+                }
+
+                alumniData.push({
+                    id: `temp_${Date.now()}`,
+                    name: itemToMove.name || '',
+                    onboarded_by: itemToMove.being_onboarded_by || ''
+                });
+
+                filteredPendingData = [];
+                pendingSearchInput.value = '';
+                filteredData = [];
+                onboardModal.classList.remove('active');
+                renderPendingTable(pendingData);
+                renderTable(alumniData);
+                showToast('Moved to onboarded list. Tap "Sync to Database" to save it.', 'success');
+            } catch (error) {
+                console.error('Onboard move error:', error);
+                showToast(`Move failed: ${error.message}`, 'error');
+            } finally {
+                confirmOnboardBtn.disabled = false;
+                confirmOnboardBtn.innerHTML = '<i class="fas fa-check"></i> Yes, Onboarded';
+                onboardTargetIndex = null;
             }
         }
 
@@ -807,17 +899,23 @@
             deleteModal.addEventListener('click', function(e) {
                 if (e.target === deleteModal) { deleteModal.classList.remove('active'); deleteTargetIndex = null; }
             });
+            cancelOnboardBtn.addEventListener('click', function() { onboardModal.classList.remove('active'); onboardTargetIndex = null; });
+            confirmOnboardBtn.addEventListener('click', confirmOnboard);
+            onboardModal.addEventListener('click', function(e) {
+                if (e.target === onboardModal) { onboardModal.classList.remove('active'); onboardTargetIndex = null; }
+            });
             document.addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); addRow(); }
             });
             console.log('✅ AMSUL Alumni Database ready. Deletion code: AAN2026');
 
-            // ---------- NAV MENU ----------
+            // ---------- NAV MENU + TAB SWITCHER ----------
             const hamburgerBtn = document.getElementById('hamburgerBtn');
             const navMenu = document.getElementById('navMenu');
             const navOverlay = document.getElementById('navOverlay');
             const closeNavBtn = document.getElementById('closeNavBtn');
             const navItems = document.querySelectorAll('.nav-menu-item');
+            const tabButtons = document.querySelectorAll('#tabSwitcher button');
             const pageSections = document.querySelectorAll('.page-section');
 
             function openNav() { navMenu.classList.add('active'); navOverlay.classList.add('active'); }
@@ -826,25 +924,21 @@
             closeNavBtn.addEventListener('click', closeNav);
             navOverlay.addEventListener('click', closeNav);
 
-            navItems.forEach(function(navItem) {
-                navItem.addEventListener('click', function() {
-                    const targetId = this.dataset.target;
-                    pageSections.forEach(function(section) {
-                        section.classList.toggle('active', section.id === targetId);
-                    });
-                    navItems.forEach(function(item) { item.classList.remove('active'); });
-                    this.classList.add('active');
-                    closeNav();
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+            function switchPage(targetId) {
+                pageSections.forEach(function(section) {
+                    section.classList.toggle('active', section.id === targetId);
                 });
-            });
-
-            // ---------- SCROLL BUTTONS ----------
-            document.getElementById('scrollTopBtn').addEventListener('click', function() {
+                navItems.forEach(function(item) { item.classList.toggle('active', item.dataset.target === targetId); });
+                tabButtons.forEach(function(btn) { btn.classList.toggle('active', btn.dataset.target === targetId); });
+                closeNav();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            navItems.forEach(function(navItem) {
+                navItem.addEventListener('click', function() { switchPage(this.dataset.target); });
             });
-            document.getElementById('scrollBottomBtn').addEventListener('click', function() {
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            tabButtons.forEach(function(tabBtn) {
+                tabBtn.addEventListener('click', function() { switchPage(this.dataset.target); });
             });
         }
 
