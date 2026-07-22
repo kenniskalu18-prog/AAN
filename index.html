@@ -161,7 +161,7 @@
 
     <div class="table-wrapper">
         <table id="dataTable">
-            <thead><tr><th style="width:25px;">#</th><th>Full Name</th><th>Onboarded By</th><th style="width:60px;">Action</th></tr></thead>
+            <thead><tr><th style="width:25px;">#</th><th>Full Name</th><th>Onboarded By</th><th style="width:80px;">Action</th></tr></thead>
             <tbody id="tableBody"></tbody>
         </table>
     </div>
@@ -229,6 +229,18 @@
     </div>
 </div>
 
+<!-- RETURN TO PENDING MODAL -->
+<div class="modal-overlay" id="returnModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-undo" style="color:#c9820a;"></i> Return to Pending</h3>
+        <p>Move <strong id="returnNamePreview"></strong> back to the Pending list? Use this if they were onboarded by mistake.</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelReturnBtn">Cancel</button>
+            <button class="btn btn-primary" id="confirmReturnBtn"><i class="fas fa-undo"></i> Yes, Return</button>
+        </div>
+    </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 <script>
@@ -251,6 +263,7 @@
         let deleteTargetIndex = null;
         let deleteContext = 'alumni'; // 'alumni' or 'pending'
         let onboardTargetIndex = null;
+        let returnTargetIndex = null;
 
         // DOM refs
         const tbody = document.getElementById('tableBody');
@@ -276,6 +289,10 @@
         const onboardNamePreview = document.getElementById('onboardNamePreview');
         const cancelOnboardBtn = document.getElementById('cancelOnboardBtn');
         const confirmOnboardBtn = document.getElementById('confirmOnboardBtn');
+        const returnModal = document.getElementById('returnModal');
+        const returnNamePreview = document.getElementById('returnNamePreview');
+        const cancelReturnBtn = document.getElementById('cancelReturnBtn');
+        const confirmReturnBtn = document.getElementById('confirmReturnBtn');
 
         // ---------- TOAST ----------
         let toastTimer = null;
@@ -354,9 +371,30 @@
                 tdOnboarded.appendChild(inputOnboarded);
                 tr.appendChild(tdOnboarded);
 
-                // Delete Action
+                // Return-to-Pending + Delete Actions
                 const tdAction = document.createElement('td');
                 tdAction.style.textAlign = 'center';
+                tdAction.style.whiteSpace = 'nowrap';
+
+                const returnBtn = document.createElement('button');
+                returnBtn.className = 'delete-btn';
+                returnBtn.style.color = '#c9820a';
+                returnBtn.title = 'Return to pending';
+                returnBtn.innerHTML = '<i class="fas fa-undo"></i>';
+                const itemIdForReturn = item.id || `temp_${index}`;
+                returnBtn.dataset.id = itemIdForReturn;
+                returnBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        returnTargetIndex = idx;
+                        returnNamePreview.textContent = src[idx].name || 'Unnamed';
+                        returnModal.classList.add('active');
+                    }
+                });
+                tdAction.appendChild(returnBtn);
+
                 const delBtn = document.createElement('button');
                 delBtn.className = 'delete-btn';
                 delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
@@ -653,6 +691,60 @@
             }
         }
 
+        async function confirmReturn() {
+            const src = filteredData.length > 0 ? filteredData : alumniData;
+            if (returnTargetIndex === null || returnTargetIndex >= src.length) {
+                showToast('No record found.', 'error');
+                returnModal.classList.remove('active');
+                return;
+            }
+            const itemToMove = src[returnTargetIndex];
+            const idToRemove = itemToMove.id;
+            confirmReturnBtn.disabled = true;
+            confirmReturnBtn.textContent = 'Moving...';
+            try {
+                if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${idToRemove}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Move failed: ${response.status} - ${errorText}`);
+                    }
+                    const masterIdx = alumniData.findIndex(d => d.id === idToRemove);
+                    if (masterIdx !== -1) alumniData.splice(masterIdx, 1);
+                } else {
+                    const idx = alumniData.indexOf(itemToMove);
+                    if (idx !== -1) alumniData.splice(idx, 1);
+                }
+
+                pendingData.push({
+                    id: `temp_${Date.now()}`,
+                    name: itemToMove.name || '',
+                    being_onboarded_by: itemToMove.onboarded_by || ''
+                });
+
+                filteredData = [];
+                searchInput.value = '';
+                filteredPendingData = [];
+                returnModal.classList.remove('active');
+                renderTable(alumniData);
+                renderPendingTable(pendingData);
+                showToast('Moved back to pending. Tap "Sync to Database" to save it.', 'success');
+            } catch (error) {
+                console.error('Return move error:', error);
+                showToast(`Move failed: ${error.message}`, 'error');
+            } finally {
+                confirmReturnBtn.disabled = false;
+                confirmReturnBtn.innerHTML = '<i class="fas fa-undo"></i> Yes, Return';
+                returnTargetIndex = null;
+            }
+        }
+
         async function syncToSupabase() {
             const validData = alumniData.filter(item => item.name && item.name.trim() !== '');
             const validPendingData = pendingData.filter(item => item.name && item.name.trim() !== '');
@@ -903,6 +995,11 @@
             confirmOnboardBtn.addEventListener('click', confirmOnboard);
             onboardModal.addEventListener('click', function(e) {
                 if (e.target === onboardModal) { onboardModal.classList.remove('active'); onboardTargetIndex = null; }
+            });
+            cancelReturnBtn.addEventListener('click', function() { returnModal.classList.remove('active'); returnTargetIndex = null; });
+            confirmReturnBtn.addEventListener('click', confirmReturn);
+            returnModal.addEventListener('click', function(e) {
+                if (e.target === returnModal) { returnModal.classList.remove('active'); returnTargetIndex = null; }
             });
             document.addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); addRow(); }
