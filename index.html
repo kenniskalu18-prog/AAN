@@ -46,6 +46,11 @@
         .btn i { font-size:0.85rem; }
         .status-badge { background:#e8f0fe; color:#1a5f7a; padding:0.2rem 0.7rem; border-radius:30px; font-size:0.7rem; font-weight:600; }
         .search-box { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem; }
+        .filter-panel { display:none; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0.7rem; align-items:end; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.8rem; margin-bottom:1rem; }
+        .filter-panel.active { display:grid; }
+        .filter-field { display:flex; flex-direction:column; gap:0.25rem; }
+        .filter-field label { font-size:0.7rem; font-weight:600; color:#5b6f86; text-transform:uppercase; letter-spacing:0.3px; }
+        .filter-field select, .filter-field input[type="date"] { padding:0.45rem 0.5rem; border:1px solid #cbd5e0; border-radius:6px; font-size:0.82rem; font-family:inherit; background:white; }
         .search-box input { padding:0.4rem 0.8rem; border:1px solid #cbd5e0; border-radius:6px; font-size:0.85rem; width:260px; font-family:inherit; }
         .search-box input:focus { outline:2px solid #2a7a4d; border-color:transparent; }
         .table-wrapper { overflow-x:auto; overflow-y:auto; max-height:420px; margin-top:0.5rem; border:1px solid #edf2f6; border-radius:8px; }
@@ -183,6 +188,31 @@
         <i class="fas fa-search" style="color:#5b6f86;"></i>
         <input type="text" id="searchInput" placeholder="Search by name...">
         <button class="btn btn-outline" id="clearSearchBtn" style="font-size:0.75rem;"><i class="fas fa-times"></i> Clear</button>
+        <button class="btn btn-outline" id="toggleAlumniFiltersBtn" style="font-size:0.75rem;"><i class="fas fa-filter"></i> Filters</button>
+    </div>
+
+    <div class="filter-panel" id="alumniFilterPanel">
+        <div class="filter-field">
+            <label>Onboarded By</label>
+            <select id="filterAlumniRep"><option value="">All</option></select>
+        </div>
+        <div class="filter-field">
+            <label>Date Added (from)</label>
+            <input type="date" id="filterAlumniDateAddedFrom">
+        </div>
+        <div class="filter-field">
+            <label>Date Added (to)</label>
+            <input type="date" id="filterAlumniDateAddedTo">
+        </div>
+        <div class="filter-field">
+            <label>Date Onboarded (from)</label>
+            <input type="date" id="filterAlumniDateOnboardedFrom">
+        </div>
+        <div class="filter-field">
+            <label>Date Onboarded (to)</label>
+            <input type="date" id="filterAlumniDateOnboardedTo">
+        </div>
+        <button class="btn btn-outline" id="clearAlumniFiltersBtn" style="font-size:0.75rem;">Clear Filters</button>
     </div>
 
     <div class="table-wrapper">
@@ -210,6 +240,23 @@
         <i class="fas fa-search" style="color:#5b6f86;"></i>
         <input type="text" id="pendingSearchInput" placeholder="Search by name...">
         <button class="btn btn-outline" id="pendingClearSearchBtn" style="font-size:0.75rem;"><i class="fas fa-times"></i> Clear</button>
+        <button class="btn btn-outline" id="togglePendingFiltersBtn" style="font-size:0.75rem;"><i class="fas fa-filter"></i> Filters</button>
+    </div>
+
+    <div class="filter-panel" id="pendingFilterPanel">
+        <div class="filter-field">
+            <label>Being Onboarded By</label>
+            <select id="filterPendingRep"><option value="">All</option></select>
+        </div>
+        <div class="filter-field">
+            <label>Date Added (from)</label>
+            <input type="date" id="filterPendingDateAddedFrom">
+        </div>
+        <div class="filter-field">
+            <label>Date Added (to)</label>
+            <input type="date" id="filterPendingDateAddedTo">
+        </div>
+        <button class="btn btn-outline" id="clearPendingFiltersBtn" style="font-size:0.75rem;">Clear Filters</button>
     </div>
 
     <div class="table-wrapper">
@@ -318,6 +365,20 @@
         const pendingRowCount = document.getElementById('pendingRowCount');
         const pendingSearchInput = document.getElementById('pendingSearchInput');
         const pendingClearSearchBtn = document.getElementById('pendingClearSearchBtn');
+        const toggleAlumniFiltersBtn = document.getElementById('toggleAlumniFiltersBtn');
+        const alumniFilterPanel = document.getElementById('alumniFilterPanel');
+        const filterAlumniRep = document.getElementById('filterAlumniRep');
+        const filterAlumniDateAddedFrom = document.getElementById('filterAlumniDateAddedFrom');
+        const filterAlumniDateAddedTo = document.getElementById('filterAlumniDateAddedTo');
+        const filterAlumniDateOnboardedFrom = document.getElementById('filterAlumniDateOnboardedFrom');
+        const filterAlumniDateOnboardedTo = document.getElementById('filterAlumniDateOnboardedTo');
+        const clearAlumniFiltersBtn = document.getElementById('clearAlumniFiltersBtn');
+        const togglePendingFiltersBtn = document.getElementById('togglePendingFiltersBtn');
+        const pendingFilterPanel = document.getElementById('pendingFilterPanel');
+        const filterPendingRep = document.getElementById('filterPendingRep');
+        const filterPendingDateAddedFrom = document.getElementById('filterPendingDateAddedFrom');
+        const filterPendingDateAddedTo = document.getElementById('filterPendingDateAddedTo');
+        const clearPendingFiltersBtn = document.getElementById('clearPendingFiltersBtn');
         const addPendingBtn = document.getElementById('addPendingRowBtn');
         const toastEl = document.getElementById('toast');
         const deleteModal = document.getElementById('deleteModal');
@@ -515,6 +576,7 @@
             });
             rowCount.textContent = source.length;
             updateStats();
+            populateRepDropdowns();
         }
 
         // ---------- RENDER PENDING TABLE ----------
@@ -657,6 +719,7 @@
             });
             pendingRowCount.textContent = source.length;
             updateStats();
+            populateRepDropdowns();
         }
 
         // ---------- ADD ROW ----------
@@ -683,13 +746,6 @@
             showToast('New row added. Fill in the name.', 'info');
         }
 
-        function filterTable(query) {
-            const q = query.toLowerCase().trim();
-            if (!q) { filteredData = []; renderTable(alumniData); return; }
-            filteredData = alumniData.filter(item => (item.name || '').toLowerCase().includes(q));
-            renderTable(filteredData);
-        }
-
         function addPendingRow() {
             const newItem = {
                 id: `temp_${Date.now()}`,
@@ -709,11 +765,53 @@
             showToast('New pending row added. Fill in the name.', 'info');
         }
 
+        function dateInRange(dateStr, fromStr, toStr) {
+            if (!fromStr && !toStr) return true;
+            if (!dateStr) return false;
+            const d = new Date(dateStr);
+            if (fromStr) { const f = new Date(fromStr); if (d < f) return false; }
+            if (toStr) { const t = new Date(toStr); t.setHours(23,59,59,999); if (d > t) return false; }
+            return true;
+        }
+
+        function populateRepDropdowns() {
+            const alumniReps = [...new Set(alumniData.map(i => (i.onboarded_by || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+            const currentAlumniVal = filterAlumniRep.value;
+            filterAlumniRep.innerHTML = '<option value="">All</option>' + alumniReps.map(r => `<option value="${r}">${r}</option>`).join('');
+            if (alumniReps.includes(currentAlumniVal)) filterAlumniRep.value = currentAlumniVal;
+
+            const pendingReps = [...new Set(pendingData.map(i => (i.being_onboarded_by || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+            const currentPendingVal = filterPendingRep.value;
+            filterPendingRep.innerHTML = '<option value="">All</option>' + pendingReps.map(r => `<option value="${r}">${r}</option>`).join('');
+            if (pendingReps.includes(currentPendingVal)) filterPendingRep.value = currentPendingVal;
+        }
+
+        function filterTable(query) {
+            const q = (query || '').toLowerCase().trim();
+            let base = alumniData;
+            if (q) base = base.filter(item => (item.name || '').toLowerCase().includes(q));
+            const rep = filterAlumniRep.value;
+            if (rep) base = base.filter(item => (item.onboarded_by || '').trim() === rep);
+            const daf = filterAlumniDateAddedFrom.value, dat = filterAlumniDateAddedTo.value;
+            if (daf || dat) base = base.filter(item => dateInRange(item.date_added, daf, dat));
+            const dof = filterAlumniDateOnboardedFrom.value, dot = filterAlumniDateOnboardedTo.value;
+            if (dof || dot) base = base.filter(item => dateInRange(item.date_onboarded, dof, dot));
+            const anyActive = !!(q || rep || daf || dat || dof || dot);
+            filteredData = anyActive ? base : [];
+            renderTable(anyActive ? base : alumniData);
+        }
+
         function filterPendingTable(query) {
-            const q = query.toLowerCase().trim();
-            if (!q) { filteredPendingData = []; renderPendingTable(pendingData); return; }
-            filteredPendingData = pendingData.filter(item => (item.name || '').toLowerCase().includes(q));
-            renderPendingTable(filteredPendingData);
+            const q = (query || '').toLowerCase().trim();
+            let base = pendingData;
+            if (q) base = base.filter(item => (item.name || '').toLowerCase().includes(q));
+            const rep = filterPendingRep.value;
+            if (rep) base = base.filter(item => (item.being_onboarded_by || '').trim() === rep);
+            const daf = filterPendingDateAddedFrom.value, dat = filterPendingDateAddedTo.value;
+            if (daf || dat) base = base.filter(item => dateInRange(item.date_added, daf, dat));
+            const anyActive = !!(q || rep || daf || dat);
+            filteredPendingData = anyActive ? base : [];
+            renderPendingTable(anyActive ? base : pendingData);
         }
 
         async function confirmDelete() {
@@ -1210,10 +1308,35 @@
             downloadBtn.addEventListener('click', downloadCSV);
             downloadPdfBtn.addEventListener('click', downloadPDF);
             searchInput.addEventListener('input', function(e) { filterTable(this.value); });
-            clearSearchBtn.addEventListener('click', function() { searchInput.value = ''; filteredData = []; renderTable(alumniData); });
+            clearSearchBtn.addEventListener('click', function() { searchInput.value = ''; filterTable(''); });
             addPendingBtn.addEventListener('click', addPendingRow);
             pendingSearchInput.addEventListener('input', function(e) { filterPendingTable(this.value); });
-            pendingClearSearchBtn.addEventListener('click', function() { pendingSearchInput.value = ''; filteredPendingData = []; renderPendingTable(pendingData); });
+            pendingClearSearchBtn.addEventListener('click', function() { pendingSearchInput.value = ''; filterPendingTable(''); });
+
+            toggleAlumniFiltersBtn.addEventListener('click', function() { alumniFilterPanel.classList.toggle('active'); });
+            [filterAlumniRep, filterAlumniDateAddedFrom, filterAlumniDateAddedTo, filterAlumniDateOnboardedFrom, filterAlumniDateOnboardedTo].forEach(function(el) {
+                el.addEventListener('change', function() { filterTable(searchInput.value); });
+            });
+            clearAlumniFiltersBtn.addEventListener('click', function() {
+                filterAlumniRep.value = '';
+                filterAlumniDateAddedFrom.value = '';
+                filterAlumniDateAddedTo.value = '';
+                filterAlumniDateOnboardedFrom.value = '';
+                filterAlumniDateOnboardedTo.value = '';
+                filterTable(searchInput.value);
+            });
+
+            togglePendingFiltersBtn.addEventListener('click', function() { pendingFilterPanel.classList.toggle('active'); });
+            [filterPendingRep, filterPendingDateAddedFrom, filterPendingDateAddedTo].forEach(function(el) {
+                el.addEventListener('change', function() { filterPendingTable(pendingSearchInput.value); });
+            });
+            clearPendingFiltersBtn.addEventListener('click', function() {
+                filterPendingRep.value = '';
+                filterPendingDateAddedFrom.value = '';
+                filterPendingDateAddedTo.value = '';
+                filterPendingTable(pendingSearchInput.value);
+            });
+
             cancelDeleteBtn.addEventListener('click', function() { deleteModal.classList.remove('active'); deleteTargetIndex = null; });
             confirmDeleteBtn.addEventListener('click', confirmDelete);
             deleteCodeInput.addEventListener('keydown', function(e) {
