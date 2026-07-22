@@ -99,6 +99,13 @@
         .nav-menu-item.active i { color:#7fd6a0; }
 
         /* ---------- TAB SWITCHER ---------- */
+        /* ---------- STATS BAR ---------- */
+        .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:0.7rem; margin-bottom:1.2rem; }
+        .stat-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:0.7rem 0.5rem; text-align:center; }
+        .stat-value { font-size:1.3rem; font-weight:800; color:#0a2a44; }
+        .stat-label { font-size:0.68rem; color:#5b6f86; font-weight:600; text-transform:uppercase; letter-spacing:0.3px; margin-top:0.15rem; }
+        @media (max-width:700px) { .stats-bar { grid-template-columns:repeat(2,1fr); } }
+
         .tab-switcher { display:flex; gap:0.4rem; background:#eef2f6; border-radius:10px; padding:0.3rem; margin-bottom:1.2rem; }
         .tab-switcher button {
             flex:1; border:none; background:none; padding:0.6rem 0.5rem; border-radius:8px;
@@ -127,6 +134,194 @@
 <body>
 <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
 <div class="nav-overlay" id="navOverlay"></div>
+<div class="nav-menu" id="navMenu">
+    <div class="nav-menu-header">
+        <span>Menu</span>
+        <button id="closeNavBtn" aria-label="Close menu"><i class="fas fa-times"></i></button>
+    </div>
+    <button class="nav-menu-item active" data-target="alumniSection"><i class="fas fa-user-graduate"></i> Alumni Onboarded</button>
+    <button class="nav-menu-item" data-target="pendingSection"><i class="fas fa-hourglass-half"></i> Pending Onboarding</button>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h1><img src="https://i.ibb.co/7JTvt1Zn/1002087198-removebg-preview.png" alt="AMSUL logo" class="logo-img"> AMSUL Alumni Onboarding</h1>
+        <div class="header-actions">
+            <button class="btn btn-primary" id="syncBtn"><i class="fas fa-cloud-upload-alt"></i> Sync to Database</button>
+            <button class="btn btn-success" id="downloadCsv"><i class="fas fa-file-download"></i> Download CSV</button>
+            <button class="btn btn-primary" id="downloadPdf"><i class="fas fa-file-pdf"></i> Download PDF</button>
+            <span class="status-badge" id="connectionStatus">🔴 Offline</span>
+        </div>
+    </div>
+
+    <div class="stats-bar" id="statsBar">
+        <div class="stat-card">
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-label">Total Alumni</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statPending">0</div>
+            <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statOnboarded">0</div>
+            <div class="stat-label">Onboarded</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statCompletion">0%</div>
+            <div class="stat-label">Completion</div>
+        </div>
+    </div>
+
+    <div class="tab-switcher" id="tabSwitcher">
+        <button class="active" data-target="alumniSection"><i class="fas fa-user-graduate"></i> Onboarded</button>
+        <button data-target="pendingSection"><i class="fas fa-hourglass-half"></i> Pending</button>
+    </div>
+
+    <div class="page-section active" id="alumniSection">
+    <div class="search-box">
+        <i class="fas fa-search" style="color:#5b6f86;"></i>
+        <input type="text" id="searchInput" placeholder="Search by name...">
+        <button class="btn btn-outline" id="clearSearchBtn" style="font-size:0.75rem;"><i class="fas fa-times"></i> Clear</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="dataTable">
+            <thead><tr><th style="width:25px;">#</th><th>Full Name</th><th>Onboarded By</th><th style="width:105px;">Action</th></tr></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <button class="add-row-btn" id="addRowBtn"><i class="fas fa-plus-circle"></i> Add New Alumni</button>
+
+    <div class="footer">
+        <span><span class="count" id="rowCount">0</span> alumni onboarded</span>
+        <span><i class="fas fa-lock" style="font-size:0.7rem;"></i> Deletion requires code: <strong>AAN2026</strong></span>
+    </div>
+    </div>
+
+    <div class="page-section" id="pendingSection">
+    <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+        <h2><i class="fas fa-hourglass-half"></i> Pending Onboarding</h2>
+        <p class="section-sub">Alumni who've been contacted but haven't been fully onboarded yet.</p>
+    </div>
+
+    <div class="search-box">
+        <i class="fas fa-search" style="color:#5b6f86;"></i>
+        <input type="text" id="pendingSearchInput" placeholder="Search by name...">
+        <button class="btn btn-outline" id="pendingClearSearchBtn" style="font-size:0.75rem;"><i class="fas fa-times"></i> Clear</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="pendingTable">
+            <thead><tr><th style="width:25px;">#</th><th>Full Name</th><th>Being Onboarded By</th><th style="width:105px;">Action</th></tr></thead>
+            <tbody id="pendingTableBody"></tbody>
+        </table>
+    </div>
+
+    <button class="add-row-btn" id="addPendingRowBtn"><i class="fas fa-plus-circle"></i> Add Pending Alumni</button>
+
+    <div class="footer">
+        <span><span class="count" id="pendingRowCount">0</span> pending</span>
+        <span><i class="fas fa-lock" style="font-size:0.7rem;"></i> Deletion requires code: <strong>AAN2026</strong></span>
+    </div>
+    </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Confirm Deletion</h3>
+        <p>You are about to delete <strong id="deleteNamePreview"></strong> from the database.</p>
+        <p style="font-size:0.8rem; color:#5b6f86;">Enter the security code to confirm:</p>
+        <div class="code-hint">AAN2026</div>
+        <input type="text" id="deleteCodeInput" placeholder="Enter code..." maxlength="7" autocomplete="off">
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelDeleteBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- ONBOARD CONFIRM MODAL -->
+<div class="modal-overlay" id="onboardModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-check-circle" style="color:#2a7a4d;"></i> Confirm Onboarding</h3>
+        <p>Mark <strong id="onboardNamePreview"></strong> as fully onboarded and move them to the Onboarded list?</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelOnboardBtn">Cancel</button>
+            <button class="btn btn-success" id="confirmOnboardBtn"><i class="fas fa-check"></i> Yes, Onboarded</button>
+        </div>
+    </div>
+</div>
+
+<!-- RETURN TO PENDING MODAL -->
+<div class="modal-overlay" id="returnModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-undo" style="color:#c9820a;"></i> Return to Pending</h3>
+        <p>Move <strong id="returnNamePreview"></strong> back to the Pending list? Use this if they were onboarded by mistake.</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelReturnBtn">Cancel</button>
+            <button class="btn btn-primary" id="confirmReturnBtn"><i class="fas fa-undo"></i> Yes, Return</button>
+        </div>
+    </div>
+</div>
+
+<!-- NOTES MODAL -->
+<div class="modal-overlay" id="notesModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-sticky-note" style="color:#0a2a44;"></i> Notes — <span id="notesNamePreview"></span></h3>
+        <textarea id="notesTextarea" placeholder="e.g. Called today, number switched off, asked to call next week..." rows="5" style="width:100%; padding:0.6rem; border:1px solid #cbd5e0; border-radius:8px; font-family:inherit; font-size:0.85rem; resize:vertical; box-sizing:border-box;"></textarea>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelNotesBtn">Cancel</button>
+            <button class="btn btn-primary" id="saveNotesBtn"><i class="fas fa-save"></i> Save Notes</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    (function() {
+        "use strict";
+
+        // ---------- SUPABASE CREDENTIALS ----------
+        // ⚠️ REPLACE the URL below with your actual Supabase project URL
+        const SUPABASE_URL = 'https://ndsvnwyzakvslxrtwaep.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kc3Zud3l6YWt2c2x4cnR3YWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NTkwMTEsImV4cCI6MjEwMDIzNTAxMX0.EdOt-E7xWRyxRN6KmBKl9tlR1TqOhjfk0EbPEmdbc-Y';
+        const TABLE_NAME = 'ammsul_alumni';
+        const PENDING_TABLE_NAME = 'ammsul_pending';
+        const DELETE_CODE = 'AAN2026';
+
+        // ---------- STATE ----------
+        let alumniData = [];
+        let filteredData = [];
+        let pendingData = [];
+        let filteredPendingData = [];
+        let deleteTargetIndex = null;
+        let deleteContext = 'alumni'; // 'alumni' or 'pending'
+        let onboardTargetIndex = null;
+        let returnTargetIndex = null;
+        let noteContext = 'alumni';
+        let noteTargetIndex = null;
+
+        // DOM refs
+        const tbody = document.getElementById('tableBody');
+        const rowCount = document.getElementById('rowCount');
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const addBtn = document.getElementById('addRowBtn');
+        const syncBtn = document.getElementById('syncBtn');
+        const downloadBtn = document.getElementById('downloadCsv');
+        const downloadPdfBtn = document.getElementById('downloadPdf');
+        const pendingTbody = document.getElementById('pendingTableBody');
+        const pendingRowCount = document.getElementById('pendingRowCount');
+        const pendingSearchInput = document.getElementById('pendingSearchInput');
+        const pendingClearSearchBtn = document.getElementById('pendingClearSearchBtn');
+        const addPendingBtn = document.getElementById('addPendingRowBtn');
+        const toastEl = document.getElementById('toast');
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteCodeInput = document.getElementByy"></div>
 <div class="nav-menu" id="navMenu">
     <div class="nav-menu-header">
         <span>Menu</span>
