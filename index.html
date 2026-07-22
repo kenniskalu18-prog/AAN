@@ -321,161 +321,6 @@
         const addPendingBtn = document.getElementById('addPendingRowBtn');
         const toastEl = document.getElementById('toast');
         const deleteModal = document.getElementById('deleteModal');
-        const deleteCodeInput = document.getElementByy"></div>
-<div class="nav-menu" id="navMenu">
-    <div class="nav-menu-header">
-        <span>Menu</span>
-        <button id="closeNavBtn" aria-label="Close menu"><i class="fas fa-times"></i></button>
-    </div>
-    <button class="nav-menu-item active" data-target="alumniSection"><i class="fas fa-user-graduate"></i> Alumni Onboarded</button>
-    <button class="nav-menu-item" data-target="pendingSection"><i class="fas fa-hourglass-half"></i> Pending Onboarding</button>
-</div>
-
-<div class="container">
-    <div class="header">
-        <h1><img src="https://i.ibb.co/7JTvt1Zn/1002087198-removebg-preview.png" alt="AMSUL logo" class="logo-img"> AMSUL Alumni Onboarding</h1>
-        <div class="header-actions">
-            <button class="btn btn-primary" id="syncBtn"><i class="fas fa-cloud-upload-alt"></i> Sync to Database</button>
-            <button class="btn btn-success" id="downloadCsv"><i class="fas fa-file-download"></i> Download CSV</button>
-            <button class="btn btn-primary" id="downloadPdf"><i class="fas fa-file-pdf"></i> Download PDF</button>
-            <span class="status-badge" id="connectionStatus"><i class="fas fa-circle" style="color:#2a7a4d; font-size:0.5rem;"></i> Connected</span>
-        </div>
-    </div>
-
-    <div class="tab-switcher" id="tabSwitcher">
-        <button class="active" data-target="alumniSection"><i class="fas fa-user-graduate"></i> Onboarded</button>
-        <button data-target="pendingSection"><i class="fas fa-hourglass-half"></i> Pending</button>
-    </div>
-
-    <div class="page-section active" id="alumniSection">
-    <div class="search-box">
-        <i class="fas fa-search" style="color:#5b6f86;"></i>
-        <input type="text" id="searchInput" placeholder="Search by name...">
-        <button class="btn btn-outline" id="clearSearchBtn" style="font-size:0.75rem;"><i class="fas fa-times"></i> Clear</button>
-    </div>
-
-    <div class="table-wrapper">
-        <table id="dataTable">
-            <thead><tr><th style="width:25px;">#</th><th>Full Name</th><th>Onboarded By</th><th style="width:80px;">Action</th></tr></thead>
-            <tbody id="tableBody"></tbody>
-        </table>
-    </div>
-
-    <button class="add-row-btn" id="addRowBtn"><i class="fas fa-plus-circle"></i> Add New Alumni</button>
-
-    <div class="footer">
-        <span><span class="count" id="rowCount">0</span> alumni onboarded</span>
-        <span><i class="fas fa-lock" style="font-size:0.7rem;"></i> Deletion requires code: <strong>AAN2026</strong></span>
-    </div>
-    </div>
-
-    <div class="page-section" id="pendingSection">
-    <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
-        <h2><i class="fas fa-hourglass-half"></i> Pending Onboarding</h2>
-        <p class="section-sub">Alumni who've been contacted but haven't been fully onboarded yet.</p>
-    </div>
-
-    <div class="search-box">
-        <i class="fas fa-search" style="color:#5b6f86;"></i>
-        <input type="text" id="pendingSearchInput" placeholder="Search by name...">
-        <button class="btn btn-outline" id="pendingClearSearchBtn" style="font-size:0.75rem;"><i class="fas fa-times"></i> Clear</button>
-    </div>
-
-    <div class="table-wrapper">
-        <table id="pendingTable">
-            <thead><tr><th style="width:25px;">#</th><th>Full Name</th><th>Being Onboarded By</th><th style="width:80px;">Action</th></tr></thead>
-            <tbody id="pendingTableBody"></tbody>
-        </table>
-    </div>
-
-    <button class="add-row-btn" id="addPendingRowBtn"><i class="fas fa-plus-circle"></i> Add Pending Alumni</button>
-
-    <div class="footer">
-        <span><span class="count" id="pendingRowCount">0</span> pending</span>
-        <span><i class="fas fa-lock" style="font-size:0.7rem;"></i> Deletion requires code: <strong>AAN2026</strong></span>
-    </div>
-    </div>
-</div>
-
-<!-- DELETE MODAL -->
-<div class="modal-overlay" id="deleteModal">
-    <div class="modal-box">
-        <h3><i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Confirm Deletion</h3>
-        <p>You are about to delete <strong id="deleteNamePreview"></strong> from the database.</p>
-        <p style="font-size:0.8rem; color:#5b6f86;">Enter the security code to confirm:</p>
-        <div class="code-hint">AAN2026</div>
-        <input type="text" id="deleteCodeInput" placeholder="Enter code..." maxlength="7" autocomplete="off">
-        <div class="modal-actions">
-            <button class="btn btn-outline" id="cancelDeleteBtn">Cancel</button>
-            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
-        </div>
-    </div>
-</div>
-
-<!-- ONBOARD CONFIRM MODAL -->
-<div class="modal-overlay" id="onboardModal">
-    <div class="modal-box">
-        <h3><i class="fas fa-check-circle" style="color:#2a7a4d;"></i> Confirm Onboarding</h3>
-        <p>Mark <strong id="onboardNamePreview"></strong> as fully onboarded and move them to the Onboarded list?</p>
-        <div class="modal-actions">
-            <button class="btn btn-outline" id="cancelOnboardBtn">Cancel</button>
-            <button class="btn btn-success" id="confirmOnboardBtn"><i class="fas fa-check"></i> Yes, Onboarded</button>
-        </div>
-    </div>
-</div>
-
-<!-- RETURN TO PENDING MODAL -->
-<div class="modal-overlay" id="returnModal">
-    <div class="modal-box">
-        <h3><i class="fas fa-undo" style="color:#c9820a;"></i> Return to Pending</h3>
-        <p>Move <strong id="returnNamePreview"></strong> back to the Pending list? Use this if they were onboarded by mistake.</p>
-        <div class="modal-actions">
-            <button class="btn btn-outline" id="cancelReturnBtn">Cancel</button>
-            <button class="btn btn-primary" id="confirmReturnBtn"><i class="fas fa-undo"></i> Yes, Return</button>
-        </div>
-    </div>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script>
-    (function() {
-        "use strict";
-
-        // ---------- SUPABASE CREDENTIALS ----------
-        // ⚠️ REPLACE the URL below with your actual Supabase project URL
-        const SUPABASE_URL = 'https://ndsvnwyzakvslxrtwaep.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kc3Zud3l6YWt2c2x4cnR3YWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NTkwMTEsImV4cCI6MjEwMDIzNTAxMX0.EdOt-E7xWRyxRN6KmBKl9tlR1TqOhjfk0EbPEmdbc-Y';
-        const TABLE_NAME = 'ammsul_alumni';
-        const PENDING_TABLE_NAME = 'ammsul_pending';
-        const DELETE_CODE = 'AAN2026';
-
-        // ---------- STATE ----------
-        let alumniData = [];
-        let filteredData = [];
-        let pendingData = [];
-        let filteredPendingData = [];
-        let deleteTargetIndex = null;
-        let deleteContext = 'alumni'; // 'alumni' or 'pending'
-        let onboardTargetIndex = null;
-        let returnTargetIndex = null;
-
-        // DOM refs
-        const tbody = document.getElementById('tableBody');
-        const rowCount = document.getElementById('rowCount');
-        const searchInput = document.getElementById('searchInput');
-        const clearSearchBtn = document.getElementById('clearSearchBtn');
-        const addBtn = document.getElementById('addRowBtn');
-        const syncBtn = document.getElementById('syncBtn');
-        const downloadBtn = document.getElementById('downloadCsv');
-        const downloadPdfBtn = document.getElementById('downloadPdf');
-        const pendingTbody = document.getElementById('pendingTableBody');
-        const pendingRowCount = document.getElementById('pendingRowCount');
-        const pendingSearchInput = document.getElementById('pendingSearchInput');
-        const pendingClearSearchBtn = document.getElementById('pendingClearSearchBtn');
-        const addPendingBtn = document.getElementById('addPendingRowBtn');
-        const toastEl = document.getElementById('toast');
-        const deleteModal = document.getElementById('deleteModal');
         const deleteCodeInput = document.getElementById('deleteCodeInput');
         const deleteNamePreview = document.getElementById('deleteNamePreview');
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
@@ -488,6 +333,11 @@
         const returnNamePreview = document.getElementById('returnNamePreview');
         const cancelReturnBtn = document.getElementById('cancelReturnBtn');
         const confirmReturnBtn = document.getElementById('confirmReturnBtn');
+        const notesModal = document.getElementById('notesModal');
+        const notesNamePreview = document.getElementById('notesNamePreview');
+        const notesTextarea = document.getElementById('notesTextarea');
+        const cancelNotesBtn = document.getElementById('cancelNotesBtn');
+        const saveNotesBtn = document.getElementById('saveNotesBtn');
 
         // ---------- TOAST ----------
         let toastTimer = null;
@@ -499,6 +349,18 @@
             else if (type === 'error') toastEl.classList.add('error');
             toastEl.classList.add('show');
             toastTimer = setTimeout(() => toastEl.classList.remove('show'), 4000);
+        }
+
+        // ---------- STATS ----------
+        function updateStats() {
+            const totalPending = pendingData.length;
+            const totalOnboarded = alumniData.length;
+            const total = totalPending + totalOnboarded;
+            const pct = total === 0 ? 0 : Math.round((totalOnboarded / total) * 100);
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statPending').textContent = totalPending;
+            document.getElementById('statOnboarded').textContent = totalOnboarded;
+            document.getElementById('statCompletion').textContent = pct + '%';
         }
 
         // ---------- SORT ----------
@@ -542,6 +404,21 @@
                         const masterIdx = alumniData.findIndex(d => d.id === src[idx].id);
                         if (masterIdx !== -1) alumniData[masterIdx].name = this.value;
                     }
+                    scheduleAutoSync();
+                });
+                inputName.addEventListener('blur', function() {
+                    const val = this.value.trim();
+                    if (!val) return;
+                    const normVal = normalizeName(val);
+                    const duplicate = alumniData.find(d => d !== item && normalizeName(d.name) === normVal);
+                    if (duplicate) {
+                        const keep = confirm(`A similar alumni record already exists ("${duplicate.name}"). Continue anyway?`);
+                        if (!keep) {
+                            this.value = '';
+                            item.name = '';
+                            this.focus();
+                        }
+                    }
                 });
                 tdName.appendChild(inputName);
                 tr.appendChild(tdName);
@@ -562,6 +439,7 @@
                         const masterIdx = alumniData.findIndex(d => d.id === src[idx].id);
                         if (masterIdx !== -1) alumniData[masterIdx].onboarded_by = this.value;
                     }
+                    scheduleAutoSync();
                 });
                 tdOnboarded.appendChild(inputOnboarded);
                 tr.appendChild(tdOnboarded);
@@ -590,6 +468,28 @@
                 });
                 tdAction.appendChild(returnBtn);
 
+                const noteBtn = document.createElement('button');
+                noteBtn.className = 'delete-btn';
+                noteBtn.style.color = item.notes && item.notes.trim() ? '#0a2a44' : '#a0aec0';
+                noteBtn.title = 'Notes';
+                noteBtn.innerHTML = '<i class="fas fa-sticky-note"></i>';
+                const itemIdForNote = item.id || `temp_${index}`;
+                noteBtn.dataset.id = itemIdForNote;
+                noteBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        noteContext = 'alumni';
+                        noteTargetIndex = idx;
+                        notesNamePreview.textContent = src[idx].name || 'Unnamed';
+                        notesTextarea.value = src[idx].notes || '';
+                        notesModal.classList.add('active');
+                        setTimeout(() => notesTextarea.focus(), 50);
+                    }
+                });
+                tdAction.appendChild(noteBtn);
+
                 const delBtn = document.createElement('button');
                 delBtn.className = 'delete-btn';
                 delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
@@ -614,6 +514,7 @@
                 tbody.appendChild(tr);
             });
             rowCount.textContent = source.length;
+            updateStats();
         }
 
         // ---------- RENDER PENDING TABLE ----------
@@ -645,6 +546,21 @@
                         const masterIdx = pendingData.findIndex(d => d.id === src[idx].id);
                         if (masterIdx !== -1) pendingData[masterIdx].name = this.value;
                     }
+                    scheduleAutoSync();
+                });
+                inputName.addEventListener('blur', function() {
+                    const val = this.value.trim();
+                    if (!val) return;
+                    const normVal = normalizeName(val);
+                    const duplicate = pendingData.find(d => d !== item && normalizeName(d.name) === normVal);
+                    if (duplicate) {
+                        const keep = confirm(`A similar pending record already exists ("${duplicate.name}"). Continue anyway?`);
+                        if (!keep) {
+                            this.value = '';
+                            item.name = '';
+                            this.focus();
+                        }
+                    }
                 });
                 tdName.appendChild(inputName);
                 tr.appendChild(tdName);
@@ -665,6 +581,7 @@
                         const masterIdx = pendingData.findIndex(d => d.id === src[idx].id);
                         if (masterIdx !== -1) pendingData[masterIdx].being_onboarded_by = this.value;
                     }
+                    scheduleAutoSync();
                 });
                 tdOnboarding.appendChild(inputOnboarding);
                 tr.appendChild(tdOnboarding);
@@ -693,6 +610,28 @@
                 });
                 tdAction.appendChild(onboardBtn);
 
+                const pendingNoteBtn = document.createElement('button');
+                pendingNoteBtn.className = 'delete-btn';
+                pendingNoteBtn.style.color = item.notes && item.notes.trim() ? '#0a2a44' : '#a0aec0';
+                pendingNoteBtn.title = 'Notes';
+                pendingNoteBtn.innerHTML = '<i class="fas fa-sticky-note"></i>';
+                const itemIdForPendingNote = item.id || `temp_${index}`;
+                pendingNoteBtn.dataset.id = itemIdForPendingNote;
+                pendingNoteBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        noteContext = 'pending';
+                        noteTargetIndex = idx;
+                        notesNamePreview.textContent = src[idx].name || 'Unnamed';
+                        notesTextarea.value = src[idx].notes || '';
+                        notesModal.classList.add('active');
+                        setTimeout(() => notesTextarea.focus(), 50);
+                    }
+                });
+                tdAction.appendChild(pendingNoteBtn);
+
                 const delBtn = document.createElement('button');
                 delBtn.className = 'delete-btn';
                 delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
@@ -717,14 +656,20 @@
                 pendingTbody.appendChild(tr);
             });
             pendingRowCount.textContent = source.length;
+            updateStats();
         }
 
         // ---------- ADD ROW ----------
+        function normalizeName(str) {
+            return (str || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
         function addRow() {
             const newItem = {
                 id: `temp_${Date.now()}`,
                 name: '',
-                onboarded_by: ''
+                onboarded_by: '',
+                notes: ''
             };
             alumniData.push(newItem);
             filteredData = [];
@@ -749,7 +694,8 @@
             const newItem = {
                 id: `temp_${Date.now()}`,
                 name: '',
-                being_onboarded_by: ''
+                being_onboarded_by: '',
+                notes: ''
             };
             pendingData.push(newItem);
             filteredPendingData = [];
@@ -866,7 +812,9 @@
                 alumniData.push({
                     id: `temp_${Date.now()}`,
                     name: itemToMove.name || '',
-                    onboarded_by: itemToMove.being_onboarded_by || ''
+                    onboarded_by: itemToMove.being_onboarded_by || '',
+                    notes: itemToMove.notes || '',
+                    date_onboarded: new Date().toISOString()
                 });
 
                 filteredPendingData = [];
@@ -875,7 +823,8 @@
                 onboardModal.classList.remove('active');
                 renderPendingTable(pendingData);
                 renderTable(alumniData);
-                showToast('Moved to onboarded list. Tap "Sync to Database" to save it.', 'success');
+                scheduleAutoSync();
+                showToast('Moved to onboarded list. Syncing...', 'success');
             } catch (error) {
                 console.error('Onboard move error:', error);
                 showToast(`Move failed: ${error.message}`, 'error');
@@ -920,7 +869,8 @@
                 pendingData.push({
                     id: `temp_${Date.now()}`,
                     name: itemToMove.name || '',
-                    being_onboarded_by: itemToMove.onboarded_by || ''
+                    being_onboarded_by: itemToMove.onboarded_by || '',
+                    notes: itemToMove.notes || ''
                 });
 
                 filteredData = [];
@@ -929,7 +879,8 @@
                 returnModal.classList.remove('active');
                 renderTable(alumniData);
                 renderPendingTable(pendingData);
-                showToast('Moved back to pending. Tap "Sync to Database" to save it.', 'success');
+                scheduleAutoSync();
+                showToast('Moved back to pending. Syncing...', 'success');
             } catch (error) {
                 console.error('Return move error:', error);
                 showToast(`Move failed: ${error.message}`, 'error');
@@ -940,12 +891,42 @@
             }
         }
 
+        function saveNotes() {
+            const isPending = noteContext === 'pending';
+            const masterArr = isPending ? pendingData : alumniData;
+            const filteredArr = isPending ? filteredPendingData : filteredData;
+            const src = filteredArr.length > 0 ? filteredArr : masterArr;
+            if (noteTargetIndex === null || noteTargetIndex >= src.length) {
+                showToast('No record found.', 'error');
+                notesModal.classList.remove('active');
+                return;
+            }
+            const item = src[noteTargetIndex];
+            item.notes = notesTextarea.value;
+            const masterIdx = masterArr.findIndex(d => d.id === item.id);
+            if (masterIdx !== -1) masterArr[masterIdx].notes = notesTextarea.value;
+            notesModal.classList.remove('active');
+            if (isPending) { renderPendingTable(pendingData); } else { renderTable(alumniData); }
+            scheduleAutoSync();
+            showToast('Notes saved. Syncing...', 'success');
+            noteTargetIndex = null;
+        }
+
+        let autoSyncTimer = null;
+        function scheduleAutoSync() {
+            clearTimeout(autoSyncTimer);
+            autoSyncTimer = setTimeout(() => {
+                if (!syncBtn.disabled) syncToSupabase();
+            }, 2500);
+        }
+
         async function syncToSupabase() {
             const validData = alumniData.filter(item => item.name && item.name.trim() !== '');
             const validPendingData = pendingData.filter(item => item.name && item.name.trim() !== '');
             if (validData.length === 0 && validPendingData.length === 0) { showToast('No data to sync.', 'error'); return; }
             syncBtn.disabled = true;
             syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+            setStatusBadge('syncing');
             try {
                 const baseHeaders = {
                     'Content-Type': 'application/json',
@@ -956,10 +937,14 @@
                 // Rows that already exist in Supabase (real id) -> update in place
                 const toUpdate = validData.filter(item => item.id && !item.id.toString().startsWith('temp_'));
                 if (toUpdate.length > 0) {
-                    const updatePayload = toUpdate.map(({ id, name, onboarded_by }) => ({
+                    const nowIso = new Date().toISOString();
+                    const updatePayload = toUpdate.map(({ id, name, onboarded_by, notes, date_onboarded }) => ({
                         id,
                         name: name.trim(),
-                        onboarded_by: onboarded_by ? onboarded_by.trim() : ''
+                        onboarded_by: onboarded_by ? onboarded_by.trim() : '',
+                        notes: notes || '',
+                        date_onboarded: date_onboarded || null,
+                        last_updated: nowIso
                     }));
                     const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?on_conflict=id`, {
                         method: 'POST',
@@ -975,9 +960,11 @@
                 // Rows that don't exist yet (temp id) -> insert as new
                 const toInsert = validData.filter(item => !item.id || item.id.toString().startsWith('temp_'));
                 if (toInsert.length > 0) {
-                    const insertPayload = toInsert.map(({ name, onboarded_by }) => ({
+                    const insertPayload = toInsert.map(({ name, onboarded_by, notes, date_onboarded }) => ({
                         name: name.trim(),
-                        onboarded_by: onboarded_by ? onboarded_by.trim() : ''
+                        onboarded_by: onboarded_by ? onboarded_by.trim() : '',
+                        notes: notes || '',
+                        date_onboarded: date_onboarded || null
                     }));
                     const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}`, {
                         method: 'POST',
@@ -998,9 +985,11 @@
                 } catch (reloadError) {
                     console.warn('Synced, but could not reload:', reloadError);
                 }
+                setStatusBadge('synced');
                 showToast('Data synced successfully!', 'success');
             } catch (error) {
                 console.error('Sync error:', error);
+                setStatusBadge('failed');
                 showToast(`Sync failed: ${error.message}`, 'error');
             } finally {
                 syncBtn.disabled = false;
@@ -1019,10 +1008,13 @@
 
             const toUpdate = validData.filter(item => item.id && !item.id.toString().startsWith('temp_'));
             if (toUpdate.length > 0) {
-                const updatePayload = toUpdate.map(({ id, name, being_onboarded_by }) => ({
+                const nowIso = new Date().toISOString();
+                const updatePayload = toUpdate.map(({ id, name, being_onboarded_by, notes }) => ({
                     id,
                     name: name.trim(),
-                    being_onboarded_by: being_onboarded_by ? being_onboarded_by.trim() : ''
+                    being_onboarded_by: being_onboarded_by ? being_onboarded_by.trim() : '',
+                    notes: notes || '',
+                    last_updated: nowIso
                 }));
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}?on_conflict=id`, {
                     method: 'POST',
@@ -1037,9 +1029,10 @@
 
             const toInsert = validData.filter(item => !item.id || item.id.toString().startsWith('temp_'));
             if (toInsert.length > 0) {
-                const insertPayload = toInsert.map(({ name, being_onboarded_by }) => ({
+                const insertPayload = toInsert.map(({ name, being_onboarded_by, notes }) => ({
                     name: name.trim(),
-                    being_onboarded_by: being_onboarded_by ? being_onboarded_by.trim() : ''
+                    being_onboarded_by: being_onboarded_by ? being_onboarded_by.trim() : '',
+                    notes: notes || ''
                 }));
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}`, {
                     method: 'POST',
@@ -1069,7 +1062,11 @@
                     alumniData = data.map(item => ({
                         id: item.id,
                         name: item.name || '',
-                        onboarded_by: item.onboarded_by || ''
+                        onboarded_by: item.onboarded_by || '',
+                        notes: item.notes || '',
+                        date_added: item.created_at || '',
+                        date_onboarded: item.date_onboarded || '',
+                        last_updated: item.last_updated || ''
                     }));
                 }
                 filteredData = [];
@@ -1092,7 +1089,10 @@
                     pendingData = data.map(item => ({
                         id: item.id,
                         name: item.name || '',
-                        being_onboarded_by: item.being_onboarded_by || ''
+                        being_onboarded_by: item.being_onboarded_by || '',
+                        notes: item.notes || '',
+                        date_added: item.created_at || '',
+                        last_updated: item.last_updated || ''
                     }));
                 }
                 filteredPendingData = [];
@@ -1113,11 +1113,28 @@
             renderTable(alumniData);
         }
 
+        function formatDate(iso) {
+            if (!iso) return '';
+            try {
+                const d = new Date(iso);
+                if (isNaN(d.getTime())) return '';
+                return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } catch (e) { return ''; }
+        }
+
         function downloadCSV() {
             if (alumniData.length === 0) { showToast('No data to download', 'error'); return; }
-            let csv = 'Name,Onboarded By\n';
+            const esc = (v) => `"${(v || '').toString().replace(/"/g, '""')}"`;
+            let csv = 'Name,Onboarded By,Date Added,Date Onboarded,Last Updated,Notes\n';
             alumniData.forEach(item => {
-                csv += `${(item.name||'').replace(/,/g,';')},${(item.onboarded_by||'').replace(/,/g,';')}\n`;
+                csv += [
+                    esc(item.name),
+                    esc(item.onboarded_by),
+                    esc(formatDate(item.date_added)),
+                    esc(formatDate(item.date_onboarded)),
+                    esc(formatDate(item.last_updated)),
+                    esc(item.notes)
+                ].join(',') + '\n';
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -1132,17 +1149,24 @@
             if (alumniData.length === 0) { showToast('No data to download', 'error'); return; }
             try {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
+                const doc = new jsPDF({ orientation: 'landscape' });
                 doc.setFontSize(16);
                 doc.text('AMSUL Alumni Onboarding', 14, 18);
                 doc.setFontSize(10);
                 doc.text(`Generated: ${new Date().toLocaleDateString()}  |  Total: ${alumniData.length}`, 14, 25);
                 doc.autoTable({
                     startY: 30,
-                    head: [['#', 'Full Name', 'Onboarded By']],
-                    body: alumniData.map((item, i) => [i + 1, item.name || '', item.onboarded_by || '']),
+                    head: [['#', 'Full Name', 'Onboarded By', 'Date Added', 'Date Onboarded', 'Notes']],
+                    body: alumniData.map((item, i) => [
+                        i + 1,
+                        item.name || '',
+                        item.onboarded_by || '',
+                        formatDate(item.date_added),
+                        formatDate(item.date_onboarded),
+                        item.notes || ''
+                    ]),
                     headStyles: { fillColor: [10, 42, 68] },
-                    styles: { fontSize: 10, cellPadding: 3 }
+                    styles: { fontSize: 9, cellPadding: 3 }
                 });
                 doc.save(`AMSUL_Alumni_${new Date().toISOString().slice(0,10)}.pdf`);
                 showToast('PDF downloaded', 'success');
@@ -1152,8 +1176,21 @@
             }
         }
 
+
+        function setStatusBadge(state) {
+            const el = document.getElementById('connectionStatus');
+            const states = {
+                connecting: '<i class="fas fa-spinner fa-spin"></i> Connecting...',
+                synced: '🟢 Synced',
+                syncing: '🟡 Syncing...',
+                offline: '🔴 Offline',
+                failed: '⚠️ Sync Failed'
+            };
+            el.innerHTML = states[state] || states.offline;
+        }
+
         async function init() {
-            document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+            setStatusBadge('connecting');
             try {
                 await loadFromSupabase();
                 try {
@@ -1161,10 +1198,10 @@
                 } catch (pendingError) {
                     console.warn('Pending list unavailable:', pendingError);
                 }
-                document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-circle" style="color:#2a7a4d; font-size:0.5rem;"></i> Connected';
+                setStatusBadge('synced');
                 showToast('Connected to Supabase', 'success');
             } catch (e) {
-                document.getElementById('connectionStatus').innerHTML = '<i class="fas fa-circle" style="color:#b91c1c; font-size:0.5rem;"></i> Local only';
+                setStatusBadge('offline');
                 if (alumniData.length === 0) loadSampleData();
             }
 
@@ -1195,6 +1232,11 @@
             confirmReturnBtn.addEventListener('click', confirmReturn);
             returnModal.addEventListener('click', function(e) {
                 if (e.target === returnModal) { returnModal.classList.remove('active'); returnTargetIndex = null; }
+            });
+            cancelNotesBtn.addEventListener('click', function() { notesModal.classList.remove('active'); noteTargetIndex = null; });
+            saveNotesBtn.addEventListener('click', saveNotes);
+            notesModal.addEventListener('click', function(e) {
+                if (e.target === notesModal) { notesModal.classList.remove('active'); noteTargetIndex = null; }
             });
             document.addEventListener('keydown', function(e) {
                 if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); addRow(); }
