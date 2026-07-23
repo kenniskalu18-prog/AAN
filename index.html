@@ -53,6 +53,7 @@
         .filter-field select, .filter-field input[type="date"] { padding:0.45rem 0.5rem; border:1px solid #cbd5e0; border-radius:6px; font-size:0.82rem; font-family:inherit; background:white; }
         .search-box input { padding:0.4rem 0.8rem; border:1px solid #cbd5e0; border-radius:6px; font-size:0.85rem; width:260px; font-family:inherit; }
         .search-box input:focus { outline:2px solid #2a7a4d; border-color:transparent; }
+        .showing-count { font-size:0.78rem; color:#5b6f86; margin:-0.3rem 0 0.5rem; font-weight:500; }
         .table-wrapper { overflow-x:auto; overflow-y:auto; max-height:420px; margin-top:0.5rem; border:1px solid #edf2f6; border-radius:8px; scroll-behavior:smooth; }
         .table-wrapper th { position:sticky; top:0; z-index:5; }
         table { width:100%; border-collapse:collapse; font-size:0.85rem; }
@@ -149,8 +150,7 @@
         @keyframes highlightFlash { 0% { background-color:#c6f6d5; } 100% { background-color:transparent; } }
 
         /* ---------- ADMIN QUICK ACTIONS ---------- */
-        .admin-quick-actions { display:flex; flex-wrap:wrap; gap:0.6rem; margin:0.8rem 0 0.6rem; }
-        .admin-refresh-status { display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:#5b6f86; margin-bottom:0.4rem; }
+        .admin-quick-actions { display:flex; flex-wrap:wrap; gap:0.6rem; margin:0.8rem 0 0.6rem; }        .admin-refresh-status { display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:#5b6f86; margin-bottom:0.4rem; }
         .admin-refresh-status strong { color:#0a2a44; }
         .admin-refresh-dot { width:7px; height:7px; border-radius:50%; background:#2a7a4d; display:inline-block; animation:refreshPulse 2s ease infinite; }
         @keyframes refreshPulse { 0%,100% { opacity:1; } 50% { opacity:0.35; } }
@@ -198,6 +198,25 @@
         .modal-box input:focus { outline:2px solid #2a7a4d; border-color:transparent; }
         .modal-actions { display:flex; gap:0.8rem; justify-content:center; }
         .modal-actions .btn { min-width:100px; justify-content:center; }
+        .confirm-summary { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.8rem 1rem; margin-bottom:1rem; text-align:left; }
+        .confirm-summary-name { font-size:1.05rem; font-weight:700; color:#0a2a44; margin-bottom:0.5rem; }
+        .confirm-summary-row { display:flex; justify-content:space-between; gap:0.8rem; font-size:0.82rem; color:#4a5a6a; padding:0.25rem 0; border-top:1px solid #edf2f6; }
+        .confirm-summary-row:first-of-type { border-top:none; }
+        .confirm-summary-row .label { font-weight:600; color:#5b6f86; flex-shrink:0; }
+        .confirm-summary-row span:last-child { text-align:right; word-break:break-word; }
+        .confirm-summary-list { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.9rem; margin-bottom:1rem; max-height:160px; overflow-y:auto; text-align:left; font-size:0.82rem; }
+        .confirm-summary-list ul { margin:0; padding-left:1.1rem; }
+        .confirm-summary-list li { padding:0.15rem 0; color:#2a3f55; }
+
+        /* ---------- TIMELINE ---------- */
+        .timeline-list { max-height:320px; overflow-y:auto; margin-bottom:1rem; padding-right:0.3rem; }
+        .timeline-item { display:flex; gap:0.7rem; position:relative; padding-bottom:1rem; }
+        .timeline-item:not(:last-child)::before { content:''; position:absolute; left:5px; top:14px; bottom:-2px; width:2px; background:#e2e8f0; }
+        .timeline-dot { width:12px; height:12px; border-radius:50%; background:#2a7a4d; margin-top:3px; flex-shrink:0; z-index:1; }
+        .timeline-content { flex:1; }
+        .timeline-time { font-size:0.75rem; color:#5b6f86; font-weight:600; }
+        .timeline-action { font-size:0.85rem; color:#1e2a3a; margin-top:0.1rem; }
+        .timeline-empty, .timeline-loading { font-size:0.85rem; color:#8a9bb0; text-align:center; padding:1.5rem 0; }
         .toast { position:fixed; bottom:25px; right:25px; background:#1f2f3f; color:white; padding:0.8rem 1.4rem; border-radius:10px; font-size:0.85rem; box-shadow:0 6px 18px rgba(0,0,0,0.15); opacity:0; transform:translateY(10px); transition:0.3s ease; pointer-events:none; max-width:350px; z-index:999; }
         .toast.show { opacity:1; transform:translateY(0); }
         .toast.success { background:#1a6e3a; }
@@ -305,6 +324,7 @@
         <button class="btn btn-danger" id="alumniBulkDeleteBtn" style="font-size:0.75rem;"><i class="fas fa-trash-alt"></i> Delete Selected</button>
     </div>
 
+    <div class="showing-count" id="alumniShowingCount">Showing 0 of 0 alumni</div>
     <div class="table-wrapper">
         <table id="dataTable">
             <thead><tr><th style="width:30px;"><input type="checkbox" id="alumniSelectAll"></th><th style="width:25px;">#</th><th>Full Name</th><th>Onboarded By</th><th style="width:105px;">Action</th></tr></thead>
@@ -356,6 +376,7 @@
         <button class="btn btn-danger" id="pendingBulkDeleteBtn" style="font-size:0.75rem;"><i class="fas fa-trash-alt"></i> Delete Selected</button>
     </div>
 
+    <div class="showing-count" id="pendingShowingCount">Showing 0 of 0 pending</div>
     <div class="table-wrapper">
         <table id="pendingTable">
             <thead><tr><th style="width:30px;"><input type="checkbox" id="pendingSelectAll"></th><th style="width:25px;">#</th><th>Full Name</th><th>Being Onboarded By</th><th style="width:105px;">Action</th></tr></thead>
@@ -463,7 +484,7 @@
 
             <div class="section-divider">
                 <h2 style="font-size:0.95rem;"><i class="fas fa-bell"></i> Live Activity</h2>
-                <p class="section-sub">Updates automatically as actions happen across the site.</p>
+                <p class="section-sub">Updates automatically as actions happen across the site. As admin, you can select entries below and remove them from the log.</p>
             </div>
             <div class="notification-summary" id="notificationSummary"></div>
             <div class="tab-switcher" id="adminActivityPeriodToggle" style="margin-bottom:0.8rem;">
@@ -472,9 +493,16 @@
                 <button data-period="month">This Month</button>
                 <button data-period="all">All Time</button>
             </div>
+            <div class="bulk-action-bar" id="activityBulkBar">
+                <span id="activityBulkCount">0 selected</span>
+                <button class="btn btn-danger" id="activityBulkDeleteBtn"><i class="fas fa-trash-alt"></i> Delete Selected</button>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-bottom:0.5rem;">
+                <button class="btn btn-outline" id="openActivityRecycleBtn"><i class="fas fa-trash-restore"></i> Activity Recycle Bin (<span id="activityRecycleCount">0</span>)</button>
+            </div>
             <div class="table-wrapper" style="max-height:280px;">
                 <table id="liveActivityTable">
-                    <thead><tr><th>Time</th><th>Alumni Name</th><th>Action</th><th>Being Onboarded By</th></tr></thead>
+                    <thead><tr><th style="width:30px;"><input type="checkbox" id="activitySelectAll"></th><th>Time</th><th>Alumni Name</th><th>Action</th><th>Being Onboarded By</th></tr></thead>
                     <tbody id="liveActivityTableBody"></tbody>
                 </table>
             </div>
@@ -486,7 +514,12 @@
 <div class="modal-overlay" id="deleteModal">
     <div class="modal-box">
         <h3><i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Confirm Deletion</h3>
-        <p>Move <strong id="deleteNamePreview"></strong> to the Recycle Bin? You can restore it later if needed.</p>
+        <div class="confirm-summary">
+            <div class="confirm-summary-name" id="deleteNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Representative</span><span id="deleteRepPreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Notes</span><span id="deleteNotesPreview">—</span></div>
+        </div>
+        <p>Move this alumnus to the Recycle Bin? You can restore it later if needed.</p>
         <div class="modal-actions">
             <button class="btn btn-outline" id="cancelDeleteBtn">Cancel</button>
             <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
@@ -498,7 +531,13 @@
 <div class="modal-overlay" id="onboardModal">
     <div class="modal-box">
         <h3><i class="fas fa-check-circle" style="color:#2a7a4d;"></i> Confirm Onboarding</h3>
-        <p>Mark <strong id="onboardNamePreview"></strong> as fully onboarded and move them to the Onboarded list?</p>
+        <div class="confirm-summary" id="onboardSummarySingle">
+            <div class="confirm-summary-name" id="onboardNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Representative</span><span id="onboardRepPreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Notes</span><span id="onboardNotesPreview">—</span></div>
+        </div>
+        <div class="confirm-summary-list" id="onboardSummaryList" style="display:none;"></div>
+        <p>Move this alumnus to Onboarded?</p>
         <div class="modal-actions">
             <button class="btn btn-outline" id="cancelOnboardBtn">Cancel</button>
             <button class="btn btn-success" id="confirmOnboardBtn"><i class="fas fa-check"></i> Yes, Onboarded</button>
@@ -510,10 +549,49 @@
 <div class="modal-overlay" id="returnModal">
     <div class="modal-box">
         <h3><i class="fas fa-undo" style="color:#c9820a;"></i> Return to Pending</h3>
-        <p>Move <strong id="returnNamePreview"></strong> back to the Pending list? Use this if they were onboarded by mistake.</p>
+        <div class="confirm-summary" id="returnSummarySingle">
+            <div class="confirm-summary-name" id="returnNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Representative</span><span id="returnRepPreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Notes</span><span id="returnNotesPreview">—</span></div>
+        </div>
+        <div class="confirm-summary-list" id="returnSummaryList" style="display:none;"></div>
+        <p>Move them back to the Pending list? Use this if they were onboarded by mistake.</p>
         <div class="modal-actions">
             <button class="btn btn-outline" id="cancelReturnBtn">Cancel</button>
             <button class="btn btn-primary" id="confirmReturnBtn"><i class="fas fa-undo"></i> Yes, Return</button>
+        </div>
+    </div>
+</div>
+
+<!-- ACTIVITY RECYCLE BIN MODAL -->
+<div class="modal-overlay" id="activityRecycleModal">
+    <div class="modal-box" style="max-width:520px; text-align:left;">
+        <h3 style="text-align:left;"><i class="fas fa-trash-restore" style="color:#c9820a;"></i> Activity Recycle Bin</h3>
+        <p style="font-size:0.8rem; color:#5b6f86;">Deleted log entries are kept here and auto-cleared after 30 days if not restored or removed manually.</p>
+        <div class="bulk-action-bar" id="activityRecycleBulkBar">
+            <span id="activityRecycleSelectedCount">0 selected</span>
+            <button class="btn btn-outline" id="activityRecycleRestoreBtn"><i class="fas fa-trash-restore"></i> Restore Selected</button>
+            <button class="btn btn-danger" id="activityRecyclePermDeleteBtn"><i class="fas fa-trash-alt"></i> Delete Permanently</button>
+        </div>
+        <div class="table-wrapper" style="max-height:280px; margin-bottom:1rem;">
+            <table>
+                <thead><tr><th style="width:25px;"><input type="checkbox" id="activityRecycleSelectAll"></th><th>Time</th><th>Name</th><th>Action</th><th style="width:90px;">Actions</th></tr></thead>
+                <tbody id="activityRecycleTableBody"></tbody>
+            </table>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="closeActivityRecycleBtn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- TIMELINE MODAL -->
+<div class="modal-overlay" id="timelineModal">
+    <div class="modal-box" style="max-width:420px; text-align:left;">
+        <h3 style="text-align:left;"><i class="fas fa-stream" style="color:#0a2a44;"></i> Timeline — <span id="timelineNamePreview"></span></h3>
+        <div class="timeline-list" id="timelineList"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="closeTimelineBtn">Close</button>
         </div>
     </div>
 </div>
@@ -534,13 +612,39 @@
 <div class="modal-overlay" id="permDeleteModal">
     <div class="modal-box">
         <h3><i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Permanently Delete</h3>
-        <p>This will permanently delete <strong id="permDeleteNamePreview"></strong>. You'll have a few seconds to undo after confirming.</p>
+        <div class="confirm-summary" id="permDeleteSummarySingle">
+            <div class="confirm-summary-name" id="permDeleteNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Type</span><span id="permDeleteTypePreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Representative</span><span id="permDeleteRepPreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Deleted</span><span id="permDeleteDeletedPreview">—</span></div>
+        </div>
+        <div class="confirm-summary-list" id="permDeleteSummaryList" style="display:none;"></div>
+        <p>You'll have a few seconds to undo after confirming.</p>
         <p style="font-size:0.8rem; color:#5b6f86;">Enter the security code to confirm:</p>
         <div class="code-hint">AAN2026</div>
         <input type="text" id="permDeleteCodeInput" placeholder="Enter code..." maxlength="7" autocomplete="off">
         <div class="modal-actions">
             <button class="btn btn-outline" id="cancelPermDeleteBtn">Cancel</button>
             <button class="btn btn-danger" id="confirmPermDeleteBtn">Delete Permanently</button>
+        </div>
+    </div>
+</div>
+
+<!-- RESTORE CONFIRM MODAL -->
+<div class="modal-overlay" id="restoreModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-trash-restore" style="color:#2a7a4d;"></i> Confirm Restore</h3>
+        <div class="confirm-summary" id="restoreSummarySingle">
+            <div class="confirm-summary-name" id="restoreNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Type</span><span id="restoreTypePreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Representative</span><span id="restoreRepPreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Deleted</span><span id="restoreDeletedPreview">—</span></div>
+        </div>
+        <div class="confirm-summary-list" id="restoreSummaryList" style="display:none;"></div>
+        <p>Restore back to its original list?</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelRestoreBtn">Cancel</button>
+            <button class="btn btn-success" id="confirmRestoreBtn"><i class="fas fa-trash-restore"></i> Restore</button>
         </div>
     </div>
 </div>
@@ -569,6 +673,8 @@
         let deleteContext = 'alumni'; // 'alumni' or 'pending'
         let onboardTargetIndex = null;
         let returnTargetIndex = null;
+        let onboardBulkIds = null;
+        let returnBulkIds = null;
         let noteContext = 'alumni';
         let noteTargetIndex = null;
         let recycleBinData = [];
@@ -579,6 +685,10 @@
         let permDeleteTargetId = null;
         let permDeleteTargetType = null;
         let permDeleteBulkIds = null;
+        let restoreTargetId = null;
+        let restoreTargetType = null;
+        let restoreBulkIds = null;
+        let selectedActivityIds = new Set();
         let pendingPermDeleteItems = [];
         let pendingPermDeleteTimer = null;
 
@@ -589,6 +699,7 @@
         const clearSearchBtn = document.getElementById('clearSearchBtn');
         const addBtn = document.getElementById('addRowBtn');
         let isSyncing = false;
+        let offlineQueue = [];
         const downloadBtn = document.getElementById('downloadCsv');
         const downloadPdfBtn = document.getElementById('downloadPdf');
         const pendingTbody = document.getElementById('pendingTableBody');
@@ -628,6 +739,13 @@
         const notesTextarea = document.getElementById('notesTextarea');
         const cancelNotesBtn = document.getElementById('cancelNotesBtn');
         const saveNotesBtn = document.getElementById('saveNotesBtn');
+        const timelineModal = document.getElementById('timelineModal');
+        const timelineNamePreview = document.getElementById('timelineNamePreview');
+        const timelineList = document.getElementById('timelineList');
+        const closeTimelineBtn = document.getElementById('closeTimelineBtn');
+        const restoreModal = document.getElementById('restoreModal');
+        const cancelRestoreBtn = document.getElementById('cancelRestoreBtn');
+        const confirmRestoreBtn = document.getElementById('confirmRestoreBtn');
         const recycleTbody = document.getElementById('recycleTableBody');
         const recycleRowCount = document.getElementById('recycleRowCount');
         const activityTbody = document.getElementById('activityTableBody');
@@ -651,6 +769,84 @@
             else if (type === 'error') toastEl.classList.add('error');
             toastEl.classList.add('show');
             toastTimer = setTimeout(() => toastEl.classList.remove('show'), 4000);
+        }
+
+        // ---------- PER-ALUMNUS TIMELINE ----------
+        async function showTimelineModal(name) {
+            timelineNamePreview.textContent = name || 'Unnamed';
+            timelineList.innerHTML = '<div class="timeline-loading">Loading timeline...</div>';
+            timelineModal.classList.add('active');
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?alumni_name=eq.${encodeURIComponent(name)}&order=created_at.asc`, { headers });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+                const rows = await response.json();
+                renderTimeline(rows);
+            } catch (error) {
+                console.warn('Could not load timeline:', error);
+                timelineList.innerHTML = '<div class="timeline-empty">Could not load timeline.</div>';
+            }
+        }
+
+        function renderTimeline(rows) {
+            if (!rows || rows.length === 0) {
+                timelineList.innerHTML = '<div class="timeline-empty">No activity recorded yet.</div>';
+                return;
+            }
+            timelineList.innerHTML = rows.map(r => {
+                const who = (r.being_onboarded_by || '').trim();
+                const actionText = (r.action || 'Updated') + (who ? ` by ${who}` : '');
+                return `<div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-time">${formatDate(r.created_at)}</div>
+                        <div class="timeline-action">${actionText}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ---------- RICH CONFIRMATION SUMMARIES ----------
+        function fillConfirmSummary(prefix, item, isPending) {
+            const rep = isPending ? (item.being_onboarded_by || '') : (item.onboarded_by || '');
+            const nameEl = document.getElementById(prefix + 'NamePreview');
+            const repEl = document.getElementById(prefix + 'RepPreview');
+            const notesEl = document.getElementById(prefix + 'NotesPreview');
+            if (nameEl) nameEl.textContent = item.name || 'Unnamed';
+            if (repEl) repEl.textContent = rep.trim() || 'Unassigned';
+            if (notesEl) notesEl.textContent = (item.notes || '').trim() || 'No notes';
+            const singleEl = document.getElementById(prefix + 'SummarySingle');
+            const listEl = document.getElementById(prefix + 'SummaryList');
+            if (singleEl) singleEl.style.display = '';
+            if (listEl) listEl.style.display = 'none';
+        }
+
+        function fillActionBulkSummary(prefix, items) {
+            const singleEl = document.getElementById(prefix + 'SummarySingle');
+            const listEl = document.getElementById(prefix + 'SummaryList');
+            if (singleEl) singleEl.style.display = 'none';
+            if (listEl) {
+                listEl.style.display = '';
+                listEl.innerHTML = `<strong>${items.length} record(s) selected:</strong><ul>${items.map(i => `<li>${i.name || 'Unnamed'}</li>`).join('')}</ul>`;
+            }
+        }
+
+        function formatRecycleType(type) { return type === 'pending' ? 'Pending' : 'Alumni'; }
+
+        function fillRecycleSummary(prefix, item) {
+            document.getElementById(prefix + 'NamePreview').textContent = item.name || 'Unnamed';
+            document.getElementById(prefix + 'TypePreview').textContent = formatRecycleType(item.type);
+            document.getElementById(prefix + 'RepPreview').textContent = (item.assignee || '').trim() || 'Unassigned';
+            document.getElementById(prefix + 'DeletedPreview').textContent = item.deleted_at ? formatDate(item.deleted_at) : '—';
+            document.getElementById(prefix + 'SummarySingle').style.display = '';
+            document.getElementById(prefix + 'SummaryList').style.display = 'none';
+        }
+
+        function fillRecycleBulkSummary(prefix, items) {
+            document.getElementById(prefix + 'SummarySingle').style.display = 'none';
+            const listEl = document.getElementById(prefix + 'SummaryList');
+            listEl.style.display = '';
+            listEl.innerHTML = `<strong>${items.length} record(s) selected:</strong><ul>${items.map(i => `<li>${i.name || 'Unnamed'} <span style="color:#8a9bb0;">(${formatRecycleType(i.type)})</span></li>`).join('')}</ul>`;
         }
 
         // ---------- STATS ----------
@@ -756,11 +952,16 @@
         let undoTimer = null;
 
         function showUndoToast(item, context) {
+            const existing = document.getElementById('regularUndoToast');
+            if (existing) existing.remove();
+            if (undoTimer) clearInterval(undoTimer);
+
             lastDeletedItem = item;
             lastDeletedContext = context;
             let timeLeft = 8;
-            
+
             const toast = document.createElement('div');
+            toast.id = 'regularUndoToast';
             toast.className = 'undo-toast';
             toast.innerHTML = `
                 <span>Deleted "${item.name || 'Unnamed'}"</span>
@@ -772,7 +973,7 @@
             const undoBtn = toast.querySelector('#undoDeleteBtn');
             undoBtn.addEventListener('click', () => {
                 restoreFromUndo();
-                clearTimeout(undoTimer);
+                clearInterval(undoTimer);
                 toast.remove();
             });
 
@@ -781,7 +982,7 @@
                 timeLeft--;
                 countdown.textContent = timeLeft;
                 if (timeLeft <= 0) {
-                    clearTimeout(undoTimer);
+                    clearInterval(undoTimer);
                     toast.remove();
                     lastDeletedItem = null;
                     lastDeletedContext = null;
@@ -943,7 +1144,7 @@
                     const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
                     if (idx !== -1) {
                         returnTargetIndex = idx;
-                        returnNamePreview.textContent = src[idx].name || 'Unnamed';
+                        fillConfirmSummary('return', src[idx], false);
                         returnModal.classList.add('active');
                     }
                 });
@@ -971,6 +1172,16 @@
                 });
                 tdAction.appendChild(noteBtn);
 
+                const timelineBtn = document.createElement('button');
+                timelineBtn.className = 'delete-btn';
+                timelineBtn.style.color = '#5b6f86';
+                timelineBtn.title = 'Timeline';
+                timelineBtn.innerHTML = '<i class="fas fa-stream"></i>';
+                timelineBtn.addEventListener('click', function() {
+                    showTimelineModal(item.name || 'Unnamed');
+                });
+                tdAction.appendChild(timelineBtn);
+
                 const delBtn = document.createElement('button');
                 delBtn.className = 'delete-btn';
                 delBtn.title = 'Delete';
@@ -983,7 +1194,7 @@
                     if (idx !== -1) {
                         deleteTargetIndex = idx;
                         deleteContext = 'alumni';
-                        deleteNamePreview.textContent = src[idx].name || 'Unnamed';
+                        fillConfirmSummary('delete', src[idx], false);
                         deleteModal.classList.add('active');
                     }
                 });
@@ -993,6 +1204,8 @@
                 tbody.appendChild(tr);
             });
             rowCount.textContent = source.length;
+            const alumniShowingEl = document.getElementById('alumniShowingCount');
+            if (alumniShowingEl) alumniShowingEl.textContent = `Showing ${source.length} of ${alumniData.length} alumni`;
             updateStats();
             populateRepDropdowns();
             const validAlumniIds = new Set(alumniData.map(d => d.id));
@@ -1106,7 +1319,7 @@
                     const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
                     if (idx !== -1) {
                         onboardTargetIndex = idx;
-                        onboardNamePreview.textContent = src[idx].name || 'Unnamed';
+                        fillConfirmSummary('onboard', src[idx], true);
                         onboardModal.classList.add('active');
                     }
                 });
@@ -1134,6 +1347,16 @@
                 });
                 tdAction.appendChild(pendingNoteBtn);
 
+                const pendingTimelineBtn = document.createElement('button');
+                pendingTimelineBtn.className = 'delete-btn';
+                pendingTimelineBtn.style.color = '#5b6f86';
+                pendingTimelineBtn.title = 'Timeline';
+                pendingTimelineBtn.innerHTML = '<i class="fas fa-stream"></i>';
+                pendingTimelineBtn.addEventListener('click', function() {
+                    showTimelineModal(item.name || 'Unnamed');
+                });
+                tdAction.appendChild(pendingTimelineBtn);
+
                 const delBtn = document.createElement('button');
                 delBtn.className = 'delete-btn';
                 delBtn.title = 'Delete';
@@ -1146,7 +1369,7 @@
                     if (idx !== -1) {
                         deleteTargetIndex = idx;
                         deleteContext = 'pending';
-                        deleteNamePreview.textContent = src[idx].name || 'Unnamed';
+                        fillConfirmSummary('delete', src[idx], true);
                         deleteModal.classList.add('active');
                     }
                 });
@@ -1156,6 +1379,8 @@
                 pendingTbody.appendChild(tr);
             });
             pendingRowCount.textContent = source.length;
+            const pendingShowingEl = document.getElementById('pendingShowingCount');
+            if (pendingShowingEl) pendingShowingEl.textContent = `Showing ${source.length} of ${pendingData.length} pending`;
             updateStats();
             populateRepDropdowns();
             const validPendingIds = new Set(pendingData.map(d => d.id));
@@ -1307,19 +1532,21 @@
             try {
                 const nowIso = new Date().toISOString();
                 if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
-                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${idToRemove}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                        },
-                        body: JSON.stringify({ deleted_at: nowIso })
+                    const result = await queueOrRun(`Delete "${itemToDelete.name}"`, async () => {
+                        const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${idToRemove}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                            },
+                            body: JSON.stringify({ deleted_at: nowIso })
+                        });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Delete failed: ${response.status} - ${errorText}`);
+                        }
                     });
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        throw new Error(`Delete failed: ${response.status} - ${errorText}`);
-                    }
                     const masterIdx = masterArr.findIndex(d => d.id === idToRemove);
                     if (masterIdx !== -1) masterArr.splice(masterIdx, 1);
                     recycleBinData.push({
@@ -1330,6 +1557,7 @@
                         deleted_at: nowIso
                     });
                     renderRecycleTable();
+                    if (result.queued) showToast(`Offline — deletion of "${itemToDelete.name}" queued.`, 'error');
                 } else {
                     const idx = masterArr.indexOf(itemToDelete);
                     if (idx !== -1) masterArr.splice(idx, 1);
@@ -1404,7 +1632,13 @@
                 restoreBtn.style.color = '#2a7a4d';
                 restoreBtn.title = 'Restore';
                 restoreBtn.innerHTML = '<i class="fas fa-trash-restore"></i>';
-                restoreBtn.addEventListener('click', function() { restoreFromRecycle(item.id, item.type); });
+                restoreBtn.addEventListener('click', function() {
+                    restoreTargetId = item.id;
+                    restoreTargetType = item.type;
+                    restoreBulkIds = null;
+                    fillRecycleSummary('restore', item);
+                    restoreModal.classList.add('active');
+                });
                 tdAction.appendChild(restoreBtn);
 
                 const permBtn = document.createElement('button');
@@ -1414,7 +1648,8 @@
                 permBtn.addEventListener('click', function() {
                     permDeleteTargetId = item.id;
                     permDeleteTargetType = item.type;
-                    permDeleteNamePreview.textContent = item.name || 'Unnamed';
+                    permDeleteBulkIds = null;
+                    fillRecycleSummary('permDelete', item);
                     permDeleteCodeInput.value = '';
                     permDeleteModal.classList.add('active');
                 });
@@ -1438,24 +1673,45 @@
             if (selectAll) selectAll.checked = recycleBinData.length > 0 && count === recycleBinData.length;
         }
 
-        async function bulkRestoreSelected() {
+        function bulkRestoreSelected() {
             const ids = [...selectedRecycleIds];
+            if (ids.length === 0) return;
+            const items = ids.map(id => recycleBinData.find(d => d.id === id)).filter(Boolean);
+            restoreBulkIds = ids;
+            restoreTargetId = null;
+            restoreTargetType = null;
+            fillRecycleBulkSummary('restore', items);
+            restoreModal.classList.add('active');
+        }
+
+        async function confirmRestore() {
+            let ids = [];
+            if (restoreBulkIds && restoreBulkIds.length > 0) {
+                ids = [...restoreBulkIds];
+                selectedRecycleIds.clear();
+            } else if (restoreTargetId) {
+                ids = [restoreTargetId];
+            }
+            restoreModal.classList.remove('active');
+            restoreTargetId = null;
+            restoreTargetType = null;
+            restoreBulkIds = null;
             if (ids.length === 0) return;
             for (const id of ids) {
                 const item = recycleBinData.find(d => d.id === id);
                 if (item) { await restoreFromRecycle(item.id, item.type); }
             }
-            selectedRecycleIds.clear();
-            showToast(`${ids.length} record(s) restored.`, 'success');
+            if (ids.length > 1) showToast(`${ids.length} record(s) restored.`, 'success');
         }
 
         function bulkPermDeleteSelected() {
             const ids = [...selectedRecycleIds];
             if (ids.length === 0) return;
+            const items = ids.map(id => recycleBinData.find(d => d.id === id)).filter(Boolean);
             permDeleteBulkIds = ids;
             permDeleteTargetId = null;
             permDeleteTargetType = null;
-            permDeleteNamePreview.textContent = `${ids.length} selected record(s)`;
+            fillRecycleBulkSummary('permDelete', items);
             permDeleteCodeInput.value = '';
             permDeleteModal.classList.add('active');
             setTimeout(() => permDeleteCodeInput.focus(), 50);
@@ -1464,27 +1720,33 @@
         async function restoreFromRecycle(id, type) {
             const table = type === 'pending' ? PENDING_TABLE_NAME : TABLE_NAME;
             try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    },
-                    body: JSON.stringify({ deleted_at: null })
+                const result = await queueOrRun(`Restore record`, async () => {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        },
+                        body: JSON.stringify({ deleted_at: null })
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Restore failed: ${response.status} - ${errorText}`);
+                    }
                 });
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`Restore failed: ${response.status} - ${errorText}`);
-                }
                 const idx = recycleBinData.findIndex(d => d.id === id);
                 const restoredName = idx !== -1 ? recycleBinData[idx].name : '';
                 const restoredAssignee = idx !== -1 ? recycleBinData[idx].assignee : '';
                 if (idx !== -1) recycleBinData.splice(idx, 1);
                 renderRecycleTable();
-                if (type === 'pending') { await loadPendingFromSupabase(); } else { await loadFromSupabase(); }
-                logActivity(restoredName, 'Restored', restoredAssignee);
-                showToast('Record restored.', 'success');
+                if (result.queued) {
+                    showToast(`Offline — restore of "${restoredName}" queued.`, 'error');
+                } else {
+                    if (type === 'pending') { await loadPendingFromSupabase(); } else { await loadFromSupabase(); }
+                    logActivity(restoredName, 'Restored', restoredAssignee);
+                    showToast('Record restored.', 'success');
+                }
             } catch (error) {
                 console.error('Restore error:', error);
                 showToast(`Restore failed: ${error.message}`, 'error');
@@ -1532,9 +1794,11 @@
                 for (const item of items) {
                     const table = item.type === 'pending' ? PENDING_TABLE_NAME : TABLE_NAME;
                     try {
-                        const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${item.id}`, { method: 'DELETE', headers });
-                        if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
-                        logActivity(item.name, 'Permanently Deleted', '');
+                        const result = await queueOrRun(`Permanently delete "${item.name}"`, async () => {
+                            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${item.id}`, { method: 'DELETE', headers });
+                            if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
+                        });
+                        if (!result.queued) logActivity(item.name, 'Permanently Deleted', '');
                     } catch (error) {
                         console.warn('Permanent delete failed for', item.id, error);
                     }
@@ -1613,7 +1877,7 @@
         async function loadActivityLog() {
             try {
                 const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?select=*&order=created_at.desc&limit=300`, { headers });
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?select=*&deleted_at=is.null&order=created_at.desc&limit=300`, { headers });
                 if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
                 activityLogData = await response.json();
                 populateActivityRepDropdown();
@@ -1645,20 +1909,47 @@
             return rows.filter(item => new Date(item.created_at) >= start);
         }
 
-        function renderActivityRows(tbody, rows, countEl) {
+        function renderActivityRows(tbody, rows, countEl, withCheckboxes) {
             let html = '';
             let lastDay = null;
+            const colspan = withCheckboxes ? 5 : 4;
             rows.forEach(item => {
                 const d = new Date(item.created_at);
                 const dayKey = d.toDateString();
                 if (dayKey !== lastDay) {
-                    html += `<tr class="activity-day-separator"><td colspan="4">${d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</td></tr>`;
+                    html += `<tr class="activity-day-separator"><td colspan="${colspan}">${d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</td></tr>`;
                     lastDay = dayKey;
                 }
-                html += `<tr><td>${formatDate(item.created_at)}</td><td>${item.alumni_name || ''}</td><td>${item.action || ''}</td><td>${item.being_onboarded_by || ''}</td></tr>`;
+                const checkboxCell = withCheckboxes
+                    ? `<td style="text-align:center;"><input type="checkbox" class="activity-row-checkbox" data-id="${item.id}" ${selectedActivityIds.has(item.id) ? 'checked' : ''}></td>`
+                    : '';
+                html += `<tr>${checkboxCell}<td>${formatDate(item.created_at)}</td><td>${item.alumni_name || ''}</td><td>${item.action || ''}</td><td>${item.being_onboarded_by || ''}</td></tr>`;
             });
-            tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center; color:#8a9bb0;">No activity found.</td></tr>';
+            tbody.innerHTML = html || `<tr><td colspan="${colspan}" style="text-align:center; color:#8a9bb0;">No activity found.</td></tr>`;
             if (countEl) countEl.textContent = rows.length;
+            if (withCheckboxes) {
+                tbody.querySelectorAll('.activity-row-checkbox').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const id = this.dataset.id;
+                        if (this.checked) selectedActivityIds.add(id); else selectedActivityIds.delete(id);
+                        updateActivityBulkBar();
+                    });
+                });
+                const validIds = new Set(rows.map(r => String(r.id)));
+                [...selectedActivityIds].forEach(id => { if (!validIds.has(String(id))) selectedActivityIds.delete(id); });
+                updateActivityBulkBar();
+            }
+        }
+
+        function updateActivityBulkBar() {
+            const bar = document.getElementById('activityBulkBar');
+            if (!bar) return;
+            const count = selectedActivityIds.size;
+            document.getElementById('activityBulkCount').textContent = `${count} selected`;
+            bar.classList.toggle('active', count > 0);
+            const selectAll = document.getElementById('activitySelectAll');
+            const totalRows = document.querySelectorAll('#liveActivityTableBody .activity-row-checkbox').length;
+            if (selectAll) selectAll.checked = totalRows > 0 && count === totalRows;
         }
 
         let activityPeriod = 'today';
@@ -1674,44 +1965,65 @@
             renderActivityRows(activityTbody, rows, activityRowCount);
         }
 
-        async function confirmOnboard() {
-            const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
-            if (onboardTargetIndex === null || onboardTargetIndex >= src.length) {
-                showToast('No record found.', 'error');
-                onboardModal.classList.remove('active');
-                return;
-            }
-            const itemToMove = src[onboardTargetIndex];
+        async function moveOneToOnboarded(itemToMove) {
             const idToRemove = itemToMove.id;
-            confirmOnboardBtn.disabled = true;
-            confirmOnboardBtn.textContent = 'Moving...';
-            try {
-                if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
+            let deleteQueued = false;
+            if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
+                const result = await queueOrRun(`Remove "${itemToMove.name}" from Pending`, async () => {
                     const response = await fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}?id=eq.${idToRemove}`, {
                         method: 'DELETE',
-                        headers: {
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                        }
+                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
                     });
                     if (!response.ok) {
                         const errorText = await response.text();
                         throw new Error(`Move failed: ${response.status} - ${errorText}`);
                     }
-                    const masterIdx = pendingData.findIndex(d => d.id === idToRemove);
-                    if (masterIdx !== -1) pendingData.splice(masterIdx, 1);
-                } else {
-                    const idx = pendingData.indexOf(itemToMove);
-                    if (idx !== -1) pendingData.splice(idx, 1);
-                }
-
-                alumniData.push({
-                    id: `temp_${Date.now()}`,
-                    name: itemToMove.name || '',
-                    onboarded_by: itemToMove.being_onboarded_by || '',
-                    notes: itemToMove.notes || '',
-                    date_onboarded: new Date().toISOString()
                 });
+                deleteQueued = result.queued;
+                const masterIdx = pendingData.findIndex(d => d.id === idToRemove);
+                if (masterIdx !== -1) pendingData.splice(masterIdx, 1);
+            } else {
+                const idx = pendingData.indexOf(itemToMove);
+                if (idx !== -1) pendingData.splice(idx, 1);
+            }
+            alumniData.push({
+                id: `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+                name: itemToMove.name || '',
+                onboarded_by: itemToMove.being_onboarded_by || '',
+                notes: itemToMove.notes || '',
+                date_onboarded: new Date().toISOString()
+            });
+            logActivity(itemToMove.name, 'Moved to Onboarded', itemToMove.being_onboarded_by);
+            return deleteQueued;
+        }
+
+        async function confirmOnboard() {
+            confirmOnboardBtn.disabled = true;
+            confirmOnboardBtn.textContent = 'Moving...';
+            try {
+                let anyQueued = false;
+                let movedCount = 0;
+                if (onboardBulkIds && onboardBulkIds.length > 0) {
+                    const ids = [...onboardBulkIds];
+                    for (const id of ids) {
+                        const item = pendingData.find(d => d.id === id);
+                        if (!item) continue;
+                        const queued = await moveOneToOnboarded(item);
+                        if (queued) anyQueued = true;
+                        movedCount++;
+                    }
+                    selectedPendingIds.clear();
+                } else {
+                    const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
+                    if (onboardTargetIndex === null || onboardTargetIndex >= src.length) {
+                        showToast('No record found.', 'error');
+                        onboardModal.classList.remove('active');
+                        return;
+                    }
+                    const itemToMove = src[onboardTargetIndex];
+                    anyQueued = await moveOneToOnboarded(itemToMove);
+                    movedCount = 1;
+                }
 
                 filteredPendingData = [];
                 pendingSearchInput.value = '';
@@ -1720,8 +2032,11 @@
                 renderPendingTable(pendingData);
                 renderTable(alumniData);
                 scheduleAutoSync();
-                logActivity(itemToMove.name, 'Moved to Onboarded', itemToMove.being_onboarded_by);
-                showToast('Moved to onboarded list. Syncing...', 'success');
+                if (movedCount > 1) {
+                    showToast(anyQueued ? `Offline — ${movedCount} moves queued, will sync when reconnected.` : `${movedCount} record(s) moved to Onboarded. Syncing...`, anyQueued ? 'error' : 'success');
+                } else {
+                    showToast(anyQueued ? 'Offline — move queued, will sync when reconnected.' : 'Moved to onboarded list. Syncing...', anyQueued ? 'error' : 'success');
+                }
             } catch (error) {
                 console.error('Onboard move error:', error);
                 showToast(`Move failed: ${error.message}`, 'error');
@@ -1729,46 +2044,68 @@
                 confirmOnboardBtn.disabled = false;
                 confirmOnboardBtn.innerHTML = '<i class="fas fa-check"></i> Yes, Onboarded';
                 onboardTargetIndex = null;
+                onboardBulkIds = null;
             }
         }
 
-        async function confirmReturn() {
-            const src = filteredData.length > 0 ? filteredData : alumniData;
-            if (returnTargetIndex === null || returnTargetIndex >= src.length) {
-                showToast('No record found.', 'error');
-                returnModal.classList.remove('active');
-                return;
-            }
-            const itemToMove = src[returnTargetIndex];
+        async function moveOneToPending(itemToMove) {
             const idToRemove = itemToMove.id;
-            confirmReturnBtn.disabled = true;
-            confirmReturnBtn.textContent = 'Moving...';
-            try {
-                if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
+            let deleteQueued = false;
+            if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
+                const result = await queueOrRun(`Remove "${itemToMove.name}" from Onboarded`, async () => {
                     const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${idToRemove}`, {
                         method: 'DELETE',
-                        headers: {
-                            'apikey': SUPABASE_ANON_KEY,
-                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                        }
+                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
                     });
                     if (!response.ok) {
                         const errorText = await response.text();
                         throw new Error(`Move failed: ${response.status} - ${errorText}`);
                     }
-                    const masterIdx = alumniData.findIndex(d => d.id === idToRemove);
-                    if (masterIdx !== -1) alumniData.splice(masterIdx, 1);
-                } else {
-                    const idx = alumniData.indexOf(itemToMove);
-                    if (idx !== -1) alumniData.splice(idx, 1);
-                }
-
-                pendingData.push({
-                    id: `temp_${Date.now()}`,
-                    name: itemToMove.name || '',
-                    being_onboarded_by: itemToMove.onboarded_by || '',
-                    notes: itemToMove.notes || ''
                 });
+                deleteQueued = result.queued;
+                const masterIdx = alumniData.findIndex(d => d.id === idToRemove);
+                if (masterIdx !== -1) alumniData.splice(masterIdx, 1);
+            } else {
+                const idx = alumniData.indexOf(itemToMove);
+                if (idx !== -1) alumniData.splice(idx, 1);
+            }
+            pendingData.push({
+                id: `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+                name: itemToMove.name || '',
+                being_onboarded_by: itemToMove.onboarded_by || '',
+                notes: itemToMove.notes || ''
+            });
+            logActivity(itemToMove.name, 'Moved to Pending', itemToMove.onboarded_by);
+            return deleteQueued;
+        }
+
+        async function confirmReturn() {
+            confirmReturnBtn.disabled = true;
+            confirmReturnBtn.textContent = 'Moving...';
+            try {
+                let anyQueued = false;
+                let movedCount = 0;
+                if (returnBulkIds && returnBulkIds.length > 0) {
+                    const ids = [...returnBulkIds];
+                    for (const id of ids) {
+                        const item = alumniData.find(d => d.id === id);
+                        if (!item) continue;
+                        const queued = await moveOneToPending(item);
+                        if (queued) anyQueued = true;
+                        movedCount++;
+                    }
+                    selectedAlumniIds.clear();
+                } else {
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    if (returnTargetIndex === null || returnTargetIndex >= src.length) {
+                        showToast('No record found.', 'error');
+                        returnModal.classList.remove('active');
+                        return;
+                    }
+                    const itemToMove = src[returnTargetIndex];
+                    anyQueued = await moveOneToPending(itemToMove);
+                    movedCount = 1;
+                }
 
                 filteredData = [];
                 searchInput.value = '';
@@ -1777,8 +2114,11 @@
                 renderTable(alumniData);
                 renderPendingTable(pendingData);
                 scheduleAutoSync();
-                logActivity(itemToMove.name, 'Moved to Pending', itemToMove.onboarded_by);
-                showToast('Moved back to pending. Syncing...', 'success');
+                if (movedCount > 1) {
+                    showToast(anyQueued ? `Offline — ${movedCount} moves queued, will sync when reconnected.` : `${movedCount} record(s) moved to Pending. Syncing...`, anyQueued ? 'error' : 'success');
+                } else {
+                    showToast(anyQueued ? 'Offline — move queued, will sync when reconnected.' : 'Moved back to pending. Syncing...', anyQueued ? 'error' : 'success');
+                }
             } catch (error) {
                 console.error('Return move error:', error);
                 showToast(`Move failed: ${error.message}`, 'error');
@@ -1786,6 +2126,7 @@
                 confirmReturnBtn.disabled = false;
                 confirmReturnBtn.innerHTML = '<i class="fas fa-undo"></i> Yes, Return';
                 returnTargetIndex = null;
+                returnBulkIds = null;
             }
         }
 
@@ -1815,6 +2156,7 @@
         function scheduleAutoSync() {
             clearTimeout(autoSyncTimer);
             autoSyncTimer = setTimeout(() => {
+                if (!navigator.onLine) { setStatusBadge('offline'); return; }
                 if (!isSyncing) syncToSupabase();
             }, 800);
         }
@@ -2208,33 +2550,14 @@
             showToast(`${ids.length} record(s) moved to Recycle Bin.`, 'success');
         }
 
-        async function bulkReturnAlumniToPending() {
+        function bulkReturnAlumniToPending() {
             const ids = [...selectedAlumniIds];
             if (ids.length === 0) return;
-            if (!confirm(`Move ${ids.length} selected record(s) back to Pending?`)) return;
-            for (const id of ids) {
-                const item = alumniData.find(d => d.id === id);
-                if (!item) continue;
-                if (!id.toString().startsWith('temp_')) {
-                    try {
-                        await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${id}`, {
-                            method: 'DELETE',
-                            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
-                        });
-                    } catch (error) { console.warn('Bulk return failed for', id, error); }
-                }
-                const idx = alumniData.findIndex(d => d.id === id);
-                if (idx !== -1) alumniData.splice(idx, 1);
-                pendingData.push({ id: `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`, name: item.name, being_onboarded_by: item.onboarded_by || '', notes: item.notes || '' });
-                logActivity(item.name, 'Moved to Pending', item.onboarded_by);
-            }
-            selectedAlumniIds.clear();
-            filteredData = [];
-            searchInput.value = '';
-            renderTable(alumniData);
-            renderPendingTable(pendingData);
-            scheduleAutoSync();
-            showToast(`${ids.length} record(s) moved to Pending.`, 'success');
+            const items = ids.map(id => alumniData.find(d => d.id === id)).filter(Boolean);
+            returnBulkIds = ids;
+            returnTargetIndex = null;
+            fillActionBulkSummary('return', items);
+            returnModal.classList.add('active');
         }
 
         function bulkExportAlumni() {
@@ -2283,33 +2606,14 @@
             showToast(`${ids.length} record(s) moved to Recycle Bin.`, 'success');
         }
 
-        async function bulkMovePendingToOnboarded() {
+        function bulkMovePendingToOnboarded() {
             const ids = [...selectedPendingIds];
             if (ids.length === 0) return;
-            if (!confirm(`Mark ${ids.length} selected record(s) as onboarded?`)) return;
-            for (const id of ids) {
-                const item = pendingData.find(d => d.id === id);
-                if (!item) continue;
-                if (!id.toString().startsWith('temp_')) {
-                    try {
-                        await fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}?id=eq.${id}`, {
-                            method: 'DELETE',
-                            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
-                        });
-                    } catch (error) { console.warn('Bulk onboard failed for', id, error); }
-                }
-                const idx = pendingData.findIndex(d => d.id === id);
-                if (idx !== -1) pendingData.splice(idx, 1);
-                alumniData.push({ id: `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`, name: item.name, onboarded_by: item.being_onboarded_by || '', notes: item.notes || '', date_onboarded: new Date().toISOString() });
-                logActivity(item.name, 'Moved to Onboarded', item.being_onboarded_by);
-            }
-            selectedPendingIds.clear();
-            filteredPendingData = [];
-            pendingSearchInput.value = '';
-            renderPendingTable(pendingData);
-            renderTable(alumniData);
-            scheduleAutoSync();
-            showToast(`${ids.length} record(s) moved to Onboarded.`, 'success');
+            const items = ids.map(id => pendingData.find(d => d.id === id)).filter(Boolean);
+            onboardBulkIds = ids;
+            onboardTargetIndex = null;
+            fillActionBulkSummary('onboard', items);
+            onboardModal.classList.add('active');
         }
 
         function bulkExportPending() {
@@ -2352,15 +2656,70 @@
 
         function setStatusBadge(state) {
             const el = document.getElementById('connectionStatus');
+            const queuedSuffix = offlineQueue.length > 0 ? ` (${offlineQueue.length} queued)` : '';
             const states = {
                 connecting: '<i class="fas fa-spinner fa-spin"></i> Connecting...',
                 synced: '<i class="fas fa-circle" style="color:#2a7a4d; font-size:0.6rem;"></i> Synced',
                 syncing: '<i class="fas fa-circle" style="color:#c9820a; font-size:0.6rem;"></i> Syncing...',
-                offline: '<i class="fas fa-circle" style="color:#b91c1c; font-size:0.6rem;"></i> Offline',
+                offline: `<i class="fas fa-circle" style="color:#b91c1c; font-size:0.6rem;"></i> Offline${queuedSuffix}`,
                 failed: '<i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Sync Failed'
             };
             el.innerHTML = states[state] || states.offline;
         }
+
+        // ---------- OFFLINE QUEUE ----------
+        // Actions are queued as in-memory closures. Local data is always updated
+        // immediately (optimistically); only the network call is deferred until
+        // the connection returns, then replayed in the order it was queued.
+        async function queueOrRun(label, fn) {
+            if (!navigator.onLine) {
+                offlineQueue.push({ label, fn });
+                setStatusBadge('offline');
+                return { queued: true };
+            }
+            try {
+                await fn();
+                return { queued: false };
+            } catch (err) {
+                if (err instanceof TypeError) {
+                    // Fetch itself failed to reach the network (dropped connection, DNS, etc.)
+                    offlineQueue.push({ label, fn });
+                    setStatusBadge('offline');
+                    return { queued: true };
+                }
+                throw err;
+            }
+        }
+
+        async function processOfflineQueue() {
+            if (offlineQueue.length === 0) return;
+            const queue = offlineQueue;
+            offlineQueue = [];
+            showToast(`Reconnected — syncing ${queue.length} queued change(s)...`, 'success');
+            for (const action of queue) {
+                try {
+                    await action.fn();
+                } catch (err) {
+                    console.warn(`Queued action failed (${action.label}):`, err);
+                }
+            }
+            try {
+                await syncToSupabase();
+            } catch (err) {
+                console.warn('Post-reconnect sync failed:', err);
+            }
+            setStatusBadge('synced');
+            showToast('All queued changes synced.', 'success');
+        }
+
+        window.addEventListener('online', function() {
+            setStatusBadge('syncing');
+            processOfflineQueue();
+        });
+        window.addEventListener('offline', function() {
+            setStatusBadge('offline');
+            showToast('You are offline. Changes will keep working and sync automatically once reconnected.', 'error');
+        });
 
         // ---------- ADMIN DASHBOARD ----------
         const ADMIN_PASSWORD = 'AAN@2026';
@@ -2403,6 +2762,7 @@
                 await loadPendingFromSupabase();
                 await loadRecycleBin();
                 await loadActivityLog();
+                await loadActivityRecycleBin();
                 renderRepSummary();
             } catch (e) {
                 console.warn('Admin refresh failed:', e);
@@ -2440,8 +2800,208 @@
         function renderLiveActivity() {
             const tbody = document.getElementById('liveActivityTableBody');
             const rows = filterRowsByPeriod(liveActivityRawData, adminActivityPeriod);
-            renderActivityRows(tbody, rows, null);
+            renderActivityRows(tbody, rows, null, true);
             renderNotificationSummary();
+        }
+
+        // ---------- ACTIVITY LOG DELETE / RECYCLE BIN (admin-only) ----------
+        // Soft-delete via deleted_at (same proven pattern as the alumni/pending
+        // recycle bin) so entries are reliably hidden from active views and
+        // safely recoverable — instead of a real DELETE that can silently do
+        // nothing if the table's delete permissions/RLS don't allow it.
+        let selectedActivityRecycleIds = new Set();
+
+        async function deleteSelectedActivity() {
+            const ids = [...selectedActivityIds];
+            if (ids.length === 0) return;
+            const headers = { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'return=representation' };
+            const nowIso = new Date().toISOString();
+            let deletedCount = 0;
+            let blockedCount = 0;
+            const softDeletedIds = [];
+            for (const id of ids) {
+                const item = liveActivityRawData.find(d => String(d.id) === String(id)) || activityLogData.find(d => String(d.id) === String(id));
+                if (!item) continue;
+                try {
+                    const result = await queueOrRun(`Remove log entry for "${item.alumni_name}"`, async () => {
+                        const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, {
+                            method: 'PATCH', headers, body: JSON.stringify({ deleted_at: nowIso })
+                        });
+                        if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
+                        const updatedRows = await response.json().catch(() => []);
+                        if (!updatedRows || updatedRows.length === 0) throw new Error('BLOCKED');
+                    });
+                    if (!result.queued) {
+                        deletedCount++;
+                    }
+                    softDeletedIds.push(String(id));
+                } catch (err) {
+                    if (err.message === 'BLOCKED') {
+                        blockedCount++;
+                        console.warn(`Delete for "${item.alumni_name}" removed nothing server-side — check delete/update permissions (RLS) on ammsul_activity_log.`);
+                    } else {
+                        console.warn('Could not delete activity entry:', err);
+                    }
+                }
+            }
+            selectedActivityIds.clear();
+            liveActivityRawData = liveActivityRawData.filter(d => !softDeletedIds.includes(String(d.id)));
+            activityLogData = activityLogData.filter(d => !softDeletedIds.includes(String(d.id)));
+            renderLiveActivity();
+            renderActivityTable();
+            if (deletedCount > 0) showToast(`${deletedCount} log entr${deletedCount === 1 ? 'y' : 'ies'} removed. View them in the Activity Recycle Bin.`, 'success');
+            if (blockedCount > 0) showToast(`${blockedCount} entr${blockedCount === 1 ? 'y' : 'ies'} could not be deleted — the database blocked it. Check delete permissions (RLS) on ammsul_activity_log.`, 'error');
+        }
+
+        const ACTIVITY_RECYCLE_RETENTION_DAYS = 30;
+        let activityRecycleData = [];
+
+        async function loadActivityRecycleBin() {
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?select=*&deleted_at=not.is.null&order=deleted_at.desc&limit=500`, { headers });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+                let data = await response.json();
+                data = await purgeOldActivityRecycleItems(data);
+                activityRecycleData = data;
+                updateActivityRecycleCount();
+                renderActivityRecycleTable();
+            } catch (err) {
+                console.warn('Could not load activity recycle bin:', err);
+            }
+        }
+
+        async function purgeOldActivityRecycleItems(items) {
+            const cutoff = Date.now() - ACTIVITY_RECYCLE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+            const expired = items.filter(item => item.deleted_at && new Date(item.deleted_at).getTime() < cutoff);
+            if (expired.length === 0) return items;
+            const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+            for (const item of expired) {
+                try {
+                    await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${item.id}`, { method: 'DELETE', headers });
+                } catch (err) {
+                    console.warn('Auto-purge failed for log entry', item.id, err);
+                }
+            }
+            if (expired.length > 0) showToast(`${expired.length} log entr${expired.length === 1 ? 'y' : 'ies'} auto-purged after 30 days in the Activity Recycle Bin.`, 'info');
+            const expiredIds = new Set(expired.map(e => String(e.id)));
+            return items.filter(item => !expiredIds.has(String(item.id)));
+        }
+
+        function updateActivityRecycleCount() {
+            const el = document.getElementById('activityRecycleCount');
+            if (el) el.textContent = activityRecycleData.length;
+        }
+
+        function renderActivityRecycleTable() {
+            const tbody = document.getElementById('activityRecycleTableBody');
+            if (!tbody) return;
+            const validIds = new Set(activityRecycleData.map(i => String(i.id)));
+            [...selectedActivityRecycleIds].forEach(id => { if (!validIds.has(String(id))) selectedActivityRecycleIds.delete(id); });
+            if (activityRecycleData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#8a9bb0;">No deleted log entries.</td></tr>';
+                updateActivityRecycleBulkBar();
+                return;
+            }
+            tbody.innerHTML = activityRecycleData.map(item => `
+                <tr>
+                    <td style="text-align:center;"><input type="checkbox" class="activity-recycle-checkbox" data-id="${item.id}" ${selectedActivityRecycleIds.has(String(item.id)) ? 'checked' : ''}></td>
+                    <td>${formatDate(item.created_at)}</td>
+                    <td>${item.alumni_name || ''}</td>
+                    <td>${item.action || ''}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="delete-btn" style="color:#2a7a4d;" title="Restore" data-restore="${item.id}"><i class="fas fa-trash-restore"></i></button>
+                        <button class="delete-btn" title="Delete permanently" data-purge="${item.id}"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            tbody.querySelectorAll('[data-restore]').forEach(btn => {
+                btn.addEventListener('click', function() { restoreActivityEntry(this.dataset.restore); });
+            });
+            tbody.querySelectorAll('[data-purge]').forEach(btn => {
+                btn.addEventListener('click', function() { purgeActivityEntry(this.dataset.purge); });
+            });
+            tbody.querySelectorAll('.activity-recycle-checkbox').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (this.checked) selectedActivityRecycleIds.add(this.dataset.id); else selectedActivityRecycleIds.delete(this.dataset.id);
+                    updateActivityRecycleBulkBar();
+                });
+            });
+            updateActivityRecycleBulkBar();
+        }
+
+        function updateActivityRecycleBulkBar() {
+            const bar = document.getElementById('activityRecycleBulkBar');
+            const countEl = document.getElementById('activityRecycleSelectedCount');
+            const count = selectedActivityRecycleIds.size;
+            if (!bar) return;
+            bar.classList.toggle('active', count > 0);
+            if (countEl) countEl.textContent = `${count} selected`;
+            const selectAllCb = document.getElementById('activityRecycleSelectAll');
+            if (selectAllCb) selectAllCb.checked = count > 0 && count === activityRecycleData.length;
+        }
+
+        async function restoreActivityEntry(id) {
+            const item = activityRecycleData.find(i => String(i.id) === String(id));
+            if (!item) return;
+            try {
+                const headers = { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, {
+                    method: 'PATCH', headers, body: JSON.stringify({ deleted_at: null })
+                });
+                if (!response.ok) throw new Error(`Restore failed: ${response.status}`);
+                activityRecycleData = activityRecycleData.filter(i => String(i.id) !== String(id));
+                selectedActivityRecycleIds.delete(String(id));
+                renderActivityRecycleTable();
+                updateActivityRecycleCount();
+                await loadActivityLog();
+                await fetchLiveActivity();
+                showToast('Log entry restored.', 'success');
+            } catch (err) {
+                console.error('Could not restore log entry:', err);
+                showToast('Could not restore log entry.', 'error');
+            }
+        }
+
+        async function purgeActivityEntry(id) {
+            if (!confirm('Permanently delete this log entry? This cannot be undone.')) return;
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, { method: 'DELETE', headers });
+                if (!response.ok) throw new Error(`Permanent delete failed: ${response.status}`);
+                activityRecycleData = activityRecycleData.filter(i => String(i.id) !== String(id));
+                selectedActivityRecycleIds.delete(String(id));
+                renderActivityRecycleTable();
+                updateActivityRecycleCount();
+                showToast('Log entry permanently cleared.', 'success');
+            } catch (err) {
+                console.error('Could not permanently delete log entry:', err);
+                showToast('Could not permanently delete log entry.', 'error');
+            }
+        }
+
+        async function bulkRestoreActivityRecycle() {
+            const ids = [...selectedActivityRecycleIds];
+            for (const id of ids) { await restoreActivityEntry(id); }
+        }
+
+        async function bulkPurgeActivityRecycle() {
+            const ids = [...selectedActivityRecycleIds];
+            if (ids.length === 0) return;
+            if (!confirm(`Permanently delete ${ids.length} log entr${ids.length === 1 ? 'y' : 'ies'}? This cannot be undone.`)) return;
+            const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+            for (const id of ids) {
+                try {
+                    await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, { method: 'DELETE', headers });
+                } catch (err) {
+                    console.warn('Could not permanently delete log entry:', id, err);
+                }
+            }
+            activityRecycleData = activityRecycleData.filter(i => !ids.includes(String(i.id)));
+            selectedActivityRecycleIds.clear();
+            renderActivityRecycleTable();
+            updateActivityRecycleCount();
+            showToast(`${ids.length} log entr${ids.length === 1 ? 'y' : 'ies'} permanently cleared.`, 'success');
         }
 
         function renderNotificationSummary() {
@@ -2476,7 +3036,7 @@
         async function fetchLiveActivity() {
             try {
                 const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?select=*&order=created_at.desc&limit=300`, { headers });
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?select=*&deleted_at=is.null&order=created_at.desc&limit=300`, { headers });
                 if (!response.ok) return;
                 const data = await response.json();
                 if (lastSeenActivityIds === null) {
@@ -2523,6 +3083,7 @@
 
             try { await loadRecycleBin(); } catch (e) { console.warn('Recycle bin unavailable:', e); }
             try { await loadActivityLog(); } catch (e) { console.warn('Activity log unavailable:', e); }
+            try { await loadActivityRecycleBin(); } catch (e) { console.warn('Activity recycle bin unavailable:', e); }
 
             addBtn.addEventListener('click', addRow);
             downloadBtn.addEventListener('click', downloadCSV);
@@ -2562,20 +3123,24 @@
             deleteModal.addEventListener('click', function(e) {
                 if (e.target === deleteModal) { deleteModal.classList.remove('active'); deleteTargetIndex = null; }
             });
-            cancelOnboardBtn.addEventListener('click', function() { onboardModal.classList.remove('active'); onboardTargetIndex = null; });
+            cancelOnboardBtn.addEventListener('click', function() { onboardModal.classList.remove('active'); onboardTargetIndex = null; onboardBulkIds = null; });
             confirmOnboardBtn.addEventListener('click', confirmOnboard);
             onboardModal.addEventListener('click', function(e) {
-                if (e.target === onboardModal) { onboardModal.classList.remove('active'); onboardTargetIndex = null; }
+                if (e.target === onboardModal) { onboardModal.classList.remove('active'); onboardTargetIndex = null; onboardBulkIds = null; }
             });
-            cancelReturnBtn.addEventListener('click', function() { returnModal.classList.remove('active'); returnTargetIndex = null; });
+            cancelReturnBtn.addEventListener('click', function() { returnModal.classList.remove('active'); returnTargetIndex = null; returnBulkIds = null; });
             confirmReturnBtn.addEventListener('click', confirmReturn);
             returnModal.addEventListener('click', function(e) {
-                if (e.target === returnModal) { returnModal.classList.remove('active'); returnTargetIndex = null; }
+                if (e.target === returnModal) { returnModal.classList.remove('active'); returnTargetIndex = null; returnBulkIds = null; }
             });
             cancelNotesBtn.addEventListener('click', function() { notesModal.classList.remove('active'); noteTargetIndex = null; });
             saveNotesBtn.addEventListener('click', saveNotes);
             notesModal.addEventListener('click', function(e) {
                 if (e.target === notesModal) { notesModal.classList.remove('active'); noteTargetIndex = null; }
+            });
+            closeTimelineBtn.addEventListener('click', function() { timelineModal.classList.remove('active'); });
+            timelineModal.addEventListener('click', function(e) {
+                if (e.target === timelineModal) timelineModal.classList.remove('active');
             });
             cancelPermDeleteBtn.addEventListener('click', function() { permDeleteModal.classList.remove('active'); permDeleteTargetId = null; permDeleteTargetType = null; permDeleteBulkIds = null; });
             confirmPermDeleteBtn.addEventListener('click', confirmPermDelete);
@@ -2585,6 +3150,11 @@
             permDeleteCodeInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') confirmPermDelete();
                 if (e.key === 'Escape') { permDeleteModal.classList.remove('active'); permDeleteTargetId = null; permDeleteTargetType = null; permDeleteBulkIds = null; }
+            });
+            cancelRestoreBtn.addEventListener('click', function() { restoreModal.classList.remove('active'); restoreTargetId = null; restoreTargetType = null; restoreBulkIds = null; });
+            confirmRestoreBtn.addEventListener('click', confirmRestore);
+            restoreModal.addEventListener('click', function(e) {
+                if (e.target === restoreModal) { restoreModal.classList.remove('active'); restoreTargetId = null; restoreTargetType = null; restoreBulkIds = null; }
             });
             activitySearchInput.addEventListener('input', renderActivityTable);
             filterActivityRep.addEventListener('change', renderActivityTable);
@@ -2696,6 +3266,50 @@
                     showToast('Data refreshed', 'success');
                 });
             });
+
+            // ---------- ACTIVITY LOG DELETE / RECYCLE BIN (admin-only) ----------
+            const activityBulkDeleteBtn = document.getElementById('activityBulkDeleteBtn');
+            const activitySelectAllCb = document.getElementById('activitySelectAll');
+            const openActivityRecycleBtn = document.getElementById('openActivityRecycleBtn');
+            const closeActivityRecycleBtn = document.getElementById('closeActivityRecycleBtn');
+            const activityRecycleModal = document.getElementById('activityRecycleModal');
+            if (activityBulkDeleteBtn) activityBulkDeleteBtn.addEventListener('click', function() {
+                const count = selectedActivityIds.size;
+                if (count === 0) return;
+                if (!confirm(`Remove ${count} log entr${count === 1 ? 'y' : 'ies'}? You can restore them from the Activity Recycle Bin.`)) return;
+                deleteSelectedActivity();
+            });
+            if (activitySelectAllCb) activitySelectAllCb.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('#liveActivityTableBody .activity-row-checkbox');
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                    if (this.checked) selectedActivityIds.add(cb.dataset.id); else selectedActivityIds.delete(cb.dataset.id);
+                });
+                updateActivityBulkBar();
+            });
+            if (openActivityRecycleBtn) openActivityRecycleBtn.addEventListener('click', function() {
+                loadActivityRecycleBin();
+                activityRecycleModal.classList.add('active');
+            });
+            if (closeActivityRecycleBtn) closeActivityRecycleBtn.addEventListener('click', function() {
+                activityRecycleModal.classList.remove('active');
+            });
+            if (activityRecycleModal) activityRecycleModal.addEventListener('click', function(e) {
+                if (e.target === activityRecycleModal) activityRecycleModal.classList.remove('active');
+            });
+            const activityRecycleSelectAll = document.getElementById('activityRecycleSelectAll');
+            if (activityRecycleSelectAll) activityRecycleSelectAll.addEventListener('change', function() {
+                if (this.checked) {
+                    activityRecycleData.forEach(item => selectedActivityRecycleIds.add(String(item.id)));
+                } else {
+                    selectedActivityRecycleIds.clear();
+                }
+                renderActivityRecycleTable();
+            });
+            const activityRecycleRestoreBtn = document.getElementById('activityRecycleRestoreBtn');
+            if (activityRecycleRestoreBtn) activityRecycleRestoreBtn.addEventListener('click', bulkRestoreActivityRecycle);
+            const activityRecyclePermDeleteBtn = document.getElementById('activityRecyclePermDeleteBtn');
+            if (activityRecyclePermDeleteBtn) activityRecyclePermDeleteBtn.addEventListener('click', bulkPurgeActivityRecycle);
 
             navItems.forEach(function(navItem) {
                 navItem.addEventListener('click', function() { switchPage(this.dataset.target); });
