@@ -4229,12 +4229,15 @@
                 return;
             }
             const sortedReps = [...activeRepsData].sort(function(a, b) {
-                if (a.role !== b.role) return a.role === 'admin' ? -1 : 1;
+                const roleA = (isProtectedManager(a) && a.id !== currentUser.id) ? 'rep' : a.role;
+                const roleB = (isProtectedManager(b) && b.id !== currentUser.id) ? 'rep' : b.role;
+                if (roleA !== roleB) return roleA === 'admin' ? -1 : 1;
                 return (a.full_name || '').localeCompare(b.full_name || '');
             });
             tbody.innerHTML = sortedReps.map(function(r) {
                 const isSelf = r.id === currentUser.id;
                 const isProtected = isProtectedManager(r);
+                const displayRole = (isProtected && !isSelf) ? 'rep' : r.role;
                 let roleBtn;
                 if (isProtected && isSelf) {
                     roleBtn = `<button class="delete-btn" style="color:#0a2a44;" title="Dismiss yourself from admin" data-rep-role="${r.id}" data-rep-newrole="rep" data-rep-name="${escapeHtml(r.full_name)}" data-self-dismiss="1"><i class="fas fa-user-minus"></i></button>`;
@@ -4249,7 +4252,7 @@
                 return `<tr>
                     <td>${escapeHtml(r.full_name)}</td>
                     <td>${escapeHtml(r.username)}</td>
-                    <td><span class="pill-badge ${r.role}">${r.role}</span></td>
+                    <td><span class="pill-badge ${displayRole}">${displayRole}</span></td>
                     <td>${r.last_login_at ? formatDate(r.last_login_at) : 'Never'}</td>
                     <td>${roleBtn}${deleteBtn}${isSelf ? '<span style="color:#8a9bb0; font-size:0.72rem; display:block;">You</span>' : ''}</td>
                 </tr>`;
