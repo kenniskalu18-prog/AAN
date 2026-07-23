@@ -236,7 +236,7 @@
     <button class="nav-menu-item" data-target="pendingSection"><i class="fas fa-hourglass-half"></i> Pending Onboarding</button>
     <button class="nav-menu-item" data-target="recycleSection"><i class="fas fa-trash-restore"></i> Recycle Bin</button>
     <button class="nav-menu-item" data-target="activitySection"><i class="fas fa-history"></i> Activity Log</button>
-    <button class="nav-menu-item" data-target="adminSection"><i class="fas fa-user-shield"></i> Admin Dashboard</button>
+    <button class="nav-menu-item" id="adminNavBtn" data-target="adminSection"><i class="fas fa-lock"></i> Admin</button>
 </div>
 
 <div class="container">
@@ -2158,7 +2158,7 @@
             autoSyncTimer = setTimeout(() => {
                 if (!navigator.onLine) { setStatusBadge('offline'); return; }
                 if (!isSyncing) syncToSupabase();
-            }, 800);
+            }, 2000);
         }
 
         async function syncToSupabase() {
@@ -2722,13 +2722,23 @@
         });
 
         // ---------- ADMIN DASHBOARD ----------
-        const ADMIN_PASSWORD = 'AAN@2026';
+        // NOTE: password is verified server-side via a Supabase RPC (see
+        // check_admin_password below) so it never sits in the page source.
         let adminUnlocked = false;
         let liveActivityTimer = null;
         let lastSeenActivityIds = null;
 
+        function updateAdminNavLabel() {
+            const btn = document.getElementById('adminNavBtn');
+            if (!btn) return;
+            btn.innerHTML = adminUnlocked
+                ? '<i class="fas fa-user-shield"></i> Admin Dashboard'
+                : '<i class="fas fa-lock"></i> Admin';
+        }
+
         function checkAdminUnlock() {
             adminUnlocked = sessionStorage.getItem('amsul_admin_unlocked') === 'true';
+            updateAdminNavLabel();
         }
 
         function showAdminPage() {
@@ -3353,15 +3363,42 @@
         const adminPasswordInput = document.getElementById('adminPasswordInput');
         const adminUnlockBtn = document.getElementById('adminUnlockBtn');
         const adminPasswordError = document.getElementById('adminPasswordError');
-        function attemptAdminUnlock() {
-            if (adminPasswordInput.value === ADMIN_PASSWORD) {
-                adminUnlocked = true;
-                sessionStorage.setItem('amsul_admin_unlocked', 'true');
-                adminPasswordError.style.display = 'none';
-                adminPasswordInput.value = '';
-                showAdminPage();
-            } else {
+        async function attemptAdminUnlock() {
+            const entered = adminPasswordInput.value;
+            if (!entered) return;
+            adminUnlockBtn.disabled = true;
+            const originalLabel = adminUnlockBtn.textContent;
+            adminUnlockBtn.textContent = 'Checking...';
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_admin_password`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({ input_password: entered })
+                });
+                if (!response.ok) throw new Error(`Check failed: ${response.status}`);
+                const isCorrect = await response.json();
+                if (isCorrect === true) {
+                    adminUnlocked = true;
+                    sessionStorage.setItem('amsul_admin_unlocked', 'true');
+                    adminPasswordError.style.display = 'none';
+                    adminPasswordInput.value = '';
+                    updateAdminNavLabel();
+                    showAdminPage();
+                } else {
+                    adminPasswordError.textContent = 'Incorrect password.';
+                    adminPasswordError.style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Admin password check failed:', err);
+                adminPasswordError.textContent = 'Could not verify password — check your connection.';
                 adminPasswordError.style.display = 'block';
+            } finally {
+                adminUnlockBtn.disabled = false;
+                adminUnlockBtn.textContent = originalLabel;
             }
         }
         adminUnlockBtn.addEventListener('click', attemptAdminUnlock);
