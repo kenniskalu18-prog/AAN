@@ -3361,7 +3361,7 @@
                     console.warn('Pending list unavailable:', pendingError);
                 }
                 setStatusBadge('synced');
-                showToast('Connected to Supabase', 'success');
+                showToast('Connected', 'success');
             } catch (e) {
                 setStatusBadge('offline');
                 if (alumniData.length === 0) loadSampleData();
@@ -3518,7 +3518,10 @@
                 navItems.forEach(function(item) { item.classList.toggle('active', item.dataset.target === targetId); });
                 tabButtons.forEach(function(btn) { btn.classList.toggle('active', btn.dataset.target === targetId); });
                 closeNav();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setTimeout(function() {
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
                 if (targetId === 'recycleSection') loadRecycleBin();
                 if (targetId === 'activitySection') loadActivityLog();
                 if (targetId === 'adminSection') {
