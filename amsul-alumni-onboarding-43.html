@@ -1,0 +1,3447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AMSUL Alumni Onboarding Database</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background-color:#f4f6f9;
+            background-image: linear-gradient(rgba(244,246,249,0.55), rgba(244,246,249,0.55)), url('https://i.ibb.co/4nMtT1Tt/file-000000007e1881f485ce6e444a6768aa.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            font-family:'Segoe UI',Roboto,Arial,sans-serif; padding:1.5rem; color:#1e2a3a;
+        }
+        .logo-img { height:52px; width:auto; object-fit:contain; }
+        .container { max-width:1400px; margin:0 auto; background:white; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.06); padding:1.5rem 1.8rem 2rem; border:1px solid #e2e8f0; }
+        .header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; border-bottom:3px solid transparent; border-image:linear-gradient(90deg,#0a2a44,#2a7a4d) 1; padding-bottom:1rem; margin-bottom:1.5rem; }
+        .header h1 {
+            font-size:1.7rem;
+            font-weight:800;
+            letter-spacing:-0.4px;
+            display:flex; align-items:center; gap:0.7rem;
+            background: linear-gradient(100deg, #0a2a44 35%, #2a7a4d 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        }
+        .header h1 i { color:#2a7a4d; margin-right:0.5rem; }
+        .header-actions { display:flex; gap:0.8rem; flex-wrap:wrap; }
+        .btn { background:white; border:1px solid #cbd5e0; padding:0.5rem 1rem; border-radius:6px; font-weight:500; font-size:0.8rem; cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem; transition:0.2s; font-family:inherit; color:#1e2a3a; }
+        .btn-primary { background:#0a2a44; border-color:#0a2a44; color:white; }
+        .btn-primary:hover { background:#1a3a5a; }
+        .btn-success { background:#2a7a4d; border-color:#2a7a4d; color:white; }
+        .btn-success:hover { background:#1e6a3d; }
+        .btn-danger { background:#b91c1c; border-color:#b91c1c; color:white; }
+        .btn-danger:hover { background:#991616; }
+        .btn-outline { background:transparent; border:1px solid #cbd5e0; }
+        .btn-outline:hover { background:#f0f4f8; }
+        .btn i { font-size:0.85rem; }
+        .status-badge { background:#e8f0fe; color:#1a5f7a; padding:0.2rem 0.7rem; border-radius:30px; font-size:0.7rem; font-weight:600; }
+        .search-box { display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap; margin-bottom:1rem; }
+        .filter-panel { display:none; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:0.7rem; align-items:end; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.8rem; margin-bottom:1rem; }
+        .filter-panel.active { display:grid; }
+        .filter-field { display:flex; flex-direction:column; gap:0.25rem; }
+        .filter-field label { font-size:0.7rem; font-weight:600; color:#5b6f86; text-transform:uppercase; letter-spacing:0.3px; }
+        .filter-field select, .filter-field input[type="date"] { padding:0.45rem 0.5rem; border:1px solid #cbd5e0; border-radius:6px; font-size:0.82rem; font-family:inherit; background:white; }
+        .search-box input { padding:0.4rem 0.8rem; border:1px solid #cbd5e0; border-radius:6px; font-size:0.85rem; width:260px; font-family:inherit; }
+        .search-box input:focus { outline:2px solid #2a7a4d; border-color:transparent; }
+        .showing-count { font-size:0.78rem; color:#5b6f86; margin:-0.3rem 0 0.5rem; font-weight:500; }
+        .table-wrapper { overflow-x:auto; overflow-y:auto; max-height:420px; margin-top:0.5rem; border:1px solid #edf2f6; border-radius:8px; scroll-behavior:smooth; }
+        .table-wrapper th { position:sticky; top:0; z-index:5; }
+        table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        th { background:#f8fafc; text-align:left; padding:0.7rem 0.6rem; font-weight:600; color:#2a3f55; border-bottom:2px solid #e2e8f0; white-space:nowrap; }
+        td { padding:0.6rem 0.6rem; border-bottom:1px solid #edf2f6; vertical-align:middle; }
+        tr:hover td { background:#fafcfe; }
+        .editable-cell { background:transparent; border:none; width:100%; font-family:inherit; font-size:0.85rem; padding:0.2rem 0.3rem; border-radius:4px; color:#1e2a3a; }
+        .editable-cell:focus { outline:2px solid #2a7a4d; background:white; }
+        .editable-cell:hover { background:#f0f7ff; }
+        .add-row-btn { background:#fdf3e0; border:1px dashed #c9820a; color:#8a5a06; padding:0.4rem 1rem; border-radius:6px; cursor:pointer; font-size:0.8rem; margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.4rem; font-family:inherit; }
+        .add-row-btn:hover { background:#f9e6c2; }
+        .delete-btn { background:none; border:none; color:#b91c1c; cursor:pointer; font-size:0.9rem; padding:0.2rem 0.4rem; border-radius:4px; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
+        .delete-btn:hover { background:#fee2e2; }
+        .btn, .tab-switcher button, .admin-subnav button { -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
+        .long-press-hint { position:fixed; z-index:3000; background:#1f2f3f; color:white; padding:0.45rem 0.8rem; border-radius:8px; font-size:0.78rem; box-shadow:0 6px 18px rgba(0,0,0,0.2); opacity:0; transform:translate(-50%, 6px); transition:0.15s ease; pointer-events:none; max-width:240px; text-align:center; }
+        .long-press-hint.show { opacity:1; transform:translate(-50%, 0); }
+        .footer { margin-top:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem; font-size:0.8rem; color:#5b6f86; border-top:1px solid #e2e8f0; padding-top:1rem; }
+        .footer .count { font-weight:600; color:#0a2a44; }
+        .section-divider { margin-top:2rem; padding-top:1.5rem; border-top:2px dashed #e2e8f0; }
+        .section-divider h2 { font-size:1.15rem; font-weight:700; color:#0a2a44; display:flex; align-items:center; gap:0.5rem; }
+        .section-divider h2 i { color:#c9820a; }
+        .section-divider .section-sub { font-size:0.8rem; color:#5b6f86; margin-top:0.2rem; margin-bottom:1rem; }
+        .bulk-action-bar { display:none; align-items:center; gap:0.6rem; flex-wrap:wrap; background:#fdf3e0; border:1px solid #f0d9a6; border-radius:8px; padding:0.6rem 0.8rem; margin-bottom:0.8rem; font-size:0.82rem; color:#8a5a06; font-weight:600; }
+        .bulk-action-bar.active { display:flex; }
+        tr.activity-group-header td { background:#0a2a44; color:white; font-weight:700; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.4px; padding:0.5rem 0.7rem; }
+        tr.activity-day-separator td { background:#fdf3e0; color:#8a5a06; font-weight:700; font-size:0.75rem; padding:0.4rem 0.7rem; border-top:1px solid #f0d9a6; border-bottom:1px solid #f0d9a6; }
+
+        /* ---------- PAGE SECTIONS ---------- */
+        .page-section { display:none; }
+        .page-section.active { display:block; }
+
+        /* ---------- HAMBURGER + NAV MENU ---------- */
+        .hamburger-btn {
+            position:fixed; top:1rem; right:1rem; z-index:1200;
+            width:44px; height:44px; border-radius:10px; border:1px solid #cbd5e0;
+            background:white; color:#0a2a44; font-size:1.1rem; cursor:pointer;
+            box-shadow:0 2px 8px rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center;
+        }
+        .nav-overlay {
+            display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:1300;
+        }
+        .nav-overlay.active { display:block; }
+        .nav-menu {
+            position:fixed; top:0; right:-280px; width:260px; height:100%; background:white; z-index:1400;
+            box-shadow:-4px 0 20px rgba(0,0,0,0.15); transition:right 0.25s ease; padding:1rem; display:flex; flex-direction:column; gap:0.4rem;
+        }
+        .nav-menu.active { right:0; }
+        .nav-menu-header { display:flex; justify-content:space-between; align-items:center; font-weight:700; color:#0a2a44; padding-bottom:0.8rem; margin-bottom:0.4rem; border-bottom:1px solid #eef2f6; }
+        .nav-menu-header button { background:none; border:none; font-size:1rem; color:#5b6f86; cursor:pointer; }
+        .nav-menu-item {
+            display:flex; align-items:center; gap:0.6rem; text-align:left; background:none; border:none;
+            padding:0.7rem 0.6rem; border-radius:8px; font-size:0.9rem; color:#1e2a3a; cursor:pointer; font-family:inherit;
+        }
+        .nav-menu-item:hover { background:#f0f7ff; }
+        .nav-menu-item.active { background:#0a2a44; color:white; }
+        .nav-menu-item.active i { color:#7fd6a0; }
+
+        /* ---------- TAB SWITCHER ---------- */
+        /* ---------- STATS BAR ---------- */
+        .stats-bar { display:grid; grid-template-columns:repeat(4,1fr); gap:0.7rem; margin-bottom:1.2rem; }
+        .stat-card { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:0.7rem 0.5rem; text-align:center; }
+        .stat-value { font-size:1.3rem; font-weight:800; color:#0a2a44; }
+        .stat-label { font-size:0.68rem; color:#5b6f86; font-weight:600; text-transform:uppercase; letter-spacing:0.3px; margin-top:0.15rem; }
+        @media (max-width:700px) { .stats-bar { grid-template-columns:repeat(2,1fr); } }
+
+        /* ---------- RECENTLY ADDED WIDGET ---------- */
+        .recently-added-widget { background:linear-gradient(135deg, #f0f9ff 0%, #fdf3e0 100%); border:1px solid #e0f2fe; border-radius:10px; padding:1rem; margin-bottom:1.2rem; }
+        .recently-added-widget h3 { font-size:0.95rem; font-weight:700; color:#0a2a44; margin:0 0 0.6rem; display:flex; align-items:center; gap:0.4rem; }
+        .recently-added-widget h3 i { color:#c9820a; }
+        .recently-added-item { display:flex; justify-content:space-between; align-items:center; padding:0.5rem; margin:0.3rem 0; background:white; border-radius:6px; border-left:3px solid #2a7a4d; font-size:0.85rem; }
+        .recently-added-item .name { font-weight:600; color:#1e2a3a; }
+        .recently-added-item .time { color:#5b6f86; font-size:0.75rem; }
+        .recently-added-empty { text-align:center; color:#5b6f86; font-size:0.85rem; padding:0.8rem; }
+
+        /* ---------- EMPTY STATES ---------- */
+        .empty-state { text-align:center; padding:2rem 1rem; color:#5b6f86; }
+        .empty-state .title { font-size:1.1rem; font-weight:700; color:#0a2a44; margin:0.5rem 0; }
+        .empty-state .subtitle { font-size:0.85rem; margin:0; }
+
+        /* ---------- LOADING & UNDO ---------- */
+        .sync-indicator { display:none; align-items:center; gap:0.5rem; font-size:0.85rem; color:#2a7a4d; padding:0.6rem 0.8rem; background:#e8f5e9; border-radius:6px; margin-bottom:0.8rem; border:1px solid #c8e6c9; }
+        .sync-indicator.active { display:flex; }
+        .sync-indicator .spinner { width:20px; height:20px; border:2px solid #c8e6c9; border-top:2px solid #2a7a4d; border-radius:50%; animation:spin 0.8s linear infinite; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        
+        .undo-toast { position:fixed; bottom:20px; left:20px; background:#0a2a44; color:white; padding:1rem 1.2rem; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:2000; display:flex; align-items:center; gap:0.8rem; animation:slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform:translateX(-100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+        .undo-toast button { background:white; color:#0a2a44; border:none; padding:0.4rem 0.8rem; border-radius:4px; font-weight:600; cursor:pointer; font-size:0.8rem; }
+        .undo-toast button:hover { background:#f0f4f8; }
+        .undo-timer { font-size:0.75rem; color:#c8c8c8; min-width:30px; }
+
+        /* ---------- ROW HIGHLIGHT ---------- */
+        .row-highlight { animation:highlightFlash 2s ease; }
+        @keyframes highlightFlash { 0% { background-color:#c6f6d5; } 100% { background-color:transparent; } }
+
+        /* ---------- ADMIN QUICK ACTIONS ---------- */
+        .admin-quick-actions { display:flex; flex-wrap:wrap; gap:0.6rem; margin:0.8rem 0 0.6rem; }        .admin-refresh-status { display:flex; align-items:center; gap:0.5rem; font-size:0.78rem; color:#5b6f86; margin-bottom:0.4rem; }
+        .admin-refresh-status strong { color:#0a2a44; }
+        .admin-refresh-dot { width:7px; height:7px; border-radius:50%; background:#2a7a4d; display:inline-block; animation:refreshPulse 2s ease infinite; }
+        @keyframes refreshPulse { 0%,100% { opacity:1; } 50% { opacity:0.35; } }
+
+        /* ---------- NOTIFICATION SUMMARY ---------- */
+        .notification-summary { display:flex; flex-direction:column; gap:0.6rem; margin-bottom:0.9rem; }
+        .notification-day-group { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.8rem; }
+        .notification-day-group .day-label { font-size:0.78rem; font-weight:700; color:#0a2a44; margin-bottom:0.35rem; }
+        .notification-day-group .day-counts { display:flex; flex-wrap:wrap; gap:0.5rem; }
+        .notification-count-pill { font-size:0.75rem; font-weight:600; color:#2a3f55; background:white; border:1px solid #e2e8f0; border-radius:20px; padding:0.2rem 0.65rem; }
+
+        /* ---------- REP COLOR TAGS ---------- */
+        .rep-tag { display:inline-block; padding:0.3rem 0.6rem; border-radius:20px; font-size:0.75rem; font-weight:600; color:white; }
+        .rep-tag.color-1 { background:#3b82f6; }
+        .rep-tag.color-2 { background:#10b981; }
+        .rep-tag.color-3 { background:#f59e0b; }
+        .rep-tag.color-4 { background:#ef4444; }
+        .rep-tag.color-5 { background:#8b5cf6; }
+        .rep-tag.color-6 { background:#ec4899; }
+        .rep-tag.color-7 { background:#06b6d4; }
+        .rep-tag.color-8 { background:#14b8a6; }
+
+        /* ---------- STICKY HEADERS ---------- */
+        .table-wrapper th { position:sticky; top:0; z-index:5; }
+
+        /* ---------- ROW HOVER ---------- */
+        tr:hover td { background:#fafcfe; }
+        .table-wrapper tbody tr { transition:background-color 0.15s ease; }
+
+        .tab-switcher { display:flex; gap:0.4rem; background:#eef2f6; border-radius:10px; padding:0.3rem; margin-bottom:1.2rem; }
+        .tab-switcher button {
+            flex:1; border:none; background:none; padding:0.6rem 0.5rem; border-radius:8px;
+            font-size:0.85rem; font-weight:600; color:#5b6f86; cursor:pointer; font-family:inherit;
+            display:flex; align-items:center; justify-content:center; gap:0.4rem; transition:0.2s;
+        }
+        .tab-switcher button.active { background:#0a2a44; color:white; box-shadow:0 2px 6px rgba(10,42,68,0.3); }
+        .tab-switcher button i { font-size:0.85rem; }
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
+        .modal-overlay.active { display:flex; }
+        .modal-box { background:white; border-radius:12px; padding:2rem; max-width:420px; width:90%; box-shadow:0 20px 40px rgba(0,0,0,0.2); text-align:center; }
+        .modal-box h3 { font-size:1.1rem; margin-bottom:0.5rem; color:#0a2a44; }
+        .modal-box p { font-size:0.85rem; color:#4a5a6a; margin-bottom:1.2rem; }
+        .modal-box .code-hint { background:#f0f4f8; padding:0.4rem; border-radius:6px; font-family:monospace; font-size:1.1rem; font-weight:700; color:#0a2a44; margin:0.5rem 0 1rem 0; }
+        .modal-box input { width:100%; padding:0.6rem; border:1px solid #cbd5e0; border-radius:6px; font-size:0.9rem; font-family:inherit; text-align:center; letter-spacing:2px; margin-bottom:1rem; }
+        .modal-box input:focus { outline:2px solid #2a7a4d; border-color:transparent; }
+        .modal-actions { display:flex; gap:0.8rem; justify-content:center; }
+        .modal-actions .btn { min-width:100px; justify-content:center; }
+        .confirm-summary { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.8rem 1rem; margin-bottom:1rem; text-align:left; }
+        .confirm-summary-name { font-size:1.05rem; font-weight:700; color:#0a2a44; margin-bottom:0.5rem; }
+        .confirm-summary-row { display:flex; justify-content:space-between; gap:0.8rem; font-size:0.82rem; color:#4a5a6a; padding:0.25rem 0; border-top:1px solid #edf2f6; }
+        .confirm-summary-row:first-of-type { border-top:none; }
+        .confirm-summary-row .label { font-weight:600; color:#5b6f86; flex-shrink:0; }
+        .confirm-summary-row span:last-child { text-align:right; word-break:break-word; }
+        .confirm-summary-list { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.9rem; margin-bottom:1rem; max-height:160px; overflow-y:auto; text-align:left; font-size:0.82rem; }
+        .confirm-summary-list ul { margin:0; padding-left:1.1rem; }
+        .confirm-summary-list li { padding:0.15rem 0; color:#2a3f55; }
+
+        /* ---------- TIMELINE ---------- */
+        .timeline-list { max-height:320px; overflow-y:auto; margin-bottom:1rem; padding-right:0.3rem; }
+        .timeline-item { display:flex; gap:0.7rem; position:relative; padding-bottom:1rem; }
+        .timeline-item:not(:last-child)::before { content:''; position:absolute; left:5px; top:14px; bottom:-2px; width:2px; background:#e2e8f0; }
+        .timeline-dot { width:12px; height:12px; border-radius:50%; background:#2a7a4d; margin-top:3px; flex-shrink:0; z-index:1; }
+        .timeline-content { flex:1; }
+        .timeline-time { font-size:0.75rem; color:#5b6f86; font-weight:600; }
+        .timeline-action { font-size:0.85rem; color:#1e2a3a; margin-top:0.1rem; }
+        .timeline-empty, .timeline-loading { font-size:0.85rem; color:#8a9bb0; text-align:center; padding:1.5rem 0; }
+        .toast { position:fixed; bottom:25px; right:25px; background:#1f2f3f; color:white; padding:0.8rem 1.4rem; border-radius:10px; font-size:0.85rem; box-shadow:0 6px 18px rgba(0,0,0,0.15); opacity:0; transform:translateY(10px); transition:0.3s ease; pointer-events:none; max-width:350px; z-index:999; }
+        .toast.show { opacity:1; transform:translateY(0); }
+        .toast.success { background:#1a6e3a; }
+        .toast.error { background:#a1302a; }
+        @media (max-width:700px) { .header { flex-direction:column; align-items:start; gap:0.8rem; } .container { padding:1rem; } th,td { font-size:0.75rem; padding:0.4rem 0.4rem; } .search-box input { width:100%; } }
+    </style>
+</head>
+<body>
+<button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+<div class="nav-overlay" id="navOverlay"></div>
+<div class="nav-menu" id="navMenu">
+    <div class="nav-menu-header">
+        <span>Menu</span>
+        <button id="closeNavBtn" aria-label="Close menu"><i class="fas fa-times"></i></button>
+    </div>
+    <button class="nav-menu-item active" data-target="alumniSection"><i class="fas fa-user-graduate"></i> Alumni Onboarded</button>
+    <button class="nav-menu-item" data-target="pendingSection"><i class="fas fa-hourglass-half"></i> Pending Onboarding</button>
+    <button class="nav-menu-item" data-target="recycleSection"><i class="fas fa-trash-restore"></i> Recycle Bin</button>
+    <button class="nav-menu-item" data-target="activitySection"><i class="fas fa-history"></i> Activity Log</button>
+    <button class="nav-menu-item" data-target="adminSection"><i class="fas fa-user-shield"></i> Admin Dashboard</button>
+</div>
+
+<div class="container">
+    <div class="header">
+        <h1><img src="https://i.ibb.co/7JTvt1Zn/1002087198-removebg-preview.png" alt="AMSUL logo" class="logo-img"> AMSUL Alumni Onboarding</h1>
+        <div class="header-actions">
+            <button class="btn btn-success" id="downloadCsv"><i class="fas fa-file-download"></i> Download CSV</button>
+            <button class="btn btn-primary" id="downloadPdf"><i class="fas fa-file-pdf"></i> Download PDF</button>
+            <span class="status-badge" id="connectionStatus"><i class="fas fa-circle" style="color:#b91c1c; font-size:0.6rem;"></i> Offline</span>
+        </div>
+    </div>
+
+    <div class="stats-bar" id="statsBar">
+        <div class="stat-card">
+            <div class="stat-value" id="statTotal">0</div>
+            <div class="stat-label">Total Alumni</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statPending">0</div>
+            <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statOnboarded">0</div>
+            <div class="stat-label">Onboarded</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="statCompletion">0%</div>
+            <div class="stat-label">Completion</div>
+        </div>
+    </div>
+
+    <!-- RECENTLY ADDED WIDGET -->
+    <div class="recently-added-widget">
+        <h3>Recently Added</h3>
+        <div id="recentlyAddedContainer">
+            <div class="recently-added-empty">No recent additions yet</div>
+        </div>
+    </div>
+
+    <div class="tab-switcher" id="tabSwitcher">
+        <button class="active" data-target="alumniSection"><i class="fas fa-user-graduate"></i> Onboarded</button>
+        <button data-target="pendingSection"><i class="fas fa-hourglass-half"></i> Pending</button>
+    </div>
+
+    <div class="page-section active" id="alumniSection">
+    <div id="syncIndicator" class="sync-indicator">
+        <div class="spinner"></div>
+        <span>Syncing with server...</span>
+    </div>
+    <div class="search-box">
+        <i class="fas fa-search" style="color:#5b6f86;"></i>
+        <input type="text" id="searchInput" placeholder="Search by name, representative, notes...">
+        <button class="btn btn-outline" id="clearSearchBtn" style="font-size:0.75rem;"><i class="fas fa-times"></i> Clear</button>
+        <button class="btn btn-outline" id="toggleAlumniFiltersBtn" style="font-size:0.75rem;"><i class="fas fa-filter"></i> Filters</button>
+    </div>
+
+    <div class="filter-panel" id="alumniFilterPanel">
+        <div class="filter-field">
+            <label>Onboarded By</label>
+            <select id="filterAlumniRep"><option value="">All</option></select>
+        </div>
+        <div class="filter-field">
+            <label>Date Added (from)</label>
+            <input type="date" id="filterAlumniDateAddedFrom">
+        </div>
+        <div class="filter-field">
+            <label>Date Added (to)</label>
+            <input type="date" id="filterAlumniDateAddedTo">
+        </div>
+        <div class="filter-field">
+            <label>Date Onboarded (from)</label>
+            <input type="date" id="filterAlumniDateOnboardedFrom">
+        </div>
+        <div class="filter-field">
+            <label>Date Onboarded (to)</label>
+            <input type="date" id="filterAlumniDateOnboardedTo">
+        </div>
+        <button class="btn btn-outline" id="clearAlumniFiltersBtn" style="font-size:0.75rem;">Clear Filters</button>
+    </div>
+
+    <div class="bulk-action-bar" id="alumniBulkBar">
+        <span id="alumniBulkCount">0 selected</span>
+        <button class="btn btn-outline" id="alumniBulkExportBtn" style="font-size:0.75rem;"><i class="fas fa-file-download"></i> Export Selected</button>
+        <button class="btn btn-outline" id="alumniBulkReturnBtn" style="font-size:0.75rem;"><i class="fas fa-undo"></i> Move to Pending</button>
+        <button class="btn btn-danger" id="alumniBulkDeleteBtn" style="font-size:0.75rem;"><i class="fas fa-trash-alt"></i> Delete Selected</button>
+    </div>
+
+    <div class="showing-count" id="alumniShowingCount">Showing 0 of 0 alumni</div>
+    <div class="table-wrapper">
+        <table id="dataTable">
+            <thead><tr><th style="width:30px;"><input type="checkbox" id="alumniSelectAll"></th><th style="width:25px;">#</th><th>Full Name</th><th>Onboarded By</th><th style="width:105px;">Action</th></tr></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <button class="add-row-btn" id="addRowBtn"><i class="fas fa-plus-circle"></i> Add New Alumni</button>
+
+    <div class="footer">
+        <span><span class="count" id="rowCount">0</span> alumni onboarded</span>
+        <span><i class="fas fa-trash-restore" style="font-size:0.7rem;"></i> Deleted items go to the Recycle Bin</span>
+    </div>
+    </div>
+
+    <div class="page-section" id="pendingSection">
+    <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+        <h2><i class="fas fa-hourglass-half"></i> Pending Onboarding</h2>
+        <p class="section-sub">Alumni who've been contacted but haven't been fully onboarded yet.</p>
+    </div>
+
+    <div class="search-box">
+        <i class="fas fa-search" style="color:#5b6f86;"></i>
+        <input type="text" id="pendingSearchInput" placeholder="Search by name, representative, notes...">
+        <button class="btn btn-outline" id="pendingClearSearchBtn" style="font-size:0.75rem;"><i class="fas fa-times"></i> Clear</button>
+        <button class="btn btn-outline" id="togglePendingFiltersBtn" style="font-size:0.75rem;"><i class="fas fa-filter"></i> Filters</button>
+    </div>
+
+    <div class="filter-panel" id="pendingFilterPanel">
+        <div class="filter-field">
+            <label>Being Onboarded By</label>
+            <select id="filterPendingRep"><option value="">All</option></select>
+        </div>
+        <div class="filter-field">
+            <label>Date Added (from)</label>
+            <input type="date" id="filterPendingDateAddedFrom">
+        </div>
+        <div class="filter-field">
+            <label>Date Added (to)</label>
+            <input type="date" id="filterPendingDateAddedTo">
+        </div>
+        <button class="btn btn-outline" id="clearPendingFiltersBtn" style="font-size:0.75rem;">Clear Filters</button>
+    </div>
+
+    <div class="bulk-action-bar" id="pendingBulkBar">
+        <span id="pendingBulkCount">0 selected</span>
+        <button class="btn btn-outline" id="pendingBulkExportBtn" style="font-size:0.75rem;"><i class="fas fa-file-download"></i> Export Selected</button>
+        <button class="btn btn-outline" id="pendingBulkOnboardBtn" style="font-size:0.75rem;"><i class="fas fa-check"></i> Move to Onboarded</button>
+        <button class="btn btn-danger" id="pendingBulkDeleteBtn" style="font-size:0.75rem;"><i class="fas fa-trash-alt"></i> Delete Selected</button>
+    </div>
+
+    <div class="showing-count" id="pendingShowingCount">Showing 0 of 0 pending</div>
+    <div class="table-wrapper">
+        <table id="pendingTable">
+            <thead><tr><th style="width:30px;"><input type="checkbox" id="pendingSelectAll"></th><th style="width:25px;">#</th><th>Full Name</th><th>Being Onboarded By</th><th style="width:105px;">Action</th></tr></thead>
+            <tbody id="pendingTableBody"></tbody>
+        </table>
+    </div>
+
+    <button class="add-row-btn" id="addPendingRowBtn"><i class="fas fa-plus-circle"></i> Add Pending Alumni</button>
+
+    <div class="footer">
+        <span><span class="count" id="pendingRowCount">0</span> pending</span>
+        <span><i class="fas fa-trash-restore" style="font-size:0.7rem;"></i> Deleted items go to the Recycle Bin</span>
+    </div>
+    </div>
+
+    <div class="page-section" id="recycleSection">
+        <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+            <h2><i class="fas fa-trash-restore"></i> Recycle Bin</h2>
+            <p class="section-sub">Deleted records are kept here. Restore them or delete permanently. Records are auto-purged after 30 days.</p>
+        </div>
+        <div class="bulk-action-bar" id="recycleBulkBar">
+            <span id="recycleBulkCount">0 selected</span>
+            <button class="btn btn-outline" id="bulkRestoreBtn" style="font-size:0.75rem;"><i class="fas fa-trash-restore"></i> Restore Selected</button>
+            <button class="btn btn-danger" id="bulkPermDeleteBtn" style="font-size:0.75rem;"><i class="fas fa-trash-alt"></i> Delete Selected Permanently</button>
+        </div>
+        <div class="table-wrapper">
+            <table id="recycleTable">
+                <thead><tr><th style="width:30px;"><input type="checkbox" id="recycleSelectAll"></th><th style="width:25px;">#</th><th>Full Name</th><th>Type</th><th>Deleted On</th><th style="width:90px;">Action</th></tr></thead>
+                <tbody id="recycleTableBody"></tbody>
+            </table>
+        </div>
+        <div class="footer">
+            <span><span class="count" id="recycleRowCount">0</span> in recycle bin</span>
+        </div>
+    </div>
+
+    <div class="page-section" id="activitySection">
+        <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+            <h2><i class="fas fa-history"></i> Activity Log</h2>
+            <p class="section-sub">A record of every important action taken across the site.</p>
+        </div>
+        <div class="tab-switcher" id="activityPeriodToggle" style="margin-bottom:1rem;">
+            <button class="active" data-period="today">Today</button>
+            <button data-period="week">This Week</button>
+            <button data-period="month">This Month</button>
+            <button data-period="all">All Time</button>
+        </div>
+        <div class="search-box">
+            <i class="fas fa-search" style="color:#5b6f86;"></i>
+            <input type="text" id="activitySearchInput" placeholder="Search by name or representative...">
+            <select id="filterActivityRep" style="padding:0.5rem 0.7rem; border:1px solid #cbd5e0; border-radius:8px; font-size:0.85rem; font-family:inherit;"><option value="">All Representatives</option></select>
+            <input type="date" id="filterActivityDate" style="padding:0.45rem 0.6rem; border:1px solid #cbd5e0; border-radius:8px; font-size:0.85rem; font-family:inherit;">
+            <button class="btn btn-outline" id="clearActivityFiltersBtn" style="font-size:0.75rem;"><i class="fas fa-times"></i> Clear</button>
+        </div>
+        <div class="table-wrapper">
+            <table id="activityTable">
+                <thead><tr><th>Time</th><th>Alumni Name</th><th>Action</th><th>Being Onboarded By</th></tr></thead>
+                <tbody id="activityTableBody"></tbody>
+            </table>
+        </div>
+        <div class="footer">
+            <span><span class="count" id="activityRowCount">0</span> activities logged</span>
+        </div>
+    </div>
+
+    <div class="page-section" id="adminSection">
+        <div id="adminLocked" style="text-align:center; padding:2rem 1rem;">
+            <i class="fas fa-lock" style="font-size:2rem; color:#5b6f86;"></i>
+            <p style="margin:0.8rem 0 1rem; color:#5b6f86; font-size:0.9rem;">This page is restricted. Enter the admin password to continue.</p>
+            <input type="password" id="adminPasswordInput" placeholder="Admin password" style="width:100%; max-width:260px; padding:0.6rem 0.8rem; border:1px solid #cbd5e0; border-radius:8px; font-family:inherit; box-sizing:border-box;">
+            <br>
+            <button class="btn btn-primary" id="adminUnlockBtn" style="margin-top:0.7rem;">Unlock</button>
+            <p id="adminPasswordError" style="color:#b91c1c; font-size:0.8rem; margin-top:0.6rem; display:none;">Incorrect password.</p>
+        </div>
+
+        <div id="adminContent" style="display:none;">
+            <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+                <h2><i class="fas fa-user-shield"></i> Admin Dashboard</h2>
+                <p class="section-sub">Overview, representative summary, and live activity.</p>
+            </div>
+
+            <div class="admin-quick-actions">
+                <button class="btn btn-outline" id="qaExportCsv"><i class="fas fa-file-export"></i> Export CSV</button>
+                <button class="btn btn-outline" id="qaImportCsv"><i class="fas fa-file-import"></i> Import CSV</button>
+                <input type="file" id="qaImportCsvInput" accept=".csv" style="display:none;">
+                <button class="btn btn-outline" id="qaRecycleBin"><i class="fas fa-trash-restore"></i> Recycle Bin</button>
+                <button class="btn btn-outline" id="qaActivityLog"><i class="fas fa-history"></i> Activity Log</button>
+                <button class="btn btn-outline" id="qaRefresh"><i class="fas fa-sync-alt"></i> Refresh</button>
+            </div>
+            <div class="admin-refresh-status">
+                <span>Last updated <strong id="adminLastUpdated">—</strong></span>
+                <span class="admin-refresh-dot"></span>
+                <span>Refreshing every 30 seconds</span>
+            </div>
+
+            <div class="section-divider" style="margin-top:0.5rem; padding-top:0.8rem;">
+                <h2 style="font-size:0.95rem;">Representative Summary</h2>
+            </div>
+            <div class="table-wrapper">
+                <table id="repSummaryTable">
+                    <thead><tr><th>Representative</th><th>Pending</th><th>Completed</th><th>Total</th></tr></thead>
+                    <tbody id="repSummaryTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="section-divider">
+                <h2 style="font-size:0.95rem;"><i class="fas fa-bell"></i> Live Activity</h2>
+                <p class="section-sub">Updates automatically as actions happen across the site. As admin, you can select entries below and remove them from the log.</p>
+            </div>
+            <div class="notification-summary" id="notificationSummary"></div>
+            <div class="tab-switcher" id="adminActivityPeriodToggle" style="margin-bottom:0.8rem;">
+                <button class="active" data-period="today">Today</button>
+                <button data-period="week">This Week</button>
+                <button data-period="month">This Month</button>
+                <button data-period="all">All Time</button>
+            </div>
+            <div class="bulk-action-bar" id="activityBulkBar">
+                <span id="activityBulkCount">0 selected</span>
+                <button class="btn btn-danger" id="activityBulkDeleteBtn"><i class="fas fa-trash-alt"></i> Delete Selected</button>
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-bottom:0.5rem;">
+                <button class="btn btn-outline" id="openActivityRecycleBtn"><i class="fas fa-trash-restore"></i> Activity Recycle Bin (<span id="activityRecycleCount">0</span>)</button>
+            </div>
+            <div class="table-wrapper" style="max-height:280px;">
+                <table id="liveActivityTable">
+                    <thead><tr><th style="width:30px;"><input type="checkbox" id="activitySelectAll"></th><th>Time</th><th>Alumni Name</th><th>Action</th><th>Being Onboarded By</th></tr></thead>
+                    <tbody id="liveActivityTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Confirm Deletion</h3>
+        <div class="confirm-summary">
+            <div class="confirm-summary-name" id="deleteNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Representative</span><span id="deleteRepPreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Notes</span><span id="deleteNotesPreview">—</span></div>
+        </div>
+        <p>Move this alumnus to the Recycle Bin? You can restore it later if needed.</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelDeleteBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- ONBOARD CONFIRM MODAL -->
+<div class="modal-overlay" id="onboardModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-check-circle" style="color:#2a7a4d;"></i> Confirm Onboarding</h3>
+        <div class="confirm-summary" id="onboardSummarySingle">
+            <div class="confirm-summary-name" id="onboardNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Representative</span><span id="onboardRepPreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Notes</span><span id="onboardNotesPreview">—</span></div>
+        </div>
+        <div class="confirm-summary-list" id="onboardSummaryList" style="display:none;"></div>
+        <p>Move this alumnus to Onboarded?</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelOnboardBtn">Cancel</button>
+            <button class="btn btn-success" id="confirmOnboardBtn"><i class="fas fa-check"></i> Yes, Onboarded</button>
+        </div>
+    </div>
+</div>
+
+<!-- RETURN TO PENDING MODAL -->
+<div class="modal-overlay" id="returnModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-undo" style="color:#c9820a;"></i> Return to Pending</h3>
+        <div class="confirm-summary" id="returnSummarySingle">
+            <div class="confirm-summary-name" id="returnNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Representative</span><span id="returnRepPreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Notes</span><span id="returnNotesPreview">—</span></div>
+        </div>
+        <div class="confirm-summary-list" id="returnSummaryList" style="display:none;"></div>
+        <p>Move them back to the Pending list? Use this if they were onboarded by mistake.</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelReturnBtn">Cancel</button>
+            <button class="btn btn-primary" id="confirmReturnBtn"><i class="fas fa-undo"></i> Yes, Return</button>
+        </div>
+    </div>
+</div>
+
+<!-- ACTIVITY RECYCLE BIN MODAL -->
+<div class="modal-overlay" id="activityRecycleModal">
+    <div class="modal-box" style="max-width:520px; text-align:left;">
+        <h3 style="text-align:left;"><i class="fas fa-trash-restore" style="color:#c9820a;"></i> Activity Recycle Bin</h3>
+        <p style="font-size:0.8rem; color:#5b6f86;">Deleted log entries are kept here and auto-cleared after 30 days if not restored or removed manually.</p>
+        <div class="bulk-action-bar" id="activityRecycleBulkBar">
+            <span id="activityRecycleSelectedCount">0 selected</span>
+            <button class="btn btn-outline" id="activityRecycleRestoreBtn"><i class="fas fa-trash-restore"></i> Restore Selected</button>
+            <button class="btn btn-danger" id="activityRecyclePermDeleteBtn"><i class="fas fa-trash-alt"></i> Delete Permanently</button>
+        </div>
+        <div class="table-wrapper" style="max-height:280px; margin-bottom:1rem;">
+            <table>
+                <thead><tr><th style="width:25px;"><input type="checkbox" id="activityRecycleSelectAll"></th><th>Time</th><th>Name</th><th>Action</th><th style="width:90px;">Actions</th></tr></thead>
+                <tbody id="activityRecycleTableBody"></tbody>
+            </table>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="closeActivityRecycleBtn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- TIMELINE MODAL -->
+<div class="modal-overlay" id="timelineModal">
+    <div class="modal-box" style="max-width:420px; text-align:left;">
+        <h3 style="text-align:left;"><i class="fas fa-stream" style="color:#0a2a44;"></i> Timeline — <span id="timelineNamePreview"></span></h3>
+        <div class="timeline-list" id="timelineList"></div>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="closeTimelineBtn">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- NOTES MODAL -->
+<div class="modal-overlay" id="notesModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-sticky-note" style="color:#0a2a44;"></i> Notes — <span id="notesNamePreview"></span></h3>
+        <textarea id="notesTextarea" placeholder="e.g. Called today, number switched off, asked to call next week..." rows="5" style="width:100%; padding:0.6rem; border:1px solid #cbd5e0; border-radius:8px; font-family:inherit; font-size:0.85rem; resize:vertical; box-sizing:border-box;"></textarea>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelNotesBtn">Cancel</button>
+            <button class="btn btn-primary" id="saveNotesBtn"><i class="fas fa-save"></i> Save Notes</button>
+        </div>
+    </div>
+</div>
+
+<!-- PERMANENT DELETE MODAL -->
+<div class="modal-overlay" id="permDeleteModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Permanently Delete</h3>
+        <div class="confirm-summary" id="permDeleteSummarySingle">
+            <div class="confirm-summary-name" id="permDeleteNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Type</span><span id="permDeleteTypePreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Representative</span><span id="permDeleteRepPreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Deleted</span><span id="permDeleteDeletedPreview">—</span></div>
+        </div>
+        <div class="confirm-summary-list" id="permDeleteSummaryList" style="display:none;"></div>
+        <p>You'll have a few seconds to undo after confirming.</p>
+        <p style="font-size:0.8rem; color:#5b6f86;">Enter the security code to confirm:</p>
+        <div class="code-hint">AAN2026</div>
+        <input type="text" id="permDeleteCodeInput" placeholder="Enter code..." maxlength="7" autocomplete="off">
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelPermDeleteBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmPermDeleteBtn">Delete Permanently</button>
+        </div>
+    </div>
+</div>
+
+<!-- RESTORE CONFIRM MODAL -->
+<div class="modal-overlay" id="restoreModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-trash-restore" style="color:#2a7a4d;"></i> Confirm Restore</h3>
+        <div class="confirm-summary" id="restoreSummarySingle">
+            <div class="confirm-summary-name" id="restoreNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Type</span><span id="restoreTypePreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Representative</span><span id="restoreRepPreview">—</span></div>
+            <div class="confirm-summary-row"><span class="label">Deleted</span><span id="restoreDeletedPreview">—</span></div>
+        </div>
+        <div class="confirm-summary-list" id="restoreSummaryList" style="display:none;"></div>
+        <p>Restore back to its original list?</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelRestoreBtn">Cancel</button>
+            <button class="btn btn-success" id="confirmRestoreBtn"><i class="fas fa-trash-restore"></i> Restore</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    (function() {
+        "use strict";
+
+        // ---------- SUPABASE CREDENTIALS ----------
+        // ⚠️ REPLACE the URL below with your actual Supabase project URL
+        const SUPABASE_URL = 'https://ndsvnwyzakvslxrtwaep.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kc3Zud3l6YWt2c2x4cnR3YWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NTkwMTEsImV4cCI6MjEwMDIzNTAxMX0.EdOt-E7xWRyxRN6KmBKl9tlR1TqOhjfk0EbPEmdbc-Y';
+
+        const TABLE_NAME = 'ammsul_alumni';
+        const PENDING_TABLE_NAME = 'ammsul_pending';
+        const DELETE_CODE = 'AAN2026';
+
+        // ---------- STATE ----------
+        let alumniData = [];
+        let filteredData = [];
+        let pendingData = [];
+        let filteredPendingData = [];
+        let deleteTargetIndex = null;
+        let deleteContext = 'alumni'; // 'alumni' or 'pending'
+        let onboardTargetIndex = null;
+        let returnTargetIndex = null;
+        let onboardBulkIds = null;
+        let returnBulkIds = null;
+        let noteContext = 'alumni';
+        let noteTargetIndex = null;
+        let recycleBinData = [];
+        let selectedRecycleIds = new Set();
+        let selectedAlumniIds = new Set();
+        let selectedPendingIds = new Set();
+        let activityLogData = [];
+        let permDeleteTargetId = null;
+        let permDeleteTargetType = null;
+        let permDeleteBulkIds = null;
+        let restoreTargetId = null;
+        let restoreTargetType = null;
+        let restoreBulkIds = null;
+        let selectedActivityIds = new Set();
+        let pendingPermDeleteItems = [];
+        let pendingPermDeleteTimer = null;
+
+        // DOM refs
+        const tbody = document.getElementById('tableBody');
+        const rowCount = document.getElementById('rowCount');
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const addBtn = document.getElementById('addRowBtn');
+        let isSyncing = false;
+        let offlineQueue = [];
+        const downloadBtn = document.getElementById('downloadCsv');
+        const downloadPdfBtn = document.getElementById('downloadPdf');
+        const pendingTbody = document.getElementById('pendingTableBody');
+        const pendingRowCount = document.getElementById('pendingRowCount');
+        const pendingSearchInput = document.getElementById('pendingSearchInput');
+        const pendingClearSearchBtn = document.getElementById('pendingClearSearchBtn');
+        const toggleAlumniFiltersBtn = document.getElementById('toggleAlumniFiltersBtn');
+        const alumniFilterPanel = document.getElementById('alumniFilterPanel');
+        const filterAlumniRep = document.getElementById('filterAlumniRep');
+        const filterAlumniDateAddedFrom = document.getElementById('filterAlumniDateAddedFrom');
+        const filterAlumniDateAddedTo = document.getElementById('filterAlumniDateAddedTo');
+        const filterAlumniDateOnboardedFrom = document.getElementById('filterAlumniDateOnboardedFrom');
+        const filterAlumniDateOnboardedTo = document.getElementById('filterAlumniDateOnboardedTo');
+        const clearAlumniFiltersBtn = document.getElementById('clearAlumniFiltersBtn');
+        const togglePendingFiltersBtn = document.getElementById('togglePendingFiltersBtn');
+        const pendingFilterPanel = document.getElementById('pendingFilterPanel');
+        const filterPendingRep = document.getElementById('filterPendingRep');
+        const filterPendingDateAddedFrom = document.getElementById('filterPendingDateAddedFrom');
+        const filterPendingDateAddedTo = document.getElementById('filterPendingDateAddedTo');
+        const clearPendingFiltersBtn = document.getElementById('clearPendingFiltersBtn');
+        const addPendingBtn = document.getElementById('addPendingRowBtn');
+        const toastEl = document.getElementById('toast');
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteNamePreview = document.getElementById('deleteNamePreview');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const onboardModal = document.getElementById('onboardModal');
+        const onboardNamePreview = document.getElementById('onboardNamePreview');
+        const cancelOnboardBtn = document.getElementById('cancelOnboardBtn');
+        const confirmOnboardBtn = document.getElementById('confirmOnboardBtn');
+        const returnModal = document.getElementById('returnModal');
+        const returnNamePreview = document.getElementById('returnNamePreview');
+        const cancelReturnBtn = document.getElementById('cancelReturnBtn');
+        const confirmReturnBtn = document.getElementById('confirmReturnBtn');
+        const notesModal = document.getElementById('notesModal');
+        const notesNamePreview = document.getElementById('notesNamePreview');
+        const notesTextarea = document.getElementById('notesTextarea');
+        const cancelNotesBtn = document.getElementById('cancelNotesBtn');
+        const saveNotesBtn = document.getElementById('saveNotesBtn');
+        const timelineModal = document.getElementById('timelineModal');
+        const timelineNamePreview = document.getElementById('timelineNamePreview');
+        const timelineList = document.getElementById('timelineList');
+        const closeTimelineBtn = document.getElementById('closeTimelineBtn');
+        const restoreModal = document.getElementById('restoreModal');
+        const cancelRestoreBtn = document.getElementById('cancelRestoreBtn');
+        const confirmRestoreBtn = document.getElementById('confirmRestoreBtn');
+        const recycleTbody = document.getElementById('recycleTableBody');
+        const recycleRowCount = document.getElementById('recycleRowCount');
+        const activityTbody = document.getElementById('activityTableBody');
+        const activityRowCount = document.getElementById('activityRowCount');
+        const activitySearchInput = document.getElementById('activitySearchInput');
+        const filterActivityRep = document.getElementById('filterActivityRep');
+        const filterActivityDate = document.getElementById('filterActivityDate');
+        const permDeleteModal = document.getElementById('permDeleteModal');
+        const permDeleteNamePreview = document.getElementById('permDeleteNamePreview');
+        const permDeleteCodeInput = document.getElementById('permDeleteCodeInput');
+        const cancelPermDeleteBtn = document.getElementById('cancelPermDeleteBtn');
+        const confirmPermDeleteBtn = document.getElementById('confirmPermDeleteBtn');
+
+        // ---------- TOAST ----------
+        let toastTimer = null;
+        function showToast(msg, type = 'info') {
+            if (toastTimer) clearTimeout(toastTimer);
+            toastEl.textContent = msg;
+            toastEl.className = 'toast';
+            if (type === 'success') toastEl.classList.add('success');
+            else if (type === 'error') toastEl.classList.add('error');
+            toastEl.classList.add('show');
+            toastTimer = setTimeout(() => toastEl.classList.remove('show'), 4000);
+        }
+
+        // ---------- PER-ALUMNUS TIMELINE ----------
+        async function showTimelineModal(name) {
+            timelineNamePreview.textContent = name || 'Unnamed';
+            timelineList.innerHTML = '<div class="timeline-loading">Loading timeline...</div>';
+            timelineModal.classList.add('active');
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?alumni_name=eq.${encodeURIComponent(name)}&order=created_at.asc`, { headers });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+                const rows = await response.json();
+                renderTimeline(rows);
+            } catch (error) {
+                console.warn('Could not load timeline:', error);
+                timelineList.innerHTML = '<div class="timeline-empty">Could not load timeline.</div>';
+            }
+        }
+
+        function renderTimeline(rows) {
+            if (!rows || rows.length === 0) {
+                timelineList.innerHTML = '<div class="timeline-empty">No activity recorded yet.</div>';
+                return;
+            }
+            timelineList.innerHTML = rows.map(r => {
+                const who = (r.being_onboarded_by || '').trim();
+                const actionText = (r.action || 'Updated') + (who ? ` by ${who}` : '');
+                return `<div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <div class="timeline-time">${formatDate(r.created_at)}</div>
+                        <div class="timeline-action">${actionText}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ---------- RICH CONFIRMATION SUMMARIES ----------
+        function fillConfirmSummary(prefix, item, isPending) {
+            const rep = isPending ? (item.being_onboarded_by || '') : (item.onboarded_by || '');
+            const nameEl = document.getElementById(prefix + 'NamePreview');
+            const repEl = document.getElementById(prefix + 'RepPreview');
+            const notesEl = document.getElementById(prefix + 'NotesPreview');
+            if (nameEl) nameEl.textContent = item.name || 'Unnamed';
+            if (repEl) repEl.textContent = rep.trim() || 'Unassigned';
+            if (notesEl) notesEl.textContent = (item.notes || '').trim() || 'No notes';
+            const singleEl = document.getElementById(prefix + 'SummarySingle');
+            const listEl = document.getElementById(prefix + 'SummaryList');
+            if (singleEl) singleEl.style.display = '';
+            if (listEl) listEl.style.display = 'none';
+        }
+
+        function fillActionBulkSummary(prefix, items) {
+            const singleEl = document.getElementById(prefix + 'SummarySingle');
+            const listEl = document.getElementById(prefix + 'SummaryList');
+            if (singleEl) singleEl.style.display = 'none';
+            if (listEl) {
+                listEl.style.display = '';
+                listEl.innerHTML = `<strong>${items.length} record(s) selected:</strong><ul>${items.map(i => `<li>${i.name || 'Unnamed'}</li>`).join('')}</ul>`;
+            }
+        }
+
+        function formatRecycleType(type) { return type === 'pending' ? 'Pending' : 'Alumni'; }
+
+        function fillRecycleSummary(prefix, item) {
+            document.getElementById(prefix + 'NamePreview').textContent = item.name || 'Unnamed';
+            document.getElementById(prefix + 'TypePreview').textContent = formatRecycleType(item.type);
+            document.getElementById(prefix + 'RepPreview').textContent = (item.assignee || '').trim() || 'Unassigned';
+            document.getElementById(prefix + 'DeletedPreview').textContent = item.deleted_at ? formatDate(item.deleted_at) : '—';
+            document.getElementById(prefix + 'SummarySingle').style.display = '';
+            document.getElementById(prefix + 'SummaryList').style.display = 'none';
+        }
+
+        function fillRecycleBulkSummary(prefix, items) {
+            document.getElementById(prefix + 'SummarySingle').style.display = 'none';
+            const listEl = document.getElementById(prefix + 'SummaryList');
+            listEl.style.display = '';
+            listEl.innerHTML = `<strong>${items.length} record(s) selected:</strong><ul>${items.map(i => `<li>${i.name || 'Unnamed'} <span style="color:#8a9bb0;">(${formatRecycleType(i.type)})</span></li>`).join('')}</ul>`;
+        }
+
+        // ---------- STATS ----------
+        function updateStats() {
+            const totalPending = pendingData.length;
+            const totalOnboarded = alumniData.length;
+            const total = totalPending + totalOnboarded;
+            const pct = total === 0 ? 0 : Math.round((totalOnboarded / total) * 100);
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statPending').textContent = totalPending;
+            document.getElementById('statOnboarded').textContent = totalOnboarded;
+            document.getElementById('statCompletion').textContent = pct + '%';
+            updateRecentlyAdded();
+        }
+
+        // ---------- REP COLORS ----------
+        const repColorMap = {};
+        const colorClasses = ['color-1', 'color-2', 'color-3', 'color-4', 'color-5', 'color-6', 'color-7', 'color-8'];
+        let colorIndex = 0;
+
+        function getRepColor(repName) {
+            if (!repName || !repName.trim()) return '';
+            const trimmed = repName.trim();
+            if (!repColorMap[trimmed]) {
+                repColorMap[trimmed] = colorClasses[colorIndex % colorClasses.length];
+                colorIndex++;
+            }
+            return repColorMap[trimmed];
+        }
+
+        function renderRepTag(repName) {
+            if (!repName || !repName.trim()) return '';
+            const colorClass = getRepColor(repName);
+            return `<span class="rep-tag ${colorClass}">${repName}</span>`;
+        }
+
+        // ---------- RECENTLY ADDED WIDGET ----------
+        function updateRecentlyAdded() {
+            const container = document.getElementById('recentlyAddedContainer');
+            if (!container) return;
+
+            // Get last 3 added from alumni data
+            const recent = [...alumniData]
+                .filter(item => item.date_added)
+                .sort((a, b) => new Date(b.date_added) - new Date(a.date_added))
+                .slice(0, 3);
+
+            if (recent.length === 0) {
+                container.innerHTML = '<div class="recently-added-empty">No recent additions yet</div>';
+                return;
+            }
+
+            container.innerHTML = recent.map(item => {
+                const date = new Date(item.date_added);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                
+                let timeStr = '';
+                if (diffMins < 1) timeStr = 'just now';
+                else if (diffMins < 60) timeStr = `${diffMins} min${diffMins > 1 ? 's' : ''} ago`;
+                else if (diffHours < 24) timeStr = `${diffHours} hr${diffHours > 1 ? 's' : ''} ago`;
+                else if (diffDays < 7) timeStr = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+                else timeStr = date.toLocaleDateString();
+
+                return `<div class="recently-added-item">
+                    <span class="name">• ${item.name || 'Unnamed'}</span>
+                    <span class="time">${timeStr}</span>
+                </div>`;
+            }).join('');
+        }
+
+        // ---------- EMPTY STATES ----------
+        function renderEmptyState(type) {
+            let title = '';
+            let subtitle = '';
+
+            if (type === 'alumni-empty') {
+                title = 'No alumni onboarded yet';
+                subtitle = 'Start by adding your first alumni record';
+            } else if (type === 'pending-empty') {
+                title = 'No pending alumni';
+                subtitle = 'Everyone has been onboarded!';
+            } else if (type === 'search-empty') {
+                title = 'No results found';
+                subtitle = 'Try adjusting your search or filters';
+            } else if (type === 'recycle-empty') {
+                title = 'Recycle bin is empty';
+                subtitle = 'All your records are safe';
+            }
+
+            return `<div class="empty-state">
+                <div class="title">${title}</div>
+                <div class="subtitle">${subtitle}</div>
+            </div>`;
+        }
+
+        // ---------- UNDO FUNCTIONALITY ----------
+        let lastDeletedItem = null;
+        let lastDeletedContext = null;
+        let undoTimer = null;
+
+        function showUndoToast(item, context) {
+            const existing = document.getElementById('regularUndoToast');
+            if (existing) existing.remove();
+            if (undoTimer) clearInterval(undoTimer);
+
+            lastDeletedItem = item;
+            lastDeletedContext = context;
+            let timeLeft = 8;
+
+            const toast = document.createElement('div');
+            toast.id = 'regularUndoToast';
+            toast.className = 'undo-toast';
+            toast.innerHTML = `
+                <span>Deleted "${item.name || 'Unnamed'}"</span>
+                <button id="undoDeleteBtn">Undo</button>
+                <span class="undo-timer"><span id="undoCountdown">8</span>s</span>
+            `;
+            document.body.appendChild(toast);
+
+            const undoBtn = toast.querySelector('#undoDeleteBtn');
+            undoBtn.addEventListener('click', () => {
+                restoreFromUndo();
+                clearInterval(undoTimer);
+                toast.remove();
+            });
+
+            const countdown = toast.querySelector('#undoCountdown');
+            undoTimer = setInterval(() => {
+                timeLeft--;
+                countdown.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(undoTimer);
+                    toast.remove();
+                    lastDeletedItem = null;
+                    lastDeletedContext = null;
+                }
+            }, 1000);
+        }
+
+        function restoreFromUndo() {
+            if (!lastDeletedItem || !lastDeletedContext) return;
+            
+            if (lastDeletedContext === 'alumni') {
+                alumniData.push(lastDeletedItem);
+                renderTable(alumniData);
+            } else if (lastDeletedContext === 'pending') {
+                pendingData.push(lastDeletedItem);
+                renderPendingTable(pendingData);
+            }
+
+            updateStats();
+            showToast('Restored from undo', 'success');
+            lastDeletedItem = null;
+            lastDeletedContext = null;
+        }
+
+        // ---------- LOADING INDICATOR ----------
+        function showSyncIndicator() {
+            const indicator = document.getElementById('syncIndicator');
+            if (indicator) indicator.classList.add('active');
+        }
+
+        function hideSyncIndicator() {
+            const indicator = document.getElementById('syncIndicator');
+            if (indicator) indicator.classList.remove('active');
+        }
+
+        // ---------- ROW HIGHLIGHTING ----------
+        function highlightRow(rowElement) {
+            rowElement.classList.add('row-highlight');
+            setTimeout(() => {
+                rowElement.classList.remove('row-highlight');
+            }, 2000);
+        }
+
+        // ---------- SORT ----------
+        function sortByName(arr) {
+            arr.sort((a, b) => {
+                const nameA = (a.name || '').trim();
+                const nameB = (b.name || '').trim();
+                if (!nameA && !nameB) return 0;
+                if (!nameA) return 1;
+                if (!nameB) return -1;
+                return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
+            });
+        }
+
+        // ---------- RENDER TABLE ----------
+        function renderTable(data) {
+            const source = data || (filteredData.length > 0 ? filteredData : alumniData);
+            sortByName(source);
+            tbody.innerHTML = '';
+            source.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const itemId = item.id || `temp_${index}`;
+                const tdCheck = document.createElement('td');
+                tdCheck.style.textAlign = 'center';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = selectedAlumniIds.has(itemId);
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) { selectedAlumniIds.add(itemId); } else { selectedAlumniIds.delete(itemId); }
+                    updateAlumniBulkBar();
+                });
+                tdCheck.appendChild(checkbox);
+                tr.appendChild(tdCheck);
+                const tdNum = document.createElement('td');
+                tdNum.textContent = index + 1;
+                tdNum.style.textAlign = 'center';
+                tdNum.style.fontWeight = '500';
+                tr.appendChild(tdNum);
+
+                // Name
+                const tdName = document.createElement('td');
+                const inputName = document.createElement('input');
+                inputName.type = 'text';
+                inputName.className = 'editable-cell';
+                inputName.value = item.name || '';
+                inputName.placeholder = 'Full name';
+                inputName.dataset.index = index;
+                inputName.addEventListener('input', function(e) {
+                    const idx = parseInt(this.dataset.index);
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    src[idx].name = this.value;
+                    if (filteredData.length > 0) {
+                        const masterIdx = alumniData.findIndex(d => d.id === src[idx].id);
+                        if (masterIdx !== -1) alumniData[masterIdx].name = this.value;
+                    }
+                    scheduleAutoSync();
+                });
+                inputName.addEventListener('blur', function() {
+                    const val = this.value.trim();
+                    if (!val) return;
+                    const normVal = normalizeName(val);
+                    const duplicate = alumniData.find(d => d !== item && normalizeName(d.name) === normVal);
+                    if (duplicate) {
+                        const keep = confirm(`A similar alumni record already exists ("${duplicate.name}"). Continue anyway?`);
+                        if (!keep) {
+                            this.value = '';
+                            item.name = '';
+                            this.focus();
+                            return;
+                        }
+                    }
+                    if (val !== (item._origName || '')) highlightRow(tr);
+                });
+                inputName.addEventListener('focus', function() { item._origName = this.value; });
+                tdName.appendChild(inputName);
+                tr.appendChild(tdName);
+
+                // Onboarded By
+                const tdOnboarded = document.createElement('td');
+                const inputOnboarded = document.createElement('input');
+                inputOnboarded.type = 'text';
+                inputOnboarded.className = 'editable-cell';
+                inputOnboarded.value = item.onboarded_by || '';
+                inputOnboarded.placeholder = 'Your name';
+                inputOnboarded.dataset.index = index;
+                inputOnboarded.addEventListener('input', function(e) {
+                    const idx = parseInt(this.dataset.index);
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    src[idx].onboarded_by = this.value;
+                    if (filteredData.length > 0) {
+                        const masterIdx = alumniData.findIndex(d => d.id === src[idx].id);
+                        if (masterIdx !== -1) alumniData[masterIdx].onboarded_by = this.value;
+                    }
+                    scheduleAutoSync();
+                });
+                inputOnboarded.addEventListener('focus', function() { item._origOnboarded = this.value; });
+                inputOnboarded.addEventListener('blur', function() {
+                    if (this.value !== (item._origOnboarded || '')) highlightRow(tr);
+                });
+                tdOnboarded.appendChild(inputOnboarded);
+                tr.appendChild(tdOnboarded);
+
+                // Return-to-Pending + Delete Actions
+                const tdAction = document.createElement('td');
+                tdAction.style.textAlign = 'center';
+                tdAction.style.whiteSpace = 'nowrap';
+
+                const returnBtn = document.createElement('button');
+                returnBtn.className = 'delete-btn';
+                returnBtn.style.color = '#c9820a';
+                returnBtn.title = 'Return to pending';
+                returnBtn.innerHTML = '<i class="fas fa-undo"></i>';
+                const itemIdForReturn = item.id || `temp_${index}`;
+                returnBtn.dataset.id = itemIdForReturn;
+                returnBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        returnTargetIndex = idx;
+                        fillConfirmSummary('return', src[idx], false);
+                        returnModal.classList.add('active');
+                    }
+                });
+                tdAction.appendChild(returnBtn);
+
+                const noteBtn = document.createElement('button');
+                noteBtn.className = 'delete-btn';
+                noteBtn.style.color = item.notes && item.notes.trim() ? '#0a2a44' : '#a0aec0';
+                noteBtn.title = 'Notes';
+                noteBtn.innerHTML = '<i class="fas fa-sticky-note"></i>';
+                const itemIdForNote = item.id || `temp_${index}`;
+                noteBtn.dataset.id = itemIdForNote;
+                noteBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        noteContext = 'alumni';
+                        noteTargetIndex = idx;
+                        notesNamePreview.textContent = src[idx].name || 'Unnamed';
+                        notesTextarea.value = src[idx].notes || '';
+                        notesModal.classList.add('active');
+                        setTimeout(() => notesTextarea.focus(), 50);
+                    }
+                });
+                tdAction.appendChild(noteBtn);
+
+                const timelineBtn = document.createElement('button');
+                timelineBtn.className = 'delete-btn';
+                timelineBtn.style.color = '#5b6f86';
+                timelineBtn.title = 'Timeline';
+                timelineBtn.innerHTML = '<i class="fas fa-stream"></i>';
+                timelineBtn.addEventListener('click', function() {
+                    showTimelineModal(item.name || 'Unnamed');
+                });
+                tdAction.appendChild(timelineBtn);
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'delete-btn';
+                delBtn.title = 'Delete';
+                delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                delBtn.dataset.id = itemId;
+                delBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        deleteTargetIndex = idx;
+                        deleteContext = 'alumni';
+                        fillConfirmSummary('delete', src[idx], false);
+                        deleteModal.classList.add('active');
+                    }
+                });
+                tdAction.appendChild(delBtn);
+                tr.appendChild(tdAction);
+
+                tbody.appendChild(tr);
+            });
+            rowCount.textContent = source.length;
+            const alumniShowingEl = document.getElementById('alumniShowingCount');
+            if (alumniShowingEl) alumniShowingEl.textContent = `Showing ${source.length} of ${alumniData.length} alumni`;
+            updateStats();
+            populateRepDropdowns();
+            const validAlumniIds = new Set(alumniData.map(d => d.id));
+            [...selectedAlumniIds].forEach(id => { if (!validAlumniIds.has(id)) selectedAlumniIds.delete(id); });
+            updateAlumniBulkBar();
+        }
+
+        // ---------- RENDER PENDING TABLE ----------
+        function renderPendingTable(data) {
+            const source = data || (filteredPendingData.length > 0 ? filteredPendingData : pendingData);
+            sortByName(source);
+            pendingTbody.innerHTML = '';
+            source.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const itemId = item.id || `temp_${index}`;
+                const tdCheck = document.createElement('td');
+                tdCheck.style.textAlign = 'center';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = selectedPendingIds.has(itemId);
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) { selectedPendingIds.add(itemId); } else { selectedPendingIds.delete(itemId); }
+                    updatePendingBulkBar();
+                });
+                tdCheck.appendChild(checkbox);
+                tr.appendChild(tdCheck);
+                const tdNum = document.createElement('td');
+                tdNum.textContent = index + 1;
+                tdNum.style.textAlign = 'center';
+                tdNum.style.fontWeight = '500';
+                tr.appendChild(tdNum);
+
+                // Name
+                const tdName = document.createElement('td');
+                const inputName = document.createElement('input');
+                inputName.type = 'text';
+                inputName.className = 'editable-cell';
+                inputName.value = item.name || '';
+                inputName.placeholder = 'Full name';
+                inputName.dataset.index = index;
+                inputName.addEventListener('input', function(e) {
+                    const idx = parseInt(this.dataset.index);
+                    const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
+                    src[idx].name = this.value;
+                    if (filteredPendingData.length > 0) {
+                        const masterIdx = pendingData.findIndex(d => d.id === src[idx].id);
+                        if (masterIdx !== -1) pendingData[masterIdx].name = this.value;
+                    }
+                    scheduleAutoSync();
+                });
+                inputName.addEventListener('blur', function() {
+                    const val = this.value.trim();
+                    if (!val) return;
+                    const normVal = normalizeName(val);
+                    const duplicate = pendingData.find(d => d !== item && normalizeName(d.name) === normVal);
+                    if (duplicate) {
+                        const keep = confirm(`A similar pending record already exists ("${duplicate.name}"). Continue anyway?`);
+                        if (!keep) {
+                            this.value = '';
+                            item.name = '';
+                            this.focus();
+                            return;
+                        }
+                    }
+                    if (val !== (item._origName || '')) highlightRow(tr);
+                });
+                inputName.addEventListener('focus', function() { item._origName = this.value; });
+                tdName.appendChild(inputName);
+                tr.appendChild(tdName);
+
+                // Being Onboarded By
+                const tdOnboarding = document.createElement('td');
+                const inputOnboarding = document.createElement('input');
+                inputOnboarding.type = 'text';
+                inputOnboarding.className = 'editable-cell';
+                inputOnboarding.value = item.being_onboarded_by || '';
+                inputOnboarding.placeholder = 'Your name';
+                inputOnboarding.dataset.index = index;
+                inputOnboarding.addEventListener('input', function(e) {
+                    const idx = parseInt(this.dataset.index);
+                    const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
+                    src[idx].being_onboarded_by = this.value;
+                    if (filteredPendingData.length > 0) {
+                        const masterIdx = pendingData.findIndex(d => d.id === src[idx].id);
+                        if (masterIdx !== -1) pendingData[masterIdx].being_onboarded_by = this.value;
+                    }
+                    scheduleAutoSync();
+                });
+                inputOnboarding.addEventListener('focus', function() { item._origOnboarding = this.value; });
+                inputOnboarding.addEventListener('blur', function() {
+                    if (this.value !== (item._origOnboarding || '')) highlightRow(tr);
+                });
+                tdOnboarding.appendChild(inputOnboarding);
+                tr.appendChild(tdOnboarding);
+
+                // Onboard + Delete Actions
+                const tdAction = document.createElement('td');
+                tdAction.style.textAlign = 'center';
+                tdAction.style.whiteSpace = 'nowrap';
+
+                const onboardBtn = document.createElement('button');
+                onboardBtn.className = 'delete-btn';
+                onboardBtn.style.color = '#2a7a4d';
+                onboardBtn.title = 'Mark as onboarded';
+                onboardBtn.innerHTML = '<i class="fas fa-check-circle"></i>';
+                const itemIdForOnboard = item.id || `temp_${index}`;
+                onboardBtn.dataset.id = itemIdForOnboard;
+                onboardBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        onboardTargetIndex = idx;
+                        fillConfirmSummary('onboard', src[idx], true);
+                        onboardModal.classList.add('active');
+                    }
+                });
+                tdAction.appendChild(onboardBtn);
+
+                const pendingNoteBtn = document.createElement('button');
+                pendingNoteBtn.className = 'delete-btn';
+                pendingNoteBtn.style.color = item.notes && item.notes.trim() ? '#0a2a44' : '#a0aec0';
+                pendingNoteBtn.title = 'Notes';
+                pendingNoteBtn.innerHTML = '<i class="fas fa-sticky-note"></i>';
+                const itemIdForPendingNote = item.id || `temp_${index}`;
+                pendingNoteBtn.dataset.id = itemIdForPendingNote;
+                pendingNoteBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        noteContext = 'pending';
+                        noteTargetIndex = idx;
+                        notesNamePreview.textContent = src[idx].name || 'Unnamed';
+                        notesTextarea.value = src[idx].notes || '';
+                        notesModal.classList.add('active');
+                        setTimeout(() => notesTextarea.focus(), 50);
+                    }
+                });
+                tdAction.appendChild(pendingNoteBtn);
+
+                const pendingTimelineBtn = document.createElement('button');
+                pendingTimelineBtn.className = 'delete-btn';
+                pendingTimelineBtn.style.color = '#5b6f86';
+                pendingTimelineBtn.title = 'Timeline';
+                pendingTimelineBtn.innerHTML = '<i class="fas fa-stream"></i>';
+                pendingTimelineBtn.addEventListener('click', function() {
+                    showTimelineModal(item.name || 'Unnamed');
+                });
+                tdAction.appendChild(pendingTimelineBtn);
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'delete-btn';
+                delBtn.title = 'Delete';
+                delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                delBtn.dataset.id = itemId;
+                delBtn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
+                    const idx = src.findIndex(d => (d.id || `temp_${index}`) === id);
+                    if (idx !== -1) {
+                        deleteTargetIndex = idx;
+                        deleteContext = 'pending';
+                        fillConfirmSummary('delete', src[idx], true);
+                        deleteModal.classList.add('active');
+                    }
+                });
+                tdAction.appendChild(delBtn);
+                tr.appendChild(tdAction);
+
+                pendingTbody.appendChild(tr);
+            });
+            pendingRowCount.textContent = source.length;
+            const pendingShowingEl = document.getElementById('pendingShowingCount');
+            if (pendingShowingEl) pendingShowingEl.textContent = `Showing ${source.length} of ${pendingData.length} pending`;
+            updateStats();
+            populateRepDropdowns();
+            const validPendingIds = new Set(pendingData.map(d => d.id));
+            [...selectedPendingIds].forEach(id => { if (!validPendingIds.has(id)) selectedPendingIds.delete(id); });
+            updatePendingBulkBar();
+        }
+
+        // ---------- ADD ROW ----------
+        function normalizeName(str) {
+            return (str || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        function addRow() {
+            const newItem = {
+                id: `temp_${Date.now()}`,
+                name: '',
+                onboarded_by: '',
+                notes: ''
+            };
+            alumniData.push(newItem);
+            filteredData = [];
+            searchInput.value = '';
+            renderTable(alumniData);
+            const rows = tbody.querySelectorAll('tr');
+            if (rows.length > 0) {
+                const lastRow = rows[rows.length - 1];
+                const input = lastRow.querySelector('td:nth-child(2) input');
+                
+                // Scroll to the new row
+                setTimeout(() => {
+                    const tableWrapper = document.querySelector('.table-wrapper');
+                    if (tableWrapper) {
+                        tableWrapper.scrollTop = tableWrapper.scrollHeight;
+                    }
+                    if (input) input.focus();
+                }, 50);
+            }
+            showToast('New row added. Scrolling...', 'info');
+        }
+
+        function addPendingRow() {
+            const newItem = {
+                id: `temp_${Date.now()}`,
+                name: '',
+                being_onboarded_by: '',
+                notes: ''
+            };
+            pendingData.push(newItem);
+            filteredPendingData = [];
+            pendingSearchInput.value = '';
+            renderPendingTable(pendingData);
+            const rows = pendingTbody.querySelectorAll('tr');
+            if (rows.length > 0) {
+                const lastRow = rows[rows.length - 1];
+                const input = lastRow.querySelector('td:nth-child(2) input');
+                
+                // Scroll to the new row
+                setTimeout(() => {
+                    const tableWrapper = document.querySelector('.table-wrapper');
+                    if (tableWrapper) {
+                        tableWrapper.scrollTop = tableWrapper.scrollHeight;
+                    }
+                    if (input) input.focus();
+                }, 50);
+            }
+            showToast('New pending row added. Scrolling...', 'info');
+        }
+
+        function dateInRange(dateStr, fromStr, toStr) {
+            if (!fromStr && !toStr) return true;
+            if (!dateStr) return false;
+            const d = new Date(dateStr);
+            if (fromStr) { const f = new Date(fromStr); if (d < f) return false; }
+            if (toStr) { const t = new Date(toStr); t.setHours(23,59,59,999); if (d > t) return false; }
+            return true;
+        }
+
+        function populateRepDropdowns() {
+            const alumniReps = [...new Set(alumniData.map(i => (i.onboarded_by || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+            const currentAlumniVal = filterAlumniRep.value;
+            filterAlumniRep.innerHTML = '<option value="">All</option>' + alumniReps.map(r => `<option value="${r}">${r}</option>`).join('');
+            if (alumniReps.includes(currentAlumniVal)) filterAlumniRep.value = currentAlumniVal;
+
+            const pendingReps = [...new Set(pendingData.map(i => (i.being_onboarded_by || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+            const currentPendingVal = filterPendingRep.value;
+            filterPendingRep.innerHTML = '<option value="">All</option>' + pendingReps.map(r => `<option value="${r}">${r}</option>`).join('');
+            if (pendingReps.includes(currentPendingVal)) filterPendingRep.value = currentPendingVal;
+        }
+
+        function filterTable(query) {
+            const q = (query || '').toLowerCase().trim();
+            let base = alumniData;
+            // Enhanced search: search across name, representative, and notes
+            if (q) {
+                base = base.filter(item => {
+                    const name = (item.name || '').toLowerCase();
+                    const rep = (item.onboarded_by || '').toLowerCase();
+                    const notes = (item.notes || '').toLowerCase();
+                    return name.includes(q) || rep.includes(q) || notes.includes(q);
+                });
+            }
+            const rep = filterAlumniRep.value;
+            if (rep) base = base.filter(item => (item.onboarded_by || '').trim() === rep);
+            const daf = filterAlumniDateAddedFrom.value, dat = filterAlumniDateAddedTo.value;
+            if (daf || dat) base = base.filter(item => dateInRange(item.date_added, daf, dat));
+            const dof = filterAlumniDateOnboardedFrom.value, dot = filterAlumniDateOnboardedTo.value;
+            if (dof || dot) base = base.filter(item => dateInRange(item.date_onboarded, dof, dot));
+            const anyActive = !!(q || rep || daf || dat || dof || dot);
+            filteredData = anyActive ? base : [];
+            renderTable(anyActive ? base : alumniData);
+        }
+
+        function filterPendingTable(query) {
+            const q = (query || '').toLowerCase().trim();
+            let base = pendingData;
+            // Enhanced search: search across name, representative, and notes
+            if (q) {
+                base = base.filter(item => {
+                    const name = (item.name || '').toLowerCase();
+                    const rep = (item.being_onboarded_by || '').toLowerCase();
+                    const notes = (item.notes || '').toLowerCase();
+                    return name.includes(q) || rep.includes(q) || notes.includes(q);
+                });
+            }
+            const rep = filterPendingRep.value;
+            if (rep) base = base.filter(item => (item.being_onboarded_by || '').trim() === rep);
+            const daf = filterPendingDateAddedFrom.value, dat = filterPendingDateAddedTo.value;
+            if (daf || dat) base = base.filter(item => dateInRange(item.date_added, daf, dat));
+            const anyActive = !!(q || rep || daf || dat);
+            filteredPendingData = anyActive ? base : [];
+            renderPendingTable(anyActive ? base : pendingData);
+        }
+
+        async function confirmDelete() {
+            const isPending = deleteContext === 'pending';
+            const masterArr = isPending ? pendingData : alumniData;
+            const filteredArr = isPending ? filteredPendingData : filteredData;
+            const table = isPending ? PENDING_TABLE_NAME : TABLE_NAME;
+            const src = filteredArr.length > 0 ? filteredArr : masterArr;
+            if (deleteTargetIndex === null || deleteTargetIndex >= src.length) {
+                showToast('No record to delete.', 'error');
+                deleteModal.classList.remove('active');
+                return;
+            }
+            const itemToDelete = src[deleteTargetIndex];
+            const idToRemove = itemToDelete.id;
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.textContent = 'Deleting...';
+            try {
+                const nowIso = new Date().toISOString();
+                if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
+                    const result = await queueOrRun(`Delete "${itemToDelete.name}"`, async () => {
+                        const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${idToRemove}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'apikey': SUPABASE_ANON_KEY,
+                                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                            },
+                            body: JSON.stringify({ deleted_at: nowIso })
+                        });
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Delete failed: ${response.status} - ${errorText}`);
+                        }
+                    });
+                    const masterIdx = masterArr.findIndex(d => d.id === idToRemove);
+                    if (masterIdx !== -1) masterArr.splice(masterIdx, 1);
+                    recycleBinData.push({
+                        id: idToRemove,
+                        name: itemToDelete.name || '',
+                        assignee: isPending ? (itemToDelete.being_onboarded_by || '') : (itemToDelete.onboarded_by || ''),
+                        type: isPending ? 'pending' : 'alumni',
+                        deleted_at: nowIso
+                    });
+                    renderRecycleTable();
+                    if (result.queued) showToast(`Offline — deletion of "${itemToDelete.name}" queued.`, 'error');
+                } else {
+                    const idx = masterArr.indexOf(itemToDelete);
+                    if (idx !== -1) masterArr.splice(idx, 1);
+                }
+                logActivity(itemToDelete.name, 'Deleted', isPending ? itemToDelete.being_onboarded_by : itemToDelete.onboarded_by);
+                if (isPending) {
+                    filteredPendingData = [];
+                    pendingSearchInput.value = '';
+                    deleteModal.classList.remove('active');
+                    renderPendingTable(pendingData);
+                } else {
+                    filteredData = [];
+                    searchInput.value = '';
+                    deleteModal.classList.remove('active');
+                    renderTable(alumniData);
+                }
+                showUndoToast(itemToDelete, isPending ? 'pending' : 'alumni');
+            } catch (error) {
+                console.error('Delete error:', error);
+                showToast(`Delete failed: ${error.message}`, 'error');
+            } finally {
+                confirmDeleteBtn.disabled = false;
+                confirmDeleteBtn.textContent = 'Delete';
+                deleteTargetIndex = null;
+            }
+        }
+
+        // ---------- RECYCLE BIN ----------
+        function renderRecycleTable() {
+            recycleTbody.innerHTML = '';
+            recycleBinData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                const tdCheck = document.createElement('td');
+                tdCheck.style.textAlign = 'center';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'recycle-row-checkbox';
+                checkbox.dataset.id = item.id;
+                checkbox.checked = selectedRecycleIds.has(item.id);
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) { selectedRecycleIds.add(item.id); } else { selectedRecycleIds.delete(item.id); }
+                    updateRecycleBulkBar();
+                });
+                tdCheck.appendChild(checkbox);
+                tr.appendChild(tdCheck);
+
+                const tdNum = document.createElement('td');
+                tdNum.style.textAlign = 'center';
+                tdNum.style.fontWeight = '500';
+                tdNum.textContent = index + 1;
+                tr.appendChild(tdNum);
+
+                const tdName = document.createElement('td');
+                tdName.textContent = item.name || 'Unnamed';
+                tr.appendChild(tdName);
+
+                const tdType = document.createElement('td');
+                tdType.style.textTransform = 'capitalize';
+                tdType.textContent = item.type;
+                tr.appendChild(tdType);
+
+                const tdDate = document.createElement('td');
+                tdDate.textContent = formatDate(item.deleted_at);
+                tr.appendChild(tdDate);
+
+                const tdAction = document.createElement('td');
+                tdAction.style.textAlign = 'center';
+                tdAction.style.whiteSpace = 'nowrap';
+
+                const restoreBtn = document.createElement('button');
+                restoreBtn.className = 'delete-btn';
+                restoreBtn.style.color = '#2a7a4d';
+                restoreBtn.title = 'Restore';
+                restoreBtn.innerHTML = '<i class="fas fa-trash-restore"></i>';
+                restoreBtn.addEventListener('click', function() {
+                    restoreTargetId = item.id;
+                    restoreTargetType = item.type;
+                    restoreBulkIds = null;
+                    fillRecycleSummary('restore', item);
+                    restoreModal.classList.add('active');
+                });
+                tdAction.appendChild(restoreBtn);
+
+                const permBtn = document.createElement('button');
+                permBtn.className = 'delete-btn';
+                permBtn.title = 'Delete permanently';
+                permBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                permBtn.addEventListener('click', function() {
+                    permDeleteTargetId = item.id;
+                    permDeleteTargetType = item.type;
+                    permDeleteBulkIds = null;
+                    fillRecycleSummary('permDelete', item);
+                    permDeleteCodeInput.value = '';
+                    permDeleteModal.classList.add('active');
+                });
+                tdAction.appendChild(permBtn);
+
+                tr.appendChild(tdAction);
+                recycleTbody.appendChild(tr);
+            });
+            recycleRowCount.textContent = recycleBinData.length;
+            const validIds = new Set(recycleBinData.map(d => d.id));
+            [...selectedRecycleIds].forEach(id => { if (!validIds.has(id)) selectedRecycleIds.delete(id); });
+            updateRecycleBulkBar();
+        }
+
+        function updateRecycleBulkBar() {
+            const bar = document.getElementById('recycleBulkBar');
+            const count = selectedRecycleIds.size;
+            document.getElementById('recycleBulkCount').textContent = `${count} selected`;
+            bar.classList.toggle('active', count > 0);
+            const selectAll = document.getElementById('recycleSelectAll');
+            if (selectAll) selectAll.checked = recycleBinData.length > 0 && count === recycleBinData.length;
+        }
+
+        function bulkRestoreSelected() {
+            const ids = [...selectedRecycleIds];
+            if (ids.length === 0) return;
+            const items = ids.map(id => recycleBinData.find(d => d.id === id)).filter(Boolean);
+            restoreBulkIds = ids;
+            restoreTargetId = null;
+            restoreTargetType = null;
+            fillRecycleBulkSummary('restore', items);
+            restoreModal.classList.add('active');
+        }
+
+        async function confirmRestore() {
+            let ids = [];
+            if (restoreBulkIds && restoreBulkIds.length > 0) {
+                ids = [...restoreBulkIds];
+                selectedRecycleIds.clear();
+            } else if (restoreTargetId) {
+                ids = [restoreTargetId];
+            }
+            restoreModal.classList.remove('active');
+            restoreTargetId = null;
+            restoreTargetType = null;
+            restoreBulkIds = null;
+            if (ids.length === 0) return;
+            for (const id of ids) {
+                const item = recycleBinData.find(d => d.id === id);
+                if (item) { await restoreFromRecycle(item.id, item.type); }
+            }
+            if (ids.length > 1) showToast(`${ids.length} record(s) restored.`, 'success');
+        }
+
+        function bulkPermDeleteSelected() {
+            const ids = [...selectedRecycleIds];
+            if (ids.length === 0) return;
+            const items = ids.map(id => recycleBinData.find(d => d.id === id)).filter(Boolean);
+            permDeleteBulkIds = ids;
+            permDeleteTargetId = null;
+            permDeleteTargetType = null;
+            fillRecycleBulkSummary('permDelete', items);
+            permDeleteCodeInput.value = '';
+            permDeleteModal.classList.add('active');
+            setTimeout(() => permDeleteCodeInput.focus(), 50);
+        }
+
+        async function restoreFromRecycle(id, type) {
+            const table = type === 'pending' ? PENDING_TABLE_NAME : TABLE_NAME;
+            try {
+                const result = await queueOrRun(`Restore record`, async () => {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        },
+                        body: JSON.stringify({ deleted_at: null })
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Restore failed: ${response.status} - ${errorText}`);
+                    }
+                });
+                const idx = recycleBinData.findIndex(d => d.id === id);
+                const restoredName = idx !== -1 ? recycleBinData[idx].name : '';
+                const restoredAssignee = idx !== -1 ? recycleBinData[idx].assignee : '';
+                if (idx !== -1) recycleBinData.splice(idx, 1);
+                renderRecycleTable();
+                if (result.queued) {
+                    showToast(`Offline — restore of "${restoredName}" queued.`, 'error');
+                } else {
+                    if (type === 'pending') { await loadPendingFromSupabase(); } else { await loadFromSupabase(); }
+                    logActivity(restoredName, 'Restored', restoredAssignee);
+                    showToast('Record restored.', 'success');
+                }
+            } catch (error) {
+                console.error('Restore error:', error);
+                showToast(`Restore failed: ${error.message}`, 'error');
+            }
+        }
+
+        function confirmPermDelete() {
+            if (permDeleteCodeInput.value.trim() !== DELETE_CODE) {
+                showToast('Invalid code. Enter AAN2026.', 'error');
+                permDeleteCodeInput.value = '';
+                permDeleteCodeInput.focus();
+                return;
+            }
+            let items = [];
+            if (permDeleteBulkIds && permDeleteBulkIds.length > 0) {
+                items = permDeleteBulkIds.map(id => recycleBinData.find(d => d.id === id)).filter(Boolean);
+                selectedRecycleIds.clear();
+            } else if (permDeleteTargetId) {
+                const item = recycleBinData.find(d => d.id === permDeleteTargetId);
+                if (item) items = [item];
+            }
+            if (items.length === 0) {
+                permDeleteModal.classList.remove('active');
+                return;
+            }
+            items.forEach(item => {
+                const idx = recycleBinData.findIndex(d => d.id === item.id);
+                if (idx !== -1) recycleBinData.splice(idx, 1);
+            });
+            renderRecycleTable();
+            schedulePermanentDelete(items);
+            permDeleteModal.classList.remove('active');
+            permDeleteTargetId = null;
+            permDeleteTargetType = null;
+            permDeleteBulkIds = null;
+        }
+
+        function commitPendingPermDeletes() {
+            if (pendingPermDeleteTimer) { clearTimeout(pendingPermDeleteTimer); pendingPermDeleteTimer = null; }
+            const items = pendingPermDeleteItems;
+            pendingPermDeleteItems = [];
+            if (items.length === 0) return;
+            (async () => {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                for (const item of items) {
+                    const table = item.type === 'pending' ? PENDING_TABLE_NAME : TABLE_NAME;
+                    try {
+                        const result = await queueOrRun(`Permanently delete "${item.name}"`, async () => {
+                            const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${item.id}`, { method: 'DELETE', headers });
+                            if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
+                        });
+                        if (!result.queued) logActivity(item.name, 'Permanently Deleted', '');
+                    } catch (error) {
+                        console.warn('Permanent delete failed for', item.id, error);
+                    }
+                }
+            })();
+        }
+
+        function schedulePermanentDelete(items) {
+            // Finalize any previously pending batch right away before starting a new one
+            commitPendingPermDeletes();
+            pendingPermDeleteItems = items;
+            showPermDeleteUndoToast(items.length);
+            pendingPermDeleteTimer = setTimeout(() => {
+                commitPendingPermDeletes();
+            }, 8000);
+        }
+
+        function undoPermanentDelete() {
+            const items = pendingPermDeleteItems;
+            pendingPermDeleteItems = [];
+            if (pendingPermDeleteTimer) { clearTimeout(pendingPermDeleteTimer); pendingPermDeleteTimer = null; }
+            if (items.length === 0) return;
+            items.forEach(item => recycleBinData.push(item));
+            renderRecycleTable();
+            showToast(`${items.length} record(s) restored to Recycle Bin.`, 'success');
+        }
+
+        function showPermDeleteUndoToast(count) {
+            const existing = document.getElementById('permDeleteUndoToast');
+            if (existing) existing.remove();
+            let timeLeft = 8;
+            const toast = document.createElement('div');
+            toast.id = 'permDeleteUndoToast';
+            toast.className = 'undo-toast';
+            toast.innerHTML = `
+                <span>Permanently deleted ${count} record(s)</span>
+                <button id="undoPermDeleteBtn">Undo</button>
+                <span class="undo-timer"><span id="undoPermCountdown">8</span>s</span>
+            `;
+            document.body.appendChild(toast);
+
+            const undoBtn = toast.querySelector('#undoPermDeleteBtn');
+            undoBtn.addEventListener('click', () => {
+                undoPermanentDelete();
+                toast.remove();
+            });
+
+            const countdown = toast.querySelector('#undoPermCountdown');
+            const interval = setInterval(() => {
+                timeLeft--;
+                if (countdown) countdown.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    toast.remove();
+                }
+            }, 1000);
+        }
+
+        // ---------- ACTIVITY LOG ----------
+        function logActivity(name, action, rep) {
+            fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify({
+                    alumni_name: name || '',
+                    action: action || '',
+                    being_onboarded_by: rep || ''
+                })
+            }).catch(err => console.warn('Activity log failed:', err));
+        }
+
+        async function loadActivityLog() {
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?select=*&deleted_at=is.null&order=created_at.desc&limit=300`, { headers });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+                activityLogData = await response.json();
+                populateActivityRepDropdown();
+                renderActivityTable();
+            } catch (error) {
+                console.warn('Could not load activity log:', error);
+            }
+        }
+
+        function populateActivityRepDropdown() {
+            const reps = [...new Set(activityLogData.map(i => (i.being_onboarded_by || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+            const currentVal = filterActivityRep.value;
+            filterActivityRep.innerHTML = '<option value="">All Representatives</option>' + reps.map(r => `<option value="${r}">${r}</option>`).join('');
+            if (reps.includes(currentVal)) filterActivityRep.value = currentVal;
+        }
+
+        function periodStartDate(period) {
+            const now = new Date();
+            const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            if (period === 'today') return startToday;
+            if (period === 'week') { const d = new Date(startToday); d.setDate(d.getDate() - 6); return d; }
+            if (period === 'month') { const d = new Date(startToday); d.setDate(d.getDate() - 29); return d; }
+            return null; // 'all'
+        }
+
+        function filterRowsByPeriod(rows, period) {
+            const start = periodStartDate(period);
+            if (!start) return rows;
+            return rows.filter(item => new Date(item.created_at) >= start);
+        }
+
+        function renderActivityRows(tbody, rows, countEl, withCheckboxes) {
+            let html = '';
+            let lastDay = null;
+            const colspan = withCheckboxes ? 5 : 4;
+            rows.forEach(item => {
+                const d = new Date(item.created_at);
+                const dayKey = d.toDateString();
+                if (dayKey !== lastDay) {
+                    html += `<tr class="activity-day-separator"><td colspan="${colspan}">${d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}</td></tr>`;
+                    lastDay = dayKey;
+                }
+                const checkboxCell = withCheckboxes
+                    ? `<td style="text-align:center;"><input type="checkbox" class="activity-row-checkbox" data-id="${item.id}" ${selectedActivityIds.has(item.id) ? 'checked' : ''}></td>`
+                    : '';
+                html += `<tr>${checkboxCell}<td>${formatDate(item.created_at)}</td><td>${item.alumni_name || ''}</td><td>${item.action || ''}</td><td>${item.being_onboarded_by || ''}</td></tr>`;
+            });
+            tbody.innerHTML = html || `<tr><td colspan="${colspan}" style="text-align:center; color:#8a9bb0;">No activity found.</td></tr>`;
+            if (countEl) countEl.textContent = rows.length;
+            if (withCheckboxes) {
+                tbody.querySelectorAll('.activity-row-checkbox').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const id = this.dataset.id;
+                        if (this.checked) selectedActivityIds.add(id); else selectedActivityIds.delete(id);
+                        updateActivityBulkBar();
+                    });
+                });
+                const validIds = new Set(rows.map(r => String(r.id)));
+                [...selectedActivityIds].forEach(id => { if (!validIds.has(String(id))) selectedActivityIds.delete(id); });
+                updateActivityBulkBar();
+            }
+        }
+
+        function updateActivityBulkBar() {
+            const bar = document.getElementById('activityBulkBar');
+            if (!bar) return;
+            const count = selectedActivityIds.size;
+            document.getElementById('activityBulkCount').textContent = `${count} selected`;
+            bar.classList.toggle('active', count > 0);
+            const selectAll = document.getElementById('activitySelectAll');
+            const totalRows = document.querySelectorAll('#liveActivityTableBody .activity-row-checkbox').length;
+            if (selectAll) selectAll.checked = totalRows > 0 && count === totalRows;
+        }
+
+        let activityPeriod = 'today';
+        function renderActivityTable() {
+            const q = (activitySearchInput.value || '').toLowerCase().trim();
+            const rep = filterActivityRep.value;
+            const dateVal = filterActivityDate.value;
+            let rows = activityLogData;
+            if (q) rows = rows.filter(item => (item.alumni_name || '').toLowerCase().includes(q));
+            if (rep) rows = rows.filter(item => (item.being_onboarded_by || '') === rep);
+            if (dateVal) rows = rows.filter(item => (item.created_at || '').slice(0, 10) === dateVal);
+            rows = filterRowsByPeriod(rows, activityPeriod);
+            renderActivityRows(activityTbody, rows, activityRowCount);
+        }
+
+        async function moveOneToOnboarded(itemToMove) {
+            const idToRemove = itemToMove.id;
+            let deleteQueued = false;
+            if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
+                const result = await queueOrRun(`Remove "${itemToMove.name}" from Pending`, async () => {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}?id=eq.${idToRemove}`, {
+                        method: 'DELETE',
+                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Move failed: ${response.status} - ${errorText}`);
+                    }
+                });
+                deleteQueued = result.queued;
+                const masterIdx = pendingData.findIndex(d => d.id === idToRemove);
+                if (masterIdx !== -1) pendingData.splice(masterIdx, 1);
+            } else {
+                const idx = pendingData.indexOf(itemToMove);
+                if (idx !== -1) pendingData.splice(idx, 1);
+            }
+            alumniData.push({
+                id: `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+                name: itemToMove.name || '',
+                onboarded_by: itemToMove.being_onboarded_by || '',
+                notes: itemToMove.notes || '',
+                date_onboarded: new Date().toISOString()
+            });
+            logActivity(itemToMove.name, 'Moved to Onboarded', itemToMove.being_onboarded_by);
+            return deleteQueued;
+        }
+
+        async function confirmOnboard() {
+            confirmOnboardBtn.disabled = true;
+            confirmOnboardBtn.textContent = 'Moving...';
+            try {
+                let anyQueued = false;
+                let movedCount = 0;
+                if (onboardBulkIds && onboardBulkIds.length > 0) {
+                    const ids = [...onboardBulkIds];
+                    for (const id of ids) {
+                        const item = pendingData.find(d => d.id === id);
+                        if (!item) continue;
+                        const queued = await moveOneToOnboarded(item);
+                        if (queued) anyQueued = true;
+                        movedCount++;
+                    }
+                    selectedPendingIds.clear();
+                } else {
+                    const src = filteredPendingData.length > 0 ? filteredPendingData : pendingData;
+                    if (onboardTargetIndex === null || onboardTargetIndex >= src.length) {
+                        showToast('No record found.', 'error');
+                        onboardModal.classList.remove('active');
+                        return;
+                    }
+                    const itemToMove = src[onboardTargetIndex];
+                    anyQueued = await moveOneToOnboarded(itemToMove);
+                    movedCount = 1;
+                }
+
+                filteredPendingData = [];
+                pendingSearchInput.value = '';
+                filteredData = [];
+                onboardModal.classList.remove('active');
+                renderPendingTable(pendingData);
+                renderTable(alumniData);
+                scheduleAutoSync();
+                if (movedCount > 1) {
+                    showToast(anyQueued ? `Offline — ${movedCount} moves queued, will sync when reconnected.` : `${movedCount} record(s) moved to Onboarded. Syncing...`, anyQueued ? 'error' : 'success');
+                } else {
+                    showToast(anyQueued ? 'Offline — move queued, will sync when reconnected.' : 'Moved to onboarded list. Syncing...', anyQueued ? 'error' : 'success');
+                }
+            } catch (error) {
+                console.error('Onboard move error:', error);
+                showToast(`Move failed: ${error.message}`, 'error');
+            } finally {
+                confirmOnboardBtn.disabled = false;
+                confirmOnboardBtn.innerHTML = '<i class="fas fa-check"></i> Yes, Onboarded';
+                onboardTargetIndex = null;
+                onboardBulkIds = null;
+            }
+        }
+
+        async function moveOneToPending(itemToMove) {
+            const idToRemove = itemToMove.id;
+            let deleteQueued = false;
+            if (idToRemove && !idToRemove.toString().startsWith('temp_')) {
+                const result = await queueOrRun(`Remove "${itemToMove.name}" from Onboarded`, async () => {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${idToRemove}`, {
+                        method: 'DELETE',
+                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Move failed: ${response.status} - ${errorText}`);
+                    }
+                });
+                deleteQueued = result.queued;
+                const masterIdx = alumniData.findIndex(d => d.id === idToRemove);
+                if (masterIdx !== -1) alumniData.splice(masterIdx, 1);
+            } else {
+                const idx = alumniData.indexOf(itemToMove);
+                if (idx !== -1) alumniData.splice(idx, 1);
+            }
+            pendingData.push({
+                id: `temp_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+                name: itemToMove.name || '',
+                being_onboarded_by: itemToMove.onboarded_by || '',
+                notes: itemToMove.notes || ''
+            });
+            logActivity(itemToMove.name, 'Moved to Pending', itemToMove.onboarded_by);
+            return deleteQueued;
+        }
+
+        async function confirmReturn() {
+            confirmReturnBtn.disabled = true;
+            confirmReturnBtn.textContent = 'Moving...';
+            try {
+                let anyQueued = false;
+                let movedCount = 0;
+                if (returnBulkIds && returnBulkIds.length > 0) {
+                    const ids = [...returnBulkIds];
+                    for (const id of ids) {
+                        const item = alumniData.find(d => d.id === id);
+                        if (!item) continue;
+                        const queued = await moveOneToPending(item);
+                        if (queued) anyQueued = true;
+                        movedCount++;
+                    }
+                    selectedAlumniIds.clear();
+                } else {
+                    const src = filteredData.length > 0 ? filteredData : alumniData;
+                    if (returnTargetIndex === null || returnTargetIndex >= src.length) {
+                        showToast('No record found.', 'error');
+                        returnModal.classList.remove('active');
+                        return;
+                    }
+                    const itemToMove = src[returnTargetIndex];
+                    anyQueued = await moveOneToPending(itemToMove);
+                    movedCount = 1;
+                }
+
+                filteredData = [];
+                searchInput.value = '';
+                filteredPendingData = [];
+                returnModal.classList.remove('active');
+                renderTable(alumniData);
+                renderPendingTable(pendingData);
+                scheduleAutoSync();
+                if (movedCount > 1) {
+                    showToast(anyQueued ? `Offline — ${movedCount} moves queued, will sync when reconnected.` : `${movedCount} record(s) moved to Pending. Syncing...`, anyQueued ? 'error' : 'success');
+                } else {
+                    showToast(anyQueued ? 'Offline — move queued, will sync when reconnected.' : 'Moved back to pending. Syncing...', anyQueued ? 'error' : 'success');
+                }
+            } catch (error) {
+                console.error('Return move error:', error);
+                showToast(`Move failed: ${error.message}`, 'error');
+            } finally {
+                confirmReturnBtn.disabled = false;
+                confirmReturnBtn.innerHTML = '<i class="fas fa-undo"></i> Yes, Return';
+                returnTargetIndex = null;
+                returnBulkIds = null;
+            }
+        }
+
+        function saveNotes() {
+            const isPending = noteContext === 'pending';
+            const masterArr = isPending ? pendingData : alumniData;
+            const filteredArr = isPending ? filteredPendingData : filteredData;
+            const src = filteredArr.length > 0 ? filteredArr : masterArr;
+            if (noteTargetIndex === null || noteTargetIndex >= src.length) {
+                showToast('No record found.', 'error');
+                notesModal.classList.remove('active');
+                return;
+            }
+            const item = src[noteTargetIndex];
+            item.notes = notesTextarea.value;
+            const masterIdx = masterArr.findIndex(d => d.id === item.id);
+            if (masterIdx !== -1) masterArr[masterIdx].notes = notesTextarea.value;
+            notesModal.classList.remove('active');
+            if (isPending) { renderPendingTable(pendingData); } else { renderTable(alumniData); }
+            scheduleAutoSync();
+            logActivity(item.name, 'Updated Notes', isPending ? item.being_onboarded_by : item.onboarded_by);
+            showToast('Notes saved. Syncing...', 'success');
+            noteTargetIndex = null;
+        }
+
+        let autoSyncTimer = null;
+        function scheduleAutoSync() {
+            clearTimeout(autoSyncTimer);
+            autoSyncTimer = setTimeout(() => {
+                if (!navigator.onLine) { setStatusBadge('offline'); return; }
+                if (!isSyncing) syncToSupabase();
+            }, 800);
+        }
+
+        async function syncToSupabase() {
+            const validData = alumniData.filter(item => item.name && item.name.trim() !== '');
+            const validPendingData = pendingData.filter(item => item.name && item.name.trim() !== '');
+            if (validData.length === 0 && validPendingData.length === 0) { showToast('No data to sync.', 'error'); return; }
+            isSyncing = true;
+            showSyncIndicator();
+            setStatusBadge('syncing');
+            try {
+                const baseHeaders = {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                };
+
+                // Rows that already exist in Supabase (real id) -> update in place
+                const toUpdate = validData.filter(item => item.id && !item.id.toString().startsWith('temp_'));
+                if (toUpdate.length > 0) {
+                    const nowIso = new Date().toISOString();
+                    const updatePayload = toUpdate.map(({ id, name, onboarded_by, notes, date_onboarded }) => ({
+                        id,
+                        name: name.trim(),
+                        onboarded_by: onboarded_by ? onboarded_by.trim() : '',
+                        notes: notes || '',
+                        date_onboarded: date_onboarded || null,
+                        last_updated: nowIso
+                    }));
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?on_conflict=id`, {
+                        method: 'POST',
+                        headers: { ...baseHeaders, 'Prefer': 'resolution=merge-duplicates' },
+                        body: JSON.stringify(updatePayload)
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Update failed: ${response.status} - ${errorText}`);
+                    }
+                }
+
+                // Rows that don't exist yet (temp id) -> insert as new
+                const toInsert = validData.filter(item => !item.id || item.id.toString().startsWith('temp_'));
+                if (toInsert.length > 0) {
+                    const insertPayload = toInsert.map(({ name, onboarded_by, notes, date_onboarded }) => ({
+                        name: name.trim(),
+                        onboarded_by: onboarded_by ? onboarded_by.trim() : '',
+                        notes: notes || '',
+                        date_onboarded: date_onboarded || null
+                    }));
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}`, {
+                        method: 'POST',
+                        headers: baseHeaders,
+                        body: JSON.stringify(insertPayload)
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`Insert failed: ${response.status} - ${errorText}`);
+                    }
+                    toInsert.forEach(item => logActivity(item.name, 'Added Alumni', item.onboarded_by));
+                }
+
+                // Also sync the pending list so one button covers both tables
+                await syncPendingToSupabase();
+
+                try {
+                    await loadFromSupabase();
+                } catch (reloadError) {
+                    console.warn('Synced, but could not reload:', reloadError);
+                }
+                setStatusBadge('synced');
+                showToast('Data synced successfully!', 'success');
+            } catch (error) {
+                console.error('Sync error:', error);
+                setStatusBadge('failed');
+                showToast(`Sync failed: ${error.message}`, 'error');
+            } finally {
+                isSyncing = false;
+                hideSyncIndicator();
+            }
+        }
+
+        async function syncPendingToSupabase() {
+            const validData = pendingData.filter(item => item.name && item.name.trim() !== '');
+            if (validData.length === 0) return;
+            const baseHeaders = {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            };
+
+            const toUpdate = validData.filter(item => item.id && !item.id.toString().startsWith('temp_'));
+            if (toUpdate.length > 0) {
+                const nowIso = new Date().toISOString();
+                const updatePayload = toUpdate.map(({ id, name, being_onboarded_by, notes }) => ({
+                    id,
+                    name: name.trim(),
+                    being_onboarded_by: being_onboarded_by ? being_onboarded_by.trim() : '',
+                    notes: notes || '',
+                    last_updated: nowIso
+                }));
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}?on_conflict=id`, {
+                    method: 'POST',
+                    headers: { ...baseHeaders, 'Prefer': 'resolution=merge-duplicates' },
+                    body: JSON.stringify(updatePayload)
+                });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Pending update failed: ${response.status} - ${errorText}`);
+                }
+            }
+
+            const toInsert = validData.filter(item => !item.id || item.id.toString().startsWith('temp_'));
+            if (toInsert.length > 0) {
+                const insertPayload = toInsert.map(({ name, being_onboarded_by, notes }) => ({
+                    name: name.trim(),
+                    being_onboarded_by: being_onboarded_by ? being_onboarded_by.trim() : '',
+                    notes: notes || ''
+                }));
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}`, {
+                    method: 'POST',
+                    headers: baseHeaders,
+                    body: JSON.stringify(insertPayload)
+                });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Pending insert failed: ${response.status} - ${errorText}`);
+                }
+                toInsert.forEach(item => logActivity(item.name, 'Added Pending', item.being_onboarded_by));
+            }
+
+            try {
+                await loadPendingFromSupabase();
+            } catch (reloadError) {
+                console.warn('Pending synced, but could not reload:', reloadError);
+            }
+        }
+
+        async function loadFromSupabase() {
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?select=*&deleted_at=is.null`, { headers });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+                const data = await response.json();
+                alumniData = (data || []).map(item => ({
+                    id: item.id,
+                    name: item.name || '',
+                    onboarded_by: item.onboarded_by || '',
+                    notes: item.notes || '',
+                    date_added: item.created_at || '',
+                    date_onboarded: item.date_onboarded || '',
+                    last_updated: item.last_updated || ''
+                }));
+                filteredData = [];
+                searchInput.value = '';
+                renderTable(alumniData);
+            } catch (error) {
+                console.warn('Could not load from Supabase:', error);
+                if (alumniData.length === 0) loadSampleData();
+                throw error;
+            }
+        }
+
+        async function loadPendingFromSupabase() {
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}?select=*&deleted_at=is.null`, { headers });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+                const data = await response.json();
+                pendingData = (data || []).map(item => ({
+                    id: item.id,
+                    name: item.name || '',
+                    being_onboarded_by: item.being_onboarded_by || '',
+                    notes: item.notes || '',
+                    date_added: item.created_at || '',
+                    last_updated: item.last_updated || ''
+                }));
+                filteredPendingData = [];
+                pendingSearchInput.value = '';
+                renderPendingTable(pendingData);
+            } catch (error) {
+                console.warn('Could not load pending list from Supabase:', error);
+                throw error;
+            }
+        }
+
+        const RECYCLE_BIN_RETENTION_DAYS = 30;
+
+        async function purgeOldRecycleBinItems(items) {
+            const cutoff = Date.now() - RECYCLE_BIN_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+            const expired = items.filter(item => item.deleted_at && new Date(item.deleted_at).getTime() < cutoff);
+            if (expired.length === 0) return items;
+            const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+            for (const item of expired) {
+                const table = item.type === 'pending' ? PENDING_TABLE_NAME : TABLE_NAME;
+                try {
+                    await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${item.id}`, { method: 'DELETE', headers });
+                    logActivity(item.name, 'Auto-Purged (30+ days in Recycle Bin)', '');
+                } catch (error) {
+                    console.warn('Auto-purge failed for', item.id, error);
+                }
+            }
+            const expiredIds = new Set(expired.map(e => e.id));
+            if (expired.length > 0) showToast(`${expired.length} record(s) auto-purged after 30 days in the Recycle Bin.`, 'info');
+            return items.filter(item => !expiredIds.has(item.id));
+        }
+
+        async function loadRecycleBin() {
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const [alumniRes, pendingRes] = await Promise.all([
+                    fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?select=*&deleted_at=not.is.null`, { headers }),
+                    fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}?select=*&deleted_at=not.is.null`, { headers })
+                ]);
+                const alumniDeleted = alumniRes.ok ? await alumniRes.json() : [];
+                const pendingDeleted = pendingRes.ok ? await pendingRes.json() : [];
+                let combined = [
+                    ...alumniDeleted.map(item => ({ id: item.id, name: item.name || '', assignee: item.onboarded_by || '', type: 'alumni', deleted_at: item.deleted_at })),
+                    ...pendingDeleted.map(item => ({ id: item.id, name: item.name || '', assignee: item.being_onboarded_by || '', type: 'pending', deleted_at: item.deleted_at }))
+                ];
+                combined = await purgeOldRecycleBinItems(combined);
+                recycleBinData = combined;
+                renderRecycleTable();
+            } catch (error) {
+                console.warn('Could not load recycle bin:', error);
+            }
+        }
+
+        function loadSampleData() {
+            alumniData = [
+                { name: 'Dede Kennis Kalu', onboarded_by: 'Kennis' },
+                { name: 'Osinachi Goodluck Okonkwo', onboarded_by: 'Kennis' },
+                { name: 'Bankole Korede Elsie', onboarded_by: 'Kennis' }
+            ];
+            renderTable(alumniData);
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '';
+            try {
+                const d = new Date(iso);
+                if (isNaN(d.getTime())) return '';
+                return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } catch (e) { return ''; }
+        }
+
+        function exportAlumniCSV(list, suffix) {
+            if (!list || list.length === 0) { showToast('No data to download', 'error'); return; }
+            const esc = (v) => `"${(v || '').toString().replace(/"/g, '""')}"`;
+            let csv = 'Name,Onboarded By,Date Added,Date Onboarded,Last Updated,Notes\n';
+            list.forEach(item => {
+                csv += [
+                    esc(item.name),
+                    esc(item.onboarded_by),
+                    esc(formatDate(item.date_added)),
+                    esc(formatDate(item.date_onboarded)),
+                    esc(formatDate(item.last_updated)),
+                    esc(item.notes)
+                ].join(',') + '\n';
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `AMSUL_Alumni_${suffix}_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            showToast('CSV downloaded', 'success');
+        }
+
+        function exportPendingCSV(list, suffix) {
+            if (!list || list.length === 0) { showToast('No data to download', 'error'); return; }
+            const esc = (v) => `"${(v || '').toString().replace(/"/g, '""')}"`;
+            let csv = 'Name,Being Onboarded By,Date Added,Last Updated,Notes\n';
+            list.forEach(item => {
+                csv += [
+                    esc(item.name),
+                    esc(item.being_onboarded_by),
+                    esc(formatDate(item.date_added)),
+                    esc(formatDate(item.last_updated)),
+                    esc(item.notes)
+                ].join(',') + '\n';
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `AMSUL_Pending_${suffix}_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            showToast('CSV downloaded', 'success');
+        }
+
+        function downloadCSV() {
+            exportAlumniCSV(alumniData, 'All');
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let cur = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (inQuotes) {
+                    if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+                    else if (ch === '"') { inQuotes = false; }
+                    else { cur += ch; }
+                } else {
+                    if (ch === '"') { inQuotes = true; }
+                    else if (ch === ',') { result.push(cur); cur = ''; }
+                    else { cur += ch; }
+                }
+            }
+            result.push(cur);
+            return result;
+        }
+
+        function importAlumniCSV(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const lines = e.target.result.split(/\r?\n/).filter(l => l.trim().length > 0);
+                    if (lines.length < 2) { showToast('CSV file has no data rows.', 'error'); return; }
+                    const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+                    const nameIdx = headers.findIndex(h => h.includes('name') && !h.includes('onboarded'));
+                    const repIdx = headers.findIndex(h => h.includes('onboarded by'));
+                    const notesIdx = headers.findIndex(h => h.includes('notes'));
+                    if (nameIdx === -1) { showToast('CSV must include a Name column.', 'error'); return; }
+                    let added = 0;
+                    for (let i = 1; i < lines.length; i++) {
+                        const cols = parseCSVLine(lines[i]);
+                        const name = (cols[nameIdx] || '').trim();
+                        if (!name) continue;
+                        alumniData.push({
+                            id: `temp_${Date.now()}_${i}`,
+                            name: name,
+                            onboarded_by: repIdx !== -1 ? (cols[repIdx] || '').trim() : '',
+                            notes: notesIdx !== -1 ? (cols[notesIdx] || '').trim() : ''
+                        });
+                        added++;
+                    }
+                    if (added === 0) { showToast('No valid rows found in CSV.', 'error'); return; }
+                    filteredData = [];
+                    searchInput.value = '';
+                    renderTable(alumniData);
+                    scheduleAutoSync();
+                    showToast(`${added} record(s) imported. Syncing...`, 'success');
+                } catch (err) {
+                    console.error('CSV import error:', err);
+                    showToast('Could not read CSV file.', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ---------- BULK ACTIONS (ONBOARDED) ----------
+        function updateAlumniBulkBar() {
+            const bar = document.getElementById('alumniBulkBar');
+            const count = selectedAlumniIds.size;
+            document.getElementById('alumniBulkCount').textContent = `${count} selected`;
+            bar.classList.toggle('active', count > 0);
+            const selectAll = document.getElementById('alumniSelectAll');
+            if (selectAll) selectAll.checked = alumniData.length > 0 && alumniData.every(d => selectedAlumniIds.has(d.id));
+        }
+
+        async function bulkDeleteAlumni() {
+            const ids = [...selectedAlumniIds];
+            if (ids.length === 0) return;
+            if (!confirm(`Move ${ids.length} selected record(s) to the Recycle Bin?`)) return;
+            const nowIso = new Date().toISOString();
+            for (const id of ids) {
+                const item = alumniData.find(d => d.id === id);
+                if (!item) continue;
+                if (!id.toString().startsWith('temp_')) {
+                    try {
+                        await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+                            body: JSON.stringify({ deleted_at: nowIso })
+                        });
+                        recycleBinData.push({ id, name: item.name, assignee: item.onboarded_by || '', type: 'alumni', deleted_at: nowIso });
+                    } catch (error) { console.warn('Bulk delete failed for', id, error); }
+                }
+                const idx = alumniData.findIndex(d => d.id === id);
+                if (idx !== -1) alumniData.splice(idx, 1);
+                logActivity(item.name, 'Deleted', item.onboarded_by);
+            }
+            selectedAlumniIds.clear();
+            filteredData = [];
+            searchInput.value = '';
+            renderTable(alumniData);
+            renderRecycleTable();
+            showToast(`${ids.length} record(s) moved to Recycle Bin.`, 'success');
+        }
+
+        function bulkReturnAlumniToPending() {
+            const ids = [...selectedAlumniIds];
+            if (ids.length === 0) return;
+            const items = ids.map(id => alumniData.find(d => d.id === id)).filter(Boolean);
+            returnBulkIds = ids;
+            returnTargetIndex = null;
+            fillActionBulkSummary('return', items);
+            returnModal.classList.add('active');
+        }
+
+        function bulkExportAlumni() {
+            const ids = [...selectedAlumniIds];
+            if (ids.length === 0) { showToast('No records selected.', 'error'); return; }
+            exportAlumniCSV(alumniData.filter(d => ids.includes(d.id)), 'Selected');
+        }
+
+        // ---------- BULK ACTIONS (PENDING) ----------
+        function updatePendingBulkBar() {
+            const bar = document.getElementById('pendingBulkBar');
+            const count = selectedPendingIds.size;
+            document.getElementById('pendingBulkCount').textContent = `${count} selected`;
+            bar.classList.toggle('active', count > 0);
+            const selectAll = document.getElementById('pendingSelectAll');
+            if (selectAll) selectAll.checked = pendingData.length > 0 && pendingData.every(d => selectedPendingIds.has(d.id));
+        }
+
+        async function bulkDeletePending() {
+            const ids = [...selectedPendingIds];
+            if (ids.length === 0) return;
+            if (!confirm(`Move ${ids.length} selected record(s) to the Recycle Bin?`)) return;
+            const nowIso = new Date().toISOString();
+            for (const id of ids) {
+                const item = pendingData.find(d => d.id === id);
+                if (!item) continue;
+                if (!id.toString().startsWith('temp_')) {
+                    try {
+                        await fetch(`${SUPABASE_URL}/rest/v1/${PENDING_TABLE_NAME}?id=eq.${id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+                            body: JSON.stringify({ deleted_at: nowIso })
+                        });
+                        recycleBinData.push({ id, name: item.name, assignee: item.being_onboarded_by || '', type: 'pending', deleted_at: nowIso });
+                    } catch (error) { console.warn('Bulk delete failed for', id, error); }
+                }
+                const idx = pendingData.findIndex(d => d.id === id);
+                if (idx !== -1) pendingData.splice(idx, 1);
+                logActivity(item.name, 'Deleted', item.being_onboarded_by);
+            }
+            selectedPendingIds.clear();
+            filteredPendingData = [];
+            pendingSearchInput.value = '';
+            renderPendingTable(pendingData);
+            renderRecycleTable();
+            showToast(`${ids.length} record(s) moved to Recycle Bin.`, 'success');
+        }
+
+        function bulkMovePendingToOnboarded() {
+            const ids = [...selectedPendingIds];
+            if (ids.length === 0) return;
+            const items = ids.map(id => pendingData.find(d => d.id === id)).filter(Boolean);
+            onboardBulkIds = ids;
+            onboardTargetIndex = null;
+            fillActionBulkSummary('onboard', items);
+            onboardModal.classList.add('active');
+        }
+
+        function bulkExportPending() {
+            const ids = [...selectedPendingIds];
+            if (ids.length === 0) { showToast('No records selected.', 'error'); return; }
+            exportPendingCSV(pendingData.filter(d => ids.includes(d.id)), 'Selected');
+        }
+
+        function downloadPDF() {
+            if (alumniData.length === 0) { showToast('No data to download', 'error'); return; }
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'landscape' });
+                doc.setFontSize(16);
+                doc.text('AMSUL Alumni Onboarding', 14, 18);
+                doc.setFontSize(10);
+                doc.text(`Generated: ${new Date().toLocaleDateString()}  |  Total: ${alumniData.length}`, 14, 25);
+                doc.autoTable({
+                    startY: 30,
+                    head: [['#', 'Full Name', 'Onboarded By', 'Date Added', 'Date Onboarded', 'Notes']],
+                    body: alumniData.map((item, i) => [
+                        i + 1,
+                        item.name || '',
+                        item.onboarded_by || '',
+                        formatDate(item.date_added),
+                        formatDate(item.date_onboarded),
+                        item.notes || ''
+                    ]),
+                    headStyles: { fillColor: [10, 42, 68] },
+                    styles: { fontSize: 9, cellPadding: 3 }
+                });
+                doc.save(`AMSUL_Alumni_${new Date().toISOString().slice(0,10)}.pdf`);
+                showToast('PDF downloaded', 'success');
+            } catch (error) {
+                console.error('PDF error:', error);
+                showToast('PDF generation failed', 'error');
+            }
+        }
+
+
+        function setStatusBadge(state) {
+            const el = document.getElementById('connectionStatus');
+            const queuedSuffix = offlineQueue.length > 0 ? ` (${offlineQueue.length} queued)` : '';
+            const states = {
+                connecting: '<i class="fas fa-spinner fa-spin"></i> Connecting...',
+                synced: '<i class="fas fa-circle" style="color:#2a7a4d; font-size:0.6rem;"></i> Synced',
+                syncing: '<i class="fas fa-circle" style="color:#c9820a; font-size:0.6rem;"></i> Syncing...',
+                offline: `<i class="fas fa-circle" style="color:#b91c1c; font-size:0.6rem;"></i> Offline${queuedSuffix}`,
+                failed: '<i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Sync Failed'
+            };
+            el.innerHTML = states[state] || states.offline;
+        }
+
+        // ---------- OFFLINE QUEUE ----------
+        // Actions are queued as in-memory closures. Local data is always updated
+        // immediately (optimistically); only the network call is deferred until
+        // the connection returns, then replayed in the order it was queued.
+        async function queueOrRun(label, fn) {
+            if (!navigator.onLine) {
+                offlineQueue.push({ label, fn });
+                setStatusBadge('offline');
+                return { queued: true };
+            }
+            try {
+                await fn();
+                return { queued: false };
+            } catch (err) {
+                if (err instanceof TypeError) {
+                    // Fetch itself failed to reach the network (dropped connection, DNS, etc.)
+                    offlineQueue.push({ label, fn });
+                    setStatusBadge('offline');
+                    return { queued: true };
+                }
+                throw err;
+            }
+        }
+
+        async function processOfflineQueue() {
+            if (offlineQueue.length === 0) return;
+            const queue = offlineQueue;
+            offlineQueue = [];
+            showToast(`Reconnected — syncing ${queue.length} queued change(s)...`, 'success');
+            for (const action of queue) {
+                try {
+                    await action.fn();
+                } catch (err) {
+                    console.warn(`Queued action failed (${action.label}):`, err);
+                }
+            }
+            try {
+                await syncToSupabase();
+            } catch (err) {
+                console.warn('Post-reconnect sync failed:', err);
+            }
+            setStatusBadge('synced');
+            showToast('All queued changes synced.', 'success');
+        }
+
+        window.addEventListener('online', function() {
+            setStatusBadge('syncing');
+            processOfflineQueue();
+        });
+        window.addEventListener('offline', function() {
+            setStatusBadge('offline');
+            showToast('You are offline. Changes will keep working and sync automatically once reconnected.', 'error');
+        });
+
+        // ---------- ADMIN DASHBOARD ----------
+        const ADMIN_PASSWORD = 'AAN@2026';
+        let adminUnlocked = false;
+        let liveActivityTimer = null;
+        let lastSeenActivityIds = null;
+
+        function checkAdminUnlock() {
+            adminUnlocked = sessionStorage.getItem('amsul_admin_unlocked') === 'true';
+        }
+
+        function showAdminPage() {
+            const locked = document.getElementById('adminLocked');
+            const content = document.getElementById('adminContent');
+            if (adminUnlocked) {
+                locked.style.display = 'none';
+                content.style.display = 'block';
+                renderRepSummary();
+                startLiveActivityPolling();
+                refreshAdminData();
+                startAdminAutoRefresh();
+            } else {
+                locked.style.display = 'block';
+                content.style.display = 'none';
+                stopLiveActivityPolling();
+                stopAdminAutoRefresh();
+            }
+        }
+
+        let adminAutoRefreshTimer = null;
+
+        function updateAdminLastUpdated() {
+            const el = document.getElementById('adminLastUpdated');
+            if (el) el.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        async function refreshAdminData() {
+            try {
+                await loadFromSupabase();
+                await loadPendingFromSupabase();
+                await loadRecycleBin();
+                await loadActivityLog();
+                await loadActivityRecycleBin();
+                renderRepSummary();
+            } catch (e) {
+                console.warn('Admin refresh failed:', e);
+            }
+            updateAdminLastUpdated();
+        }
+
+        function startAdminAutoRefresh() {
+            stopAdminAutoRefresh();
+            adminAutoRefreshTimer = setInterval(refreshAdminData, 30000);
+        }
+
+        function stopAdminAutoRefresh() {
+            if (adminAutoRefreshTimer) { clearInterval(adminAutoRefreshTimer); adminAutoRefreshTimer = null; }
+        }
+
+        function renderRepSummary() {
+            const reps = new Set();
+            alumniData.forEach(i => { if ((i.onboarded_by || '').trim()) reps.add(i.onboarded_by.trim()); });
+            pendingData.forEach(i => { if ((i.being_onboarded_by || '').trim()) reps.add(i.being_onboarded_by.trim()); });
+            const tbody = document.getElementById('repSummaryTableBody');
+            tbody.innerHTML = '';
+            [...reps].sort((a, b) => a.localeCompare(b)).forEach(rep => {
+                const completed = alumniData.filter(i => (i.onboarded_by || '').trim() === rep).length;
+                const pending = pendingData.filter(i => (i.being_onboarded_by || '').trim() === rep).length;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${rep}</td><td>${pending}</td><td>${completed}</td><td>${pending + completed}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        let adminActivityPeriod = 'today';
+        let liveActivityRawData = [];
+
+        function renderLiveActivity() {
+            const tbody = document.getElementById('liveActivityTableBody');
+            const rows = filterRowsByPeriod(liveActivityRawData, adminActivityPeriod);
+            renderActivityRows(tbody, rows, null, true);
+            renderNotificationSummary();
+        }
+
+        // ---------- ACTIVITY LOG DELETE / RECYCLE BIN (admin-only) ----------
+        // Soft-delete via deleted_at (same proven pattern as the alumni/pending
+        // recycle bin) so entries are reliably hidden from active views and
+        // safely recoverable — instead of a real DELETE that can silently do
+        // nothing if the table's delete permissions/RLS don't allow it.
+        let selectedActivityRecycleIds = new Set();
+
+        async function deleteSelectedActivity() {
+            const ids = [...selectedActivityIds];
+            if (ids.length === 0) return;
+            const headers = { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'return=representation' };
+            const nowIso = new Date().toISOString();
+            let deletedCount = 0;
+            let blockedCount = 0;
+            const softDeletedIds = [];
+            for (const id of ids) {
+                const item = liveActivityRawData.find(d => String(d.id) === String(id)) || activityLogData.find(d => String(d.id) === String(id));
+                if (!item) continue;
+                try {
+                    const result = await queueOrRun(`Remove log entry for "${item.alumni_name}"`, async () => {
+                        const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, {
+                            method: 'PATCH', headers, body: JSON.stringify({ deleted_at: nowIso })
+                        });
+                        if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
+                        const updatedRows = await response.json().catch(() => []);
+                        if (!updatedRows || updatedRows.length === 0) throw new Error('BLOCKED');
+                    });
+                    if (!result.queued) {
+                        deletedCount++;
+                    }
+                    softDeletedIds.push(String(id));
+                } catch (err) {
+                    if (err.message === 'BLOCKED') {
+                        blockedCount++;
+                        console.warn(`Delete for "${item.alumni_name}" removed nothing server-side — check delete/update permissions (RLS) on ammsul_activity_log.`);
+                    } else {
+                        console.warn('Could not delete activity entry:', err);
+                    }
+                }
+            }
+            selectedActivityIds.clear();
+            liveActivityRawData = liveActivityRawData.filter(d => !softDeletedIds.includes(String(d.id)));
+            activityLogData = activityLogData.filter(d => !softDeletedIds.includes(String(d.id)));
+            renderLiveActivity();
+            renderActivityTable();
+            if (deletedCount > 0) showToast(`${deletedCount} log entr${deletedCount === 1 ? 'y' : 'ies'} removed. View them in the Activity Recycle Bin.`, 'success');
+            if (blockedCount > 0) showToast(`${blockedCount} entr${blockedCount === 1 ? 'y' : 'ies'} could not be deleted — the database blocked it. Check delete permissions (RLS) on ammsul_activity_log.`, 'error');
+        }
+
+        const ACTIVITY_RECYCLE_RETENTION_DAYS = 30;
+        let activityRecycleData = [];
+
+        async function loadActivityRecycleBin() {
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?select=*&deleted_at=not.is.null&order=deleted_at.desc&limit=500`, { headers });
+                if (!response.ok) throw new Error(`Fetch failed: ${response.status}`);
+                let data = await response.json();
+                data = await purgeOldActivityRecycleItems(data);
+                activityRecycleData = data;
+                updateActivityRecycleCount();
+                renderActivityRecycleTable();
+            } catch (err) {
+                console.warn('Could not load activity recycle bin:', err);
+            }
+        }
+
+        async function purgeOldActivityRecycleItems(items) {
+            const cutoff = Date.now() - ACTIVITY_RECYCLE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+            const expired = items.filter(item => item.deleted_at && new Date(item.deleted_at).getTime() < cutoff);
+            if (expired.length === 0) return items;
+            const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+            for (const item of expired) {
+                try {
+                    await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${item.id}`, { method: 'DELETE', headers });
+                } catch (err) {
+                    console.warn('Auto-purge failed for log entry', item.id, err);
+                }
+            }
+            if (expired.length > 0) showToast(`${expired.length} log entr${expired.length === 1 ? 'y' : 'ies'} auto-purged after 30 days in the Activity Recycle Bin.`, 'info');
+            const expiredIds = new Set(expired.map(e => String(e.id)));
+            return items.filter(item => !expiredIds.has(String(item.id)));
+        }
+
+        function updateActivityRecycleCount() {
+            const el = document.getElementById('activityRecycleCount');
+            if (el) el.textContent = activityRecycleData.length;
+        }
+
+        function renderActivityRecycleTable() {
+            const tbody = document.getElementById('activityRecycleTableBody');
+            if (!tbody) return;
+            const validIds = new Set(activityRecycleData.map(i => String(i.id)));
+            [...selectedActivityRecycleIds].forEach(id => { if (!validIds.has(String(id))) selectedActivityRecycleIds.delete(id); });
+            if (activityRecycleData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#8a9bb0;">No deleted log entries.</td></tr>';
+                updateActivityRecycleBulkBar();
+                return;
+            }
+            tbody.innerHTML = activityRecycleData.map(item => `
+                <tr>
+                    <td style="text-align:center;"><input type="checkbox" class="activity-recycle-checkbox" data-id="${item.id}" ${selectedActivityRecycleIds.has(String(item.id)) ? 'checked' : ''}></td>
+                    <td>${formatDate(item.created_at)}</td>
+                    <td>${item.alumni_name || ''}</td>
+                    <td>${item.action || ''}</td>
+                    <td style="white-space:nowrap;">
+                        <button class="delete-btn" style="color:#2a7a4d;" title="Restore" data-restore="${item.id}"><i class="fas fa-trash-restore"></i></button>
+                        <button class="delete-btn" title="Delete permanently" data-purge="${item.id}"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            tbody.querySelectorAll('[data-restore]').forEach(btn => {
+                btn.addEventListener('click', function() { restoreActivityEntry(this.dataset.restore); });
+            });
+            tbody.querySelectorAll('[data-purge]').forEach(btn => {
+                btn.addEventListener('click', function() { purgeActivityEntry(this.dataset.purge); });
+            });
+            tbody.querySelectorAll('.activity-recycle-checkbox').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (this.checked) selectedActivityRecycleIds.add(this.dataset.id); else selectedActivityRecycleIds.delete(this.dataset.id);
+                    updateActivityRecycleBulkBar();
+                });
+            });
+            updateActivityRecycleBulkBar();
+        }
+
+        function updateActivityRecycleBulkBar() {
+            const bar = document.getElementById('activityRecycleBulkBar');
+            const countEl = document.getElementById('activityRecycleSelectedCount');
+            const count = selectedActivityRecycleIds.size;
+            if (!bar) return;
+            bar.classList.toggle('active', count > 0);
+            if (countEl) countEl.textContent = `${count} selected`;
+            const selectAllCb = document.getElementById('activityRecycleSelectAll');
+            if (selectAllCb) selectAllCb.checked = count > 0 && count === activityRecycleData.length;
+        }
+
+        async function restoreActivityEntry(id) {
+            const item = activityRecycleData.find(i => String(i.id) === String(id));
+            if (!item) return;
+            try {
+                const headers = { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, {
+                    method: 'PATCH', headers, body: JSON.stringify({ deleted_at: null })
+                });
+                if (!response.ok) throw new Error(`Restore failed: ${response.status}`);
+                activityRecycleData = activityRecycleData.filter(i => String(i.id) !== String(id));
+                selectedActivityRecycleIds.delete(String(id));
+                renderActivityRecycleTable();
+                updateActivityRecycleCount();
+                await loadActivityLog();
+                await fetchLiveActivity();
+                showToast('Log entry restored.', 'success');
+            } catch (err) {
+                console.error('Could not restore log entry:', err);
+                showToast('Could not restore log entry.', 'error');
+            }
+        }
+
+        async function purgeActivityEntry(id) {
+            if (!confirm('Permanently delete this log entry? This cannot be undone.')) return;
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, { method: 'DELETE', headers });
+                if (!response.ok) throw new Error(`Permanent delete failed: ${response.status}`);
+                activityRecycleData = activityRecycleData.filter(i => String(i.id) !== String(id));
+                selectedActivityRecycleIds.delete(String(id));
+                renderActivityRecycleTable();
+                updateActivityRecycleCount();
+                showToast('Log entry permanently cleared.', 'success');
+            } catch (err) {
+                console.error('Could not permanently delete log entry:', err);
+                showToast('Could not permanently delete log entry.', 'error');
+            }
+        }
+
+        async function bulkRestoreActivityRecycle() {
+            const ids = [...selectedActivityRecycleIds];
+            for (const id of ids) { await restoreActivityEntry(id); }
+        }
+
+        async function bulkPurgeActivityRecycle() {
+            const ids = [...selectedActivityRecycleIds];
+            if (ids.length === 0) return;
+            if (!confirm(`Permanently delete ${ids.length} log entr${ids.length === 1 ? 'y' : 'ies'}? This cannot be undone.`)) return;
+            const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+            for (const id of ids) {
+                try {
+                    await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, { method: 'DELETE', headers });
+                } catch (err) {
+                    console.warn('Could not permanently delete log entry:', id, err);
+                }
+            }
+            activityRecycleData = activityRecycleData.filter(i => !ids.includes(String(i.id)));
+            selectedActivityRecycleIds.clear();
+            renderActivityRecycleTable();
+            updateActivityRecycleCount();
+            showToast(`${ids.length} log entr${ids.length === 1 ? 'y' : 'ies'} permanently cleared.`, 'success');
+        }
+
+        function renderNotificationSummary() {
+            const el = document.getElementById('notificationSummary');
+            if (!el) return;
+            const groups = {};
+            const order = [];
+            liveActivityRawData.forEach(item => {
+                const d = new Date(item.created_at);
+                const dayKey = d.toDateString();
+                if (!groups[dayKey]) { groups[dayKey] = {}; order.push(dayKey); }
+                const action = (item.action || 'Updated').trim();
+                groups[dayKey][action] = (groups[dayKey][action] || 0) + 1;
+            });
+            const today = new Date().toDateString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            const dayLabel = (key) => {
+                if (key === today) return 'Today';
+                if (key === yesterday) return 'Yesterday';
+                return new Date(key).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+            };
+            const topDays = order.slice(0, 3);
+            if (topDays.length === 0) { el.innerHTML = ''; return; }
+            el.innerHTML = topDays.map(key => {
+                const counts = groups[key];
+                const pills = Object.keys(counts).sort((a,b)=>counts[b]-counts[a])
+                    .map(action => `<span class="notification-count-pill">${counts[action]} ${action.toLowerCase()}</span>`).join('');
+                return `<div class="notification-day-group"><div class="day-label">${dayLabel(key)}</div><div class="day-counts">${pills}</div></div>`;
+            }).join('');
+        }
+
+        async function fetchLiveActivity() {
+            try {
+                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?select=*&deleted_at=is.null&order=created_at.desc&limit=300`, { headers });
+                if (!response.ok) return;
+                const data = await response.json();
+                if (lastSeenActivityIds === null) {
+                    lastSeenActivityIds = new Set(data.map(d => d.id));
+                } else {
+                    const newOnes = data.filter(d => !lastSeenActivityIds.has(d.id));
+                    newOnes.reverse().forEach(item => {
+                        showToast(`${item.action}: ${item.alumni_name || ''}`, 'info');
+                        lastSeenActivityIds.add(item.id);
+                    });
+                }
+                liveActivityRawData = data;
+                renderLiveActivity();
+            } catch (error) {
+                console.warn('Live activity poll failed:', error);
+            }
+        }
+
+        function startLiveActivityPolling() {
+            fetchLiveActivity();
+            stopLiveActivityPolling();
+            liveActivityTimer = setInterval(fetchLiveActivity, 8000);
+        }
+
+        function stopLiveActivityPolling() {
+            if (liveActivityTimer) { clearInterval(liveActivityTimer); liveActivityTimer = null; }
+        }
+
+        async function init() {
+            setStatusBadge('connecting');
+            try {
+                await loadFromSupabase();
+                try {
+                    await loadPendingFromSupabase();
+                } catch (pendingError) {
+                    console.warn('Pending list unavailable:', pendingError);
+                }
+                setStatusBadge('synced');
+                showToast('Connected to Supabase', 'success');
+            } catch (e) {
+                setStatusBadge('offline');
+                if (alumniData.length === 0) loadSampleData();
+            }
+
+            try { await loadRecycleBin(); } catch (e) { console.warn('Recycle bin unavailable:', e); }
+            try { await loadActivityLog(); } catch (e) { console.warn('Activity log unavailable:', e); }
+            try { await loadActivityRecycleBin(); } catch (e) { console.warn('Activity recycle bin unavailable:', e); }
+
+            addBtn.addEventListener('click', addRow);
+            downloadBtn.addEventListener('click', downloadCSV);
+            downloadPdfBtn.addEventListener('click', downloadPDF);
+            searchInput.addEventListener('input', function(e) { filterTable(this.value); });
+            clearSearchBtn.addEventListener('click', function() { searchInput.value = ''; filterTable(''); });
+            addPendingBtn.addEventListener('click', addPendingRow);
+            pendingSearchInput.addEventListener('input', function(e) { filterPendingTable(this.value); });
+            pendingClearSearchBtn.addEventListener('click', function() { pendingSearchInput.value = ''; filterPendingTable(''); });
+
+            toggleAlumniFiltersBtn.addEventListener('click', function() { alumniFilterPanel.classList.toggle('active'); });
+            [filterAlumniRep, filterAlumniDateAddedFrom, filterAlumniDateAddedTo, filterAlumniDateOnboardedFrom, filterAlumniDateOnboardedTo].forEach(function(el) {
+                el.addEventListener('change', function() { filterTable(searchInput.value); });
+            });
+            clearAlumniFiltersBtn.addEventListener('click', function() {
+                filterAlumniRep.value = '';
+                filterAlumniDateAddedFrom.value = '';
+                filterAlumniDateAddedTo.value = '';
+                filterAlumniDateOnboardedFrom.value = '';
+                filterAlumniDateOnboardedTo.value = '';
+                filterTable(searchInput.value);
+            });
+
+            togglePendingFiltersBtn.addEventListener('click', function() { pendingFilterPanel.classList.toggle('active'); });
+            [filterPendingRep, filterPendingDateAddedFrom, filterPendingDateAddedTo].forEach(function(el) {
+                el.addEventListener('change', function() { filterPendingTable(pendingSearchInput.value); });
+            });
+            clearPendingFiltersBtn.addEventListener('click', function() {
+                filterPendingRep.value = '';
+                filterPendingDateAddedFrom.value = '';
+                filterPendingDateAddedTo.value = '';
+                filterPendingTable(pendingSearchInput.value);
+            });
+
+            cancelDeleteBtn.addEventListener('click', function() { deleteModal.classList.remove('active'); deleteTargetIndex = null; });
+            confirmDeleteBtn.addEventListener('click', confirmDelete);
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) { deleteModal.classList.remove('active'); deleteTargetIndex = null; }
+            });
+            cancelOnboardBtn.addEventListener('click', function() { onboardModal.classList.remove('active'); onboardTargetIndex = null; onboardBulkIds = null; });
+            confirmOnboardBtn.addEventListener('click', confirmOnboard);
+            onboardModal.addEventListener('click', function(e) {
+                if (e.target === onboardModal) { onboardModal.classList.remove('active'); onboardTargetIndex = null; onboardBulkIds = null; }
+            });
+            cancelReturnBtn.addEventListener('click', function() { returnModal.classList.remove('active'); returnTargetIndex = null; returnBulkIds = null; });
+            confirmReturnBtn.addEventListener('click', confirmReturn);
+            returnModal.addEventListener('click', function(e) {
+                if (e.target === returnModal) { returnModal.classList.remove('active'); returnTargetIndex = null; returnBulkIds = null; }
+            });
+            cancelNotesBtn.addEventListener('click', function() { notesModal.classList.remove('active'); noteTargetIndex = null; });
+            saveNotesBtn.addEventListener('click', saveNotes);
+            notesModal.addEventListener('click', function(e) {
+                if (e.target === notesModal) { notesModal.classList.remove('active'); noteTargetIndex = null; }
+            });
+            closeTimelineBtn.addEventListener('click', function() { timelineModal.classList.remove('active'); });
+            timelineModal.addEventListener('click', function(e) {
+                if (e.target === timelineModal) timelineModal.classList.remove('active');
+            });
+            cancelPermDeleteBtn.addEventListener('click', function() { permDeleteModal.classList.remove('active'); permDeleteTargetId = null; permDeleteTargetType = null; permDeleteBulkIds = null; });
+            confirmPermDeleteBtn.addEventListener('click', confirmPermDelete);
+            permDeleteModal.addEventListener('click', function(e) {
+                if (e.target === permDeleteModal) { permDeleteModal.classList.remove('active'); permDeleteTargetId = null; permDeleteTargetType = null; permDeleteBulkIds = null; }
+            });
+            permDeleteCodeInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') confirmPermDelete();
+                if (e.key === 'Escape') { permDeleteModal.classList.remove('active'); permDeleteTargetId = null; permDeleteTargetType = null; permDeleteBulkIds = null; }
+            });
+            cancelRestoreBtn.addEventListener('click', function() { restoreModal.classList.remove('active'); restoreTargetId = null; restoreTargetType = null; restoreBulkIds = null; });
+            confirmRestoreBtn.addEventListener('click', confirmRestore);
+            restoreModal.addEventListener('click', function(e) {
+                if (e.target === restoreModal) { restoreModal.classList.remove('active'); restoreTargetId = null; restoreTargetType = null; restoreBulkIds = null; }
+            });
+            activitySearchInput.addEventListener('input', renderActivityTable);
+            filterActivityRep.addEventListener('change', renderActivityTable);
+            filterActivityDate.addEventListener('change', renderActivityTable);
+            document.getElementById('clearActivityFiltersBtn').addEventListener('click', function() {
+                activitySearchInput.value = '';
+                filterActivityRep.value = '';
+                filterActivityDate.value = '';
+                renderActivityTable();
+            });
+            document.querySelectorAll('#activityPeriodToggle button').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    activityPeriod = this.dataset.period;
+                    document.querySelectorAll('#activityPeriodToggle button').forEach(b => b.classList.toggle('active', b === this));
+                    renderActivityTable();
+                });
+            });
+            document.querySelectorAll('#adminActivityPeriodToggle button').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    adminActivityPeriod = this.dataset.period;
+                    document.querySelectorAll('#adminActivityPeriodToggle button').forEach(b => b.classList.toggle('active', b === this));
+                    renderLiveActivity();
+                });
+            });
+            document.getElementById('recycleSelectAll').addEventListener('change', function() {
+                if (this.checked) {
+                    recycleBinData.forEach(item => selectedRecycleIds.add(item.id));
+                } else {
+                    selectedRecycleIds.clear();
+                }
+                renderRecycleTable();
+            });
+            document.getElementById('bulkRestoreBtn').addEventListener('click', bulkRestoreSelected);
+            document.getElementById('bulkPermDeleteBtn').addEventListener('click', bulkPermDeleteSelected);
+
+            document.getElementById('alumniSelectAll').addEventListener('change', function() {
+                if (this.checked) { alumniData.forEach(item => selectedAlumniIds.add(item.id)); } else { selectedAlumniIds.clear(); }
+                renderTable(alumniData);
+            });
+            document.getElementById('alumniBulkExportBtn').addEventListener('click', bulkExportAlumni);
+            document.getElementById('alumniBulkReturnBtn').addEventListener('click', bulkReturnAlumniToPending);
+            document.getElementById('alumniBulkDeleteBtn').addEventListener('click', bulkDeleteAlumni);
+
+            document.getElementById('pendingSelectAll').addEventListener('change', function() {
+                if (this.checked) { pendingData.forEach(item => selectedPendingIds.add(item.id)); } else { selectedPendingIds.clear(); }
+                renderPendingTable(pendingData);
+            });
+            document.getElementById('pendingBulkExportBtn').addEventListener('click', bulkExportPending);
+            document.getElementById('pendingBulkOnboardBtn').addEventListener('click', bulkMovePendingToOnboarded);
+            document.getElementById('pendingBulkDeleteBtn').addEventListener('click', bulkDeletePending);
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) { e.preventDefault(); addRow(); }
+            });
+            console.log('✅ AMSUL Alumni Database ready. Deletion code: AAN2026');
+
+            // ---------- NAV MENU + TAB SWITCHER ----------
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const navMenu = document.getElementById('navMenu');
+            const navOverlay = document.getElementById('navOverlay');
+            const closeNavBtn = document.getElementById('closeNavBtn');
+            const navItems = document.querySelectorAll('.nav-menu-item');
+            const tabButtons = document.querySelectorAll('#tabSwitcher button');
+            const pageSections = document.querySelectorAll('.page-section');
+
+            function openNav() { navMenu.classList.add('active'); navOverlay.classList.add('active'); }
+            function closeNav() { navMenu.classList.remove('active'); navOverlay.classList.remove('active'); }
+            hamburgerBtn.addEventListener('click', openNav);
+            closeNavBtn.addEventListener('click', closeNav);
+            navOverlay.addEventListener('click', closeNav);
+
+            function switchPage(targetId) {
+                pageSections.forEach(function(section) {
+                    section.classList.toggle('active', section.id === targetId);
+                });
+                navItems.forEach(function(item) { item.classList.toggle('active', item.dataset.target === targetId); });
+                tabButtons.forEach(function(btn) { btn.classList.toggle('active', btn.dataset.target === targetId); });
+                closeNav();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (targetId === 'recycleSection') loadRecycleBin();
+                if (targetId === 'activitySection') loadActivityLog();
+                if (targetId === 'adminSection') { showAdminPage(); } else { stopLiveActivityPolling(); stopAdminAutoRefresh(); }
+            }
+
+            window.switchPage = switchPage;
+
+            // ---------- ADMIN QUICK ACTIONS ----------
+            const qaExportCsv = document.getElementById('qaExportCsv');
+            const qaImportCsv = document.getElementById('qaImportCsv');
+            const qaImportCsvInput = document.getElementById('qaImportCsvInput');
+            const qaRecycleBin = document.getElementById('qaRecycleBin');
+            const qaActivityLog = document.getElementById('qaActivityLog');
+            const qaRefresh = document.getElementById('qaRefresh');
+            if (qaExportCsv) qaExportCsv.addEventListener('click', downloadCSV);
+            if (qaImportCsv) qaImportCsv.addEventListener('click', () => qaImportCsvInput.click());
+            if (qaImportCsvInput) qaImportCsvInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) importAlumniCSV(file);
+                this.value = '';
+            });
+            if (qaRecycleBin) qaRecycleBin.addEventListener('click', () => switchPage('recycleSection'));
+            if (qaActivityLog) qaActivityLog.addEventListener('click', () => switchPage('activitySection'));
+            if (qaRefresh) qaRefresh.addEventListener('click', function() {
+                this.disabled = true;
+                const icon = this.querySelector('i');
+                if (icon) icon.classList.add('fa-spin');
+                refreshAdminData().finally(() => {
+                    this.disabled = false;
+                    if (icon) icon.classList.remove('fa-spin');
+                    showToast('Data refreshed', 'success');
+                });
+            });
+
+            // ---------- ACTIVITY LOG DELETE / RECYCLE BIN (admin-only) ----------
+            const activityBulkDeleteBtn = document.getElementById('activityBulkDeleteBtn');
+            const activitySelectAllCb = document.getElementById('activitySelectAll');
+            const openActivityRecycleBtn = document.getElementById('openActivityRecycleBtn');
+            const closeActivityRecycleBtn = document.getElementById('closeActivityRecycleBtn');
+            const activityRecycleModal = document.getElementById('activityRecycleModal');
+            if (activityBulkDeleteBtn) activityBulkDeleteBtn.addEventListener('click', function() {
+                const count = selectedActivityIds.size;
+                if (count === 0) return;
+                if (!confirm(`Remove ${count} log entr${count === 1 ? 'y' : 'ies'}? You can restore them from the Activity Recycle Bin.`)) return;
+                deleteSelectedActivity();
+            });
+            if (activitySelectAllCb) activitySelectAllCb.addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('#liveActivityTableBody .activity-row-checkbox');
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                    if (this.checked) selectedActivityIds.add(cb.dataset.id); else selectedActivityIds.delete(cb.dataset.id);
+                });
+                updateActivityBulkBar();
+            });
+            if (openActivityRecycleBtn) openActivityRecycleBtn.addEventListener('click', function() {
+                loadActivityRecycleBin();
+                activityRecycleModal.classList.add('active');
+            });
+            if (closeActivityRecycleBtn) closeActivityRecycleBtn.addEventListener('click', function() {
+                activityRecycleModal.classList.remove('active');
+            });
+            if (activityRecycleModal) activityRecycleModal.addEventListener('click', function(e) {
+                if (e.target === activityRecycleModal) activityRecycleModal.classList.remove('active');
+            });
+            const activityRecycleSelectAll = document.getElementById('activityRecycleSelectAll');
+            if (activityRecycleSelectAll) activityRecycleSelectAll.addEventListener('change', function() {
+                if (this.checked) {
+                    activityRecycleData.forEach(item => selectedActivityRecycleIds.add(String(item.id)));
+                } else {
+                    selectedActivityRecycleIds.clear();
+                }
+                renderActivityRecycleTable();
+            });
+            const activityRecycleRestoreBtn = document.getElementById('activityRecycleRestoreBtn');
+            if (activityRecycleRestoreBtn) activityRecycleRestoreBtn.addEventListener('click', bulkRestoreActivityRecycle);
+            const activityRecyclePermDeleteBtn = document.getElementById('activityRecyclePermDeleteBtn');
+            if (activityRecyclePermDeleteBtn) activityRecyclePermDeleteBtn.addEventListener('click', bulkPurgeActivityRecycle);
+
+            navItems.forEach(function(navItem) {
+                navItem.addEventListener('click', function() { switchPage(this.dataset.target); });
+            });
+            tabButtons.forEach(function(tabBtn) {
+                tabBtn.addEventListener('click', function() { switchPage(this.dataset.target); });
+            });
+
+            // ---------- KEYBOARD SHORTCUTS ----------
+            document.addEventListener('keydown', function(e) {
+                // Ctrl/Cmd + K: Focus search on current section
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    const activeSection = document.querySelector('.page-section.active');
+                    if (activeSection && activeSection.id === 'alumniSection') {
+                        searchInput.focus();
+                    } else if (activeSection && activeSection.id === 'pendingSection') {
+                        pendingSearchInput.focus();
+                    }
+                }
+                // Ctrl/Cmd + N: Add new alumni
+                if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                    e.preventDefault();
+                    const activeSection = document.querySelector('.page-section.active');
+                    if (activeSection && activeSection.id === 'alumniSection') {
+                        addRow();
+                    } else if (activeSection && activeSection.id === 'pendingSection') {
+                        addPendingRow();
+                    }
+                }
+                // Ctrl/Cmd + S: Sync data
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    syncToSupabase();
+                }
+            });
+        }
+
+        checkAdminUnlock();
+
+        const adminPasswordInput = document.getElementById('adminPasswordInput');
+        const adminUnlockBtn = document.getElementById('adminUnlockBtn');
+        const adminPasswordError = document.getElementById('adminPasswordError');
+        function attemptAdminUnlock() {
+            if (adminPasswordInput.value === ADMIN_PASSWORD) {
+                adminUnlocked = true;
+                sessionStorage.setItem('amsul_admin_unlocked', 'true');
+                adminPasswordError.style.display = 'none';
+                adminPasswordInput.value = '';
+                showAdminPage();
+            } else {
+                adminPasswordError.style.display = 'block';
+            }
+        }
+        adminUnlockBtn.addEventListener('click', attemptAdminUnlock);
+        adminPasswordInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') attemptAdminUnlock(); });
+
+        // ---------- LONG-PRESS TOOLTIPS (mobile) ----------
+        // Long-pressing an icon button shows its label; long-pressing an
+        // alumnus's name field shows the full name. Desktop mouse-hold works too.
+        (function setupLongPressTooltips() {
+            const HOLD_MS = 450;
+            let timer = null;
+            let hintEl = null;
+            let activeTarget = null;
+
+            function getHintText(target) {
+                if (target.tagName === 'INPUT' && target.placeholder === 'Full name') {
+                    return (target.value || '').trim();
+                }
+                return (target.getAttribute('title') || '').trim();
+            }
+
+            function ensureHintEl() {
+                if (!hintEl) {
+                    hintEl = document.createElement('div');
+                    hintEl.className = 'long-press-hint';
+                    document.body.appendChild(hintEl);
+                }
+                return hintEl;
+            }
+
+            function showHint(target, x, y) {
+                const text = getHintText(target);
+                if (!text) return;
+                const el = ensureHintEl();
+                el.textContent = text;
+                el.style.left = x + 'px';
+                el.style.top = Math.max(10, y - 44) + 'px';
+                requestAnimationFrame(() => el.classList.add('show'));
+                if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+                clearTimeout(showHint._hideTimer);
+                showHint._hideTimer = setTimeout(hideHint, 1800);
+            }
+
+            function hideHint() {
+                if (hintEl) hintEl.classList.remove('show');
+            }
+
+            function findTarget(el) {
+                return el.closest('.delete-btn, .btn, input[placeholder="Full name"]');
+            }
+
+            function start(x, y, rawTarget) {
+                const target = findTarget(rawTarget);
+                if (!target) return;
+                activeTarget = target;
+                clearTimeout(timer);
+                timer = setTimeout(() => { showHint(target, x, y); }, HOLD_MS);
+            }
+
+            function cancel() {
+                clearTimeout(timer);
+                activeTarget = null;
+            }
+
+            document.addEventListener('touchstart', function(e) {
+                const t = e.touches[0];
+                start(t.clientX, t.clientY, e.target);
+            }, { passive: true });
+            document.addEventListener('touchend', function() { cancel(); hideHint(); }, { passive: true });
+            document.addEventListener('touchmove', cancel, { passive: true });
+            document.addEventListener('touchcancel', function() { cancel(); hideHint(); }, { passive: true });
+
+            // Desktop: mouse-hold does the same thing
+            document.addEventListener('mousedown', function(e) { start(e.clientX, e.clientY, e.target); });
+            document.addEventListener('mouseup', function() { cancel(); hideHint(); });
+            document.addEventListener('mouseleave', function() { cancel(); hideHint(); }, true);
+        })();
+
+        init();
+    })();
+</script>
+</body>
+</html>
