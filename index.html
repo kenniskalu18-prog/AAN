@@ -222,11 +222,114 @@
         .toast.success { background:#1a6e3a; }
         .toast.error { background:#a1302a; }
         @media (max-width:700px) { .header { flex-direction:column; align-items:start; gap:0.8rem; } .container { padding:1rem; } th,td { font-size:0.75rem; padding:0.4rem 0.4rem; } .search-box input { width:100%; } }
+
+        /* ---------- AUTH GATE ---------- */
+        .auth-gate { position:fixed; inset:0; background:linear-gradient(135deg,#0a2a44,#123a5c); z-index:5000; display:flex; align-items:center; justify-content:center; padding:1rem; }
+        .auth-gate.hidden { display:none; }
+        .auth-box { background:white; border-radius:14px; padding:2rem 1.8rem; max-width:380px; width:100%; box-shadow:0 20px 50px rgba(0,0,0,0.3); }
+        .auth-box h2 { font-size:1.25rem; color:#0a2a44; margin-bottom:0.3rem; display:flex; align-items:center; gap:0.5rem; }
+        .auth-box .auth-sub { font-size:0.8rem; color:#5b6f86; margin-bottom:1.2rem; }
+        .auth-tabs { display:flex; gap:0.3rem; background:#eef2f6; border-radius:10px; padding:0.3rem; margin-bottom:1.2rem; flex-wrap:wrap; }
+        .auth-tabs button { flex:1; min-width:88px; border:none; background:none; padding:0.55rem 0.3rem; border-radius:8px; font-size:0.76rem; font-weight:600; color:#5b6f86; cursor:pointer; font-family:inherit; }
+        .auth-tabs button.active { background:#0a2a44; color:white; }
+        .auth-form { display:none; flex-direction:column; gap:0.7rem; }
+        .auth-form.active { display:flex; }
+        .auth-form label { font-size:0.75rem; font-weight:600; color:#5b6f86; text-transform:uppercase; letter-spacing:0.3px; margin-bottom:-0.35rem; }
+        .auth-form input { padding:0.6rem 0.8rem; border:1px solid #cbd5e0; border-radius:8px; font-family:inherit; font-size:0.9rem; }
+        .auth-form input:focus { outline:2px solid #2a7a4d; border-color:transparent; }
+        .auth-msg { font-size:0.8rem; padding:0.6rem 0.8rem; border-radius:8px; display:none; }
+        .auth-msg.error { display:block; background:#fee2e2; color:#b91c1c; }
+        .auth-msg.success { display:block; background:#e8f5e9; color:#1a6e3a; }
+        .auth-msg.info { display:block; background:#e8f0fe; color:#1a5f7a; }
+        .user-badge { display:flex; align-items:center; gap:0.5rem; background:#f0f4f8; border:1px solid #e2e8f0; border-radius:30px; padding:0.3rem 0.5rem 0.3rem 0.9rem; font-size:0.78rem; font-weight:600; color:#0a2a44; }
+        .user-badge .role-pill { background:#0a2a44; color:white; font-size:0.62rem; text-transform:uppercase; padding:0.15rem 0.5rem; border-radius:20px; font-weight:700; letter-spacing:0.3px; }
+        .user-badge button { background:none; border:none; color:#b91c1c; cursor:pointer; font-size:0.85rem; padding:0.3rem 0.4rem; border-radius:50%; }
+        .user-badge button:hover { background:#fee2e2; }
+        .admin-subnav { display:flex; gap:0.4rem; background:#eef2f6; border-radius:10px; padding:0.3rem; margin-bottom:1.2rem; flex-wrap:wrap; }
+        .admin-subnav button { border:none; background:none; padding:0.55rem 0.7rem; border-radius:8px; font-size:0.8rem; font-weight:600; color:#5b6f86; cursor:pointer; font-family:inherit; }
+        .admin-subnav button.active { background:#0a2a44; color:white; }
+        .admin-subpage { display:none; }
+        .admin-subpage.active { display:block; }
+        .pill-badge { font-size:0.68rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:20px; text-transform:uppercase; letter-spacing:0.3px; }
+        .pill-badge.rep { background:#e8f0fe; color:#1a5f7a; }
+        .pill-badge.admin { background:#fdf3e0; color:#8a5a06; }
+        .notif-bell { position:relative; background:white; border:1px solid #cbd5e0; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#0a2a44; font-size:1rem; padding:0; }
+        .notif-bell:hover { background:#f0f4f8; }
+        .notif-bell.has-alert { animation:notifPulse 1.6s ease infinite; }
+        @keyframes notifPulse { 0%,100% { box-shadow:0 0 0 0 rgba(185,28,28,0.35); } 50% { box-shadow:0 0 0 6px rgba(185,28,28,0); } }
+        .notif-dot { position:absolute; top:3px; right:3px; width:10px; height:10px; border-radius:50%; background:#2a7a4d; border:2px solid white; }
+        .notif-count { position:absolute; top:-5px; right:-5px; background:#b91c1c; color:white; font-size:0.62rem; font-weight:700; min-width:17px; height:17px; border-radius:10px; display:flex; align-items:center; justify-content:center; padding:0 3px; border:2px solid white; }
+        .notif-panel { position:fixed; top:0; right:-320px; width:300px; max-width:88vw; height:100%; background:white; z-index:1450; box-shadow:-4px 0 20px rgba(0,0,0,0.15); transition:right 0.25s ease; padding:1rem; display:flex; flex-direction:column; }
+        .notif-panel.active { right:0; }
+        .notif-panel-header { display:flex; justify-content:space-between; align-items:center; font-weight:700; color:#0a2a44; padding-bottom:0.8rem; margin-bottom:0.4rem; border-bottom:1px solid #eef2f6; }
+        .notif-panel-header button { background:none; border:none; font-size:1rem; color:#5b6f86; cursor:pointer; }
+        .notif-panel-list { overflow-y:auto; flex:1; }
+        .notif-item { display:flex; gap:0.6rem; align-items:flex-start; padding:0.7rem 0.4rem; border-radius:8px; cursor:pointer; border-bottom:1px solid #f4f6f9; }
+        .notif-item:hover { background:#f0f7ff; }
+        .notif-item .notif-icon { width:32px; height:32px; border-radius:50%; background:#e8f0fe; color:#1a5f7a; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.8rem; }
+        .notif-item .notif-icon.pw { background:#fdf3e0; color:#8a5a06; }
+        .notif-item .notif-text { font-size:0.83rem; color:#1e2a3a; line-height:1.3; }
+        .notif-item .notif-time { font-size:0.7rem; color:#8a9bb0; margin-top:0.15rem; }
+        .notif-empty { text-align:center; color:#8a9bb0; padding:2.5rem 1rem; font-size:0.85rem; }
     </style>
 </head>
 <body>
+<div class="auth-gate" id="authGate">
+    <div class="auth-box">
+        <h2><i class="fas fa-user-shield"></i> AMSUL Access</h2>
+        <p class="auth-sub">Representative sign-in required to view or edit this site.</p>
+        <div class="auth-tabs">
+            <button class="active" id="authTabSignIn">Sign In</button>
+            <button id="authTabSignUp">Create Account</button>
+            <button id="authTabForgot">Forgot Password</button>
+        </div>
+        <div class="auth-msg" id="authMsg"></div>
+        <form class="auth-form active" id="signInForm">
+            <label>Username</label>
+            <input type="text" id="siUsername" autocomplete="username" required>
+            <label>Password</label>
+            <input type="password" id="siPassword" autocomplete="current-password" required>
+            <button type="submit" class="btn btn-primary" id="siSubmitBtn" style="justify-content:center; margin-top:0.4rem;"><i class="fas fa-right-to-bracket"></i> Sign In</button>
+        </form>
+        <form class="auth-form" id="signUpForm">
+            <label>Full Name</label>
+            <input type="text" id="suFullName" autocomplete="name" required>
+            <label>Choose a Username</label>
+            <input type="text" id="suUsername" autocomplete="username" required>
+            <label>Choose a Password</label>
+            <input type="password" id="suPassword" autocomplete="new-password" required>
+            <label>Confirm Password</label>
+            <input type="password" id="suPassword2" autocomplete="new-password" required>
+            <button type="submit" class="btn btn-primary" id="suSubmitBtn" style="justify-content:center; margin-top:0.4rem;"><i class="fas fa-user-plus"></i> Create Account</button>
+            <p style="font-size:0.72rem; color:#8a9bb0; text-align:center; margin-top:0.2rem;">An admin must approve your account before you can sign in.</p>
+        </form>
+        <div class="auth-form" id="forgotForm">
+            <p style="font-size:0.8rem; color:#4a5a6a; margin:-0.2rem 0 0.3rem;">Step 1: request a reset. An admin will review it.</p>
+            <label>Username</label>
+            <input type="text" id="fpUsername" autocomplete="username">
+            <button type="button" class="btn btn-outline" id="fpRequestBtn" style="justify-content:center;"><i class="fas fa-paper-plane"></i> Request Reset</button>
+
+            <p style="font-size:0.8rem; color:#4a5a6a; margin:0.9rem 0 0.3rem; border-top:1px solid #eef2f6; padding-top:0.9rem;">Step 2: once an admin approves your request, set your new password here.</p>
+            <label>Username</label>
+            <input type="text" id="fpUsername2" autocomplete="username">
+            <label>New Password</label>
+            <input type="password" id="fpNewPassword" autocomplete="new-password">
+            <label>Confirm New Password</label>
+            <input type="password" id="fpNewPassword2" autocomplete="new-password">
+            <button type="button" class="btn btn-primary" id="fpSetBtn" style="justify-content:center;"><i class="fas fa-check"></i> Set New Password</button>
+        </div>
+    </div>
+</div>
 <button class="hamburger-btn" id="hamburgerBtn" aria-label="Open menu"><i class="fas fa-bars"></i></button>
 <div class="nav-overlay" id="navOverlay"></div>
+<div class="nav-overlay" id="notifOverlay"></div>
+<div class="notif-panel" id="notifPanel">
+    <div class="notif-panel-header">
+        <span><i class="fas fa-bell"></i> Notifications</span>
+        <button id="closeNotifBtn" aria-label="Close notifications"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="notif-panel-list" id="notifPanelList"></div>
+</div>
 <div class="nav-menu" id="navMenu">
     <div class="nav-menu-header">
         <span>Menu</span>
@@ -236,6 +339,7 @@
     <button class="nav-menu-item" data-target="pendingSection"><i class="fas fa-hourglass-half"></i> Pending Onboarding</button>
     <button class="nav-menu-item" data-target="recycleSection"><i class="fas fa-trash-restore"></i> Recycle Bin</button>
     <button class="nav-menu-item" data-target="activitySection"><i class="fas fa-history"></i> Activity Log</button>
+    <button class="nav-menu-item" id="notifNavBtn" style="display:none; justify-content:space-between;"><span><i class="fas fa-bell"></i> Notifications</span> <span class="notif-count" id="notifNavCount" style="display:none; position:static; border:none;">0</span></button>
     <button class="nav-menu-item" id="adminNavBtn" data-target="adminSection"><i class="fas fa-lock"></i> Admin</button>
 </div>
 
@@ -246,6 +350,18 @@
             <button class="btn btn-success" id="downloadCsv"><i class="fas fa-file-download"></i> Download CSV</button>
             <button class="btn btn-primary" id="downloadPdf"><i class="fas fa-file-pdf"></i> Download PDF</button>
             <span class="status-badge" id="connectionStatus"><i class="fas fa-circle" style="color:#b91c1c; font-size:0.6rem;"></i> Offline</span>
+            <button class="notif-bell" id="notifBellBtn" style="display:none;" title="Pending admin items">
+                <i class="fas fa-bell"></i>
+                <span class="notif-dot" id="notifDot" style="display:none;"></span>
+                <span class="notif-count" id="notifCount" style="display:none;">0</span>
+            </button>
+            <span class="user-badge" id="userBadge" style="display:none;">
+                <i class="fas fa-user-circle"></i>
+                <span id="userBadgeName">—</span>
+                <span class="role-pill" id="userBadgeRole" style="display:none;">Admin</span>
+                <button id="changePasswordBtn" title="Change password" style="color:#0a2a44;"><i class="fas fa-key"></i></button>
+                <button id="logoutBtn" title="Log out"><i class="fas fa-right-from-bracket"></i></button>
+            </span>
         </div>
     </div>
 
@@ -433,7 +549,7 @@
         </div>
         <div class="table-wrapper">
             <table id="activityTable">
-                <thead><tr><th>Time</th><th>Alumni Name</th><th>Action</th><th>Being Onboarded By</th></tr></thead>
+                <thead><tr><th>Time</th><th>Alumni Name</th><th>Action</th><th>Being Onboarded By</th><th>Performed By</th></tr></thead>
                 <tbody id="activityTableBody"></tbody>
             </table>
         </div>
@@ -457,6 +573,16 @@
                 <h2><i class="fas fa-user-shield"></i> Admin Dashboard</h2>
                 <p class="section-sub">Overview, representative summary, and live activity.</p>
             </div>
+
+            <div class="admin-subnav" id="adminSubnav">
+                <button class="active" data-subpage="adminOverviewPage"><i class="fas fa-chart-line"></i> Overview</button>
+                <button data-subpage="adminRequestsPage"><i class="fas fa-user-clock"></i> Account Requests <span id="pendingReqCount" style="display:none;"></span></button>
+                <button data-subpage="adminRepsPage"><i class="fas fa-users-cog"></i> Representatives</button>
+                <button data-subpage="adminPwReqPage"><i class="fas fa-key"></i> Password Requests <span id="pendingPwReqCount" style="display:none;"></span></button>
+                <button data-subpage="adminLoginLogPage"><i class="fas fa-clipboard-list"></i> Login Log</button>
+            </div>
+
+            <div class="admin-subpage active" id="adminOverviewPage">
 
             <div class="admin-quick-actions">
                 <button class="btn btn-outline" id="qaExportCsv"><i class="fas fa-file-export"></i> Export CSV</button>
@@ -502,10 +628,155 @@
             </div>
             <div class="table-wrapper" style="max-height:280px;">
                 <table id="liveActivityTable">
-                    <thead><tr><th style="width:30px;"><input type="checkbox" id="activitySelectAll"></th><th>Time</th><th>Alumni Name</th><th>Action</th><th>Being Onboarded By</th></tr></thead>
+                    <thead><tr><th style="width:30px;"><input type="checkbox" id="activitySelectAll"></th><th>Time</th><th>Alumni Name</th><th>Action</th><th>Being Onboarded By</th><th>Performed By</th></tr></thead>
                     <tbody id="liveActivityTableBody"></tbody>
                 </table>
             </div>
+            </div>
+            <!-- /adminOverviewPage -->
+
+            <div class="admin-subpage" id="adminRequestsPage">
+                <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+                    <h2 style="font-size:0.95rem;"><i class="fas fa-user-clock"></i> Account Requests</h2>
+                    <p class="section-sub">New sign-ups wait here until you approve or deny them. Denied or unapproved accounts cannot sign in.</p>
+                </div>
+                <div class="table-wrapper">
+                    <table id="reqTable">
+                        <thead><tr><th>Full Name</th><th>Username</th><th>Requested</th><th style="width:170px;">Action</th></tr></thead>
+                        <tbody id="reqTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="footer"><span><span class="count" id="reqRowCount">0</span> pending request(s)</span></div>
+            </div>
+
+            <div class="admin-subpage" id="adminRepsPage">
+                <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+                    <h2 style="font-size:0.95rem;"><i class="fas fa-users-cog"></i> Representatives</h2>
+                    <p class="section-sub">Everyone with an approved account. Deleting an account moves it to the recycle bin below.</p>
+                </div>
+                <div class="table-wrapper">
+                    <table id="repsTable">
+                        <thead><tr><th>Full Name</th><th>Username</th><th>Role</th><th>Last Login</th><th style="width:90px;">Action</th></tr></thead>
+                        <tbody id="repsTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="footer"><span><span class="count" id="repsRowCount">0</span> active representative(s)</span></div>
+
+                <div style="display:flex; justify-content:flex-end; margin:1rem 0 0.5rem;">
+                    <button class="btn btn-outline" id="openRepRecycleBtn"><i class="fas fa-trash-restore"></i> Account Recycle Bin (<span id="repRecycleCount">0</span>)</button>
+                </div>
+                <div id="repRecyclePanel" style="display:none;">
+                    <div class="bulk-action-bar" id="repRecycleBulkBar">
+                        <span id="repRecycleBulkCount">0 selected</span>
+                        <button class="btn btn-outline" id="repBulkRestoreBtn" style="font-size:0.75rem;"><i class="fas fa-trash-restore"></i> Restore Selected</button>
+                        <button class="btn btn-danger" id="repBulkPermDeleteBtn" style="font-size:0.75rem;"><i class="fas fa-trash-alt"></i> Delete Permanently</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="repRecycleTable">
+                            <thead><tr><th style="width:30px;"><input type="checkbox" id="repRecycleSelectAll"></th><th>Full Name</th><th>Username</th><th>Deleted</th><th style="width:110px;">Action</th></tr></thead>
+                            <tbody id="repRecycleTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-subpage" id="adminPwReqPage">
+                <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+                    <h2 style="font-size:0.95rem;"><i class="fas fa-key"></i> Password Reset Requests</h2>
+                    <p class="section-sub">Someone forgot their password and requested a reset. Approve it, then they can set their own new password from the "Forgot Password" tab — you never see or choose it for them.</p>
+                </div>
+                <div class="table-wrapper">
+                    <table id="pwReqTable">
+                        <thead><tr><th>Full Name</th><th>Username</th><th>Requested</th><th style="width:170px;">Action</th></tr></thead>
+                        <tbody id="pwReqTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="footer"><span><span class="count" id="pwReqRowCount">0</span> pending request(s)</span></div>
+            </div>
+
+            <div class="admin-subpage" id="adminLoginLogPage">
+                <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+                    <h2 style="font-size:0.95rem;"><i class="fas fa-clipboard-list"></i> Login Log</h2>
+                    <p class="section-sub">A record of who signed in and when.</p>
+                </div>
+                <div class="table-wrapper">
+                    <table id="loginLogTable">
+                        <thead><tr><th>Time</th><th>Full Name</th><th>Username</th></tr></thead>
+                        <tbody id="loginLogTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="footer"><span><span class="count" id="loginLogRowCount">0</span> login(s)</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CONFIRM SOFT-DELETE ACCOUNT MODAL -->
+<div class="modal-overlay" id="repDeleteModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Delete Account?</h3>
+        <div class="confirm-summary">
+            <div class="confirm-summary-name" id="repDeleteNamePreview"></div>
+            <div class="confirm-summary-row"><span class="label">Username</span><span id="repDeleteUsernamePreview">—</span></div>
+        </div>
+        <p>This moves the account to the recycle bin. They will not be able to sign in while deleted.</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelRepDeleteBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmRepDeleteBtn"><i class="fas fa-trash-alt"></i> Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- CONFIRM PERMANENT DELETE ACCOUNT MODAL -->
+<div class="modal-overlay" id="repPermDeleteModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-triangle-exclamation" style="color:#b91c1c;"></i> Permanently Delete Account</h3>
+        <p id="repPermDeleteWarning">This cannot be undone. Enter the confirmation code to continue.</p>
+        <input type="text" id="repPermDeleteCodeInput" placeholder="Enter code..." autocomplete="off">
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelRepPermDeleteBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmRepPermDeleteBtn"><i class="fas fa-trash-alt"></i> Delete Permanently</button>
+        </div>
+    </div>
+</div>
+
+<!-- CHANGE MY OWN PASSWORD MODAL -->
+<!-- CONFIRM LOGOUT MODAL -->
+<div class="modal-overlay" id="logoutConfirmModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-right-from-bracket" style="color:#b91c1c;"></i> Log Out?</h3>
+        <p>You'll need to sign in again to get back in.</p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelLogoutBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmLogoutBtn"><i class="fas fa-right-from-bracket"></i> Log Out</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="changePasswordModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-lock" style="color:#0a2a44;"></i> Change Password</h3>
+        <input type="password" id="cpOldPassword" placeholder="Current password" autocomplete="current-password" style="letter-spacing:normal; margin-bottom:0.7rem;">
+        <input type="password" id="cpNewPassword" placeholder="New password (min 6 characters)" autocomplete="new-password" style="letter-spacing:normal; margin-bottom:0.7rem;">
+        <input type="password" id="cpNewPassword2" placeholder="Confirm new password" autocomplete="new-password" style="letter-spacing:normal;">
+        <p id="cpError" style="color:#b91c1c; font-size:0.8rem; display:none; margin-top:0.6rem;"></p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelCpBtn">Cancel</button>
+            <button class="btn btn-primary" id="confirmCpBtn"><i class="fas fa-check"></i> Update Password</button>
+        </div>
+    </div>
+</div>
+
+<!-- SELF DISMISS FROM ADMIN MODAL -->
+<div class="modal-overlay" id="selfDismissAdminModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-user-minus" style="color:#0a2a44;"></i> Dismiss Yourself as Admin?</h3>
+        <p>Enter your password to confirm. You'll lose admin access immediately.</p>
+        <input type="password" id="selfDismissPasswordInput" placeholder="Your password" autocomplete="current-password" style="letter-spacing:normal;">
+        <p id="selfDismissError" style="color:#b91c1c; font-size:0.8rem; display:none; margin-top:0.6rem;"></p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelSelfDismissBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmSelfDismissBtn"><i class="fas fa-user-minus"></i> Dismiss Me</button>
         </div>
     </div>
 </div>
@@ -665,6 +936,7 @@
         const DELETE_CODE = 'AAN2026';
 
         // ---------- STATE ----------
+        let currentUser = null; // { id, username, full_name, role }
         let alumniData = [];
         let filteredData = [];
         let pendingData = [];
@@ -1397,7 +1669,7 @@
             const newItem = {
                 id: `temp_${Date.now()}`,
                 name: '',
-                onboarded_by: '',
+                onboarded_by: (currentUser && currentUser.full_name) || '',
                 notes: ''
             };
             alumniData.push(newItem);
@@ -1425,7 +1697,7 @@
             const newItem = {
                 id: `temp_${Date.now()}`,
                 name: '',
-                being_onboarded_by: '',
+                being_onboarded_by: (currentUser && currentUser.full_name) || '',
                 notes: ''
             };
             pendingData.push(newItem);
@@ -1869,7 +2141,8 @@
                 body: JSON.stringify({
                     alumni_name: name || '',
                     action: action || '',
-                    being_onboarded_by: rep || ''
+                    being_onboarded_by: rep || '',
+                    performed_by: (currentUser && currentUser.full_name) || ''
                 })
             }).catch(err => console.warn('Activity log failed:', err));
         }
@@ -1912,7 +2185,7 @@
         function renderActivityRows(tbody, rows, countEl, withCheckboxes) {
             let html = '';
             let lastDay = null;
-            const colspan = withCheckboxes ? 5 : 4;
+            const colspan = withCheckboxes ? 6 : 5;
             rows.forEach(item => {
                 const d = new Date(item.created_at);
                 const dayKey = d.toDateString();
@@ -1923,7 +2196,7 @@
                 const checkboxCell = withCheckboxes
                     ? `<td style="text-align:center;"><input type="checkbox" class="activity-row-checkbox" data-id="${item.id}" ${selectedActivityIds.has(item.id) ? 'checked' : ''}></td>`
                     : '';
-                html += `<tr>${checkboxCell}<td>${formatDate(item.created_at)}</td><td>${item.alumni_name || ''}</td><td>${item.action || ''}</td><td>${item.being_onboarded_by || ''}</td></tr>`;
+                html += `<tr>${checkboxCell}<td>${formatDate(item.created_at)}</td><td>${item.alumni_name || ''}</td><td>${item.action || ''}</td><td>${item.being_onboarded_by || ''}</td><td>${item.performed_by || ''}</td></tr>`;
             });
             tbody.innerHTML = html || `<tr><td colspan="${colspan}" style="text-align:center; color:#8a9bb0;">No activity found.</td></tr>`;
             if (countEl) countEl.textContent = rows.length;
@@ -2790,16 +3063,19 @@
         }
 
         function renderRepSummary() {
-            const reps = new Set();
-            alumniData.forEach(i => { if ((i.onboarded_by || '').trim()) reps.add(i.onboarded_by.trim()); });
-            pendingData.forEach(i => { if ((i.being_onboarded_by || '').trim()) reps.add(i.being_onboarded_by.trim()); });
             const tbody = document.getElementById('repSummaryTableBody');
             tbody.innerHTML = '';
-            [...reps].sort((a, b) => a.localeCompare(b)).forEach(rep => {
-                const completed = alumniData.filter(i => (i.onboarded_by || '').trim() === rep).length;
-                const pending = pendingData.filter(i => (i.being_onboarded_by || '').trim() === rep).length;
+            // Uses real representative accounts (not old free-typed names)
+            const reps = (activeRepsData || []).slice().sort((a, b) => a.full_name.localeCompare(b.full_name));
+            if (reps.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#8a9bb0;">No representative accounts yet.</td></tr>';
+                return;
+            }
+            reps.forEach(rep => {
+                const completed = alumniData.filter(i => (i.onboarded_by || '').trim() === rep.full_name).length;
+                const pending = pendingData.filter(i => (i.being_onboarded_by || '').trim() === rep.full_name).length;
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${rep}</td><td>${pending}</td><td>${completed}</td><td>${pending + completed}</td>`;
+                tr.innerHTML = `<td>${escapeHtml(rep.full_name)}</td><td>${pending}</td><td>${completed}</td><td>${pending + completed}</td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -3245,7 +3521,17 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 if (targetId === 'recycleSection') loadRecycleBin();
                 if (targetId === 'activitySection') loadActivityLog();
-                if (targetId === 'adminSection') { showAdminPage(); } else { stopLiveActivityPolling(); stopAdminAutoRefresh(); }
+                if (targetId === 'adminSection') {
+                    showAdminPage();
+                    if (!adminUnlocked) {
+                        setTimeout(function() {
+                            const lockedBox = document.getElementById('adminLocked');
+                            if (lockedBox) lockedBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            const pwInput = document.getElementById('adminPasswordInput');
+                            if (pwInput) pwInput.focus({ preventScroll: true });
+                        }, 150);
+                    }
+                } else { stopLiveActivityPolling(); stopAdminAutoRefresh(); }
             }
 
             window.switchPage = switchPage;
@@ -3477,7 +3763,733 @@
             document.addEventListener('mouseleave', function() { cancel(); hideHint(); }, true);
         })();
 
-        init();
+        // ================= AUTH / REPRESENTATIVE ACCOUNTS =================
+        const SESSION_KEY = 'amsul_session';
+
+        async function rpc(fnName, body) {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fnName}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                },
+                body: JSON.stringify(body || {})
+            });
+            let data = null;
+            try { data = await response.json(); } catch (e) { /* no body */ }
+            if (!response.ok) {
+                const msg = (data && (data.message || data.error_description || data.hint)) || `Request failed (${response.status})`;
+                throw new Error(msg);
+            }
+            return data;
+        }
+
+        const authGate = document.getElementById('authGate');
+        const authTabSignIn = document.getElementById('authTabSignIn');
+        const authTabSignUp = document.getElementById('authTabSignUp');
+        const authTabForgot = document.getElementById('authTabForgot');
+        const signInForm = document.getElementById('signInForm');
+        const signUpForm = document.getElementById('signUpForm');
+        const forgotForm = document.getElementById('forgotForm');
+        const authMsg = document.getElementById('authMsg');
+        const userBadge = document.getElementById('userBadge');
+        const userBadgeName = document.getElementById('userBadgeName');
+        const userBadgeRole = document.getElementById('userBadgeRole');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        function showAuthMsg(text, type) {
+            authMsg.textContent = text;
+            authMsg.className = 'auth-msg ' + (type || 'error');
+        }
+        function clearAuthMsg() { authMsg.className = 'auth-msg'; authMsg.textContent = ''; }
+
+        function activateAuthTab(tabBtn, formEl) {
+            [authTabSignIn, authTabSignUp, authTabForgot].forEach(function(b) { b.classList.remove('active'); });
+            [signInForm, signUpForm, forgotForm].forEach(function(f) { f.classList.remove('active'); });
+            tabBtn.classList.add('active');
+            formEl.classList.add('active');
+            clearAuthMsg();
+        }
+        authTabSignIn.addEventListener('click', function() { activateAuthTab(authTabSignIn, signInForm); });
+        authTabSignUp.addEventListener('click', function() { activateAuthTab(authTabSignUp, signUpForm); });
+        authTabForgot.addEventListener('click', function() { activateAuthTab(authTabForgot, forgotForm); });
+
+        function applyLoggedInUI() {
+            userBadge.style.display = 'flex';
+            userBadgeName.textContent = currentUser.full_name;
+            const notifBellBtn = document.getElementById('notifBellBtn');
+            const notifNavBtn = document.getElementById('notifNavBtn');
+            if (currentUser.role === 'admin') {
+                userBadgeRole.style.display = 'inline-block';
+                document.getElementById('adminNavBtn').style.display = '';
+                notifBellBtn.style.display = 'flex';
+                notifNavBtn.style.display = 'flex';
+                pollAdminNotifications();
+                if (!notifPollTimer) notifPollTimer = setInterval(pollAdminNotifications, 30000);
+            } else {
+                userBadgeRole.style.display = 'none';
+                document.getElementById('adminNavBtn').style.display = 'none';
+                notifBellBtn.style.display = 'none';
+                notifNavBtn.style.display = 'none';
+            }
+        }
+
+        function startApp() {
+            authGate.classList.add('hidden');
+            applyLoggedInUI();
+            init();
+        }
+
+        // ---------- SAVE PASSWORD (Credential Management API) ----------
+        // Explicitly offers the browser's native "Save password?" prompt
+        // and lets it silently re-fill saved credentials next visit, so
+        // people don't have to retype their password every time.
+        async function offerToSaveCredential(username, password, displayName) {
+            if (!(window.PasswordCredential && navigator.credentials && navigator.credentials.store)) return;
+            try {
+                const cred = new PasswordCredential({ id: username, password: password, name: displayName });
+                await navigator.credentials.store(cred);
+            } catch (err) { console.warn('Could not offer to save credential:', err); }
+        }
+        async function tryCredentialAutofill() {
+            if (!(window.PasswordCredential && navigator.credentials && navigator.credentials.get)) return;
+            try {
+                const cred = await navigator.credentials.get({ password: true, mediation: 'optional' });
+                if (cred && cred.type === 'password') {
+                    document.getElementById('siUsername').value = cred.id;
+                    document.getElementById('siPassword').value = cred.password;
+                }
+            } catch (err) { console.warn('Credential autofill failed:', err); }
+        }
+
+        signInForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearAuthMsg();
+            const username = document.getElementById('siUsername').value.trim();
+            const password = document.getElementById('siPassword').value;
+            const btn = document.getElementById('siSubmitBtn');
+            btn.disabled = true;
+            try {
+                const result = await rpc('rep_login', { p_username: username, p_password: password });
+                currentUser = result;
+                localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+                offerToSaveCredential(username, password, currentUser.full_name);
+                startApp();
+            } catch (err) {
+                showAuthMsg(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        signUpForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            clearAuthMsg();
+            const fullName = document.getElementById('suFullName').value.trim();
+            const username = document.getElementById('suUsername').value.trim();
+            const password = document.getElementById('suPassword').value;
+            const password2 = document.getElementById('suPassword2').value;
+            if (password !== password2) { showAuthMsg('Passwords do not match', 'error'); return; }
+            const btn = document.getElementById('suSubmitBtn');
+            btn.disabled = true;
+            try {
+                await rpc('rep_signup', { p_username: username, p_password: password, p_full_name: fullName });
+                signUpForm.reset();
+                showAuthMsg('Account created! An admin needs to approve you before you can sign in.', 'success');
+                setTimeout(function() {
+                    authTabSignIn.click();
+                    document.getElementById('siUsername').value = username;
+                }, 1200);
+            } catch (err) {
+                showAuthMsg(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('fpRequestBtn').addEventListener('click', async function() {
+            clearAuthMsg();
+            const username = document.getElementById('fpUsername').value.trim();
+            if (!username) { showAuthMsg('Enter your username first', 'error'); return; }
+            const btn = this;
+            btn.disabled = true;
+            try {
+                await rpc('rep_request_password_reset', { p_username: username });
+                showAuthMsg('If that account exists, your request has been sent to an admin. Come back here once it\'s approved to set a new password.', 'success');
+            } catch (err) {
+                showAuthMsg(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('fpSetBtn').addEventListener('click', async function() {
+            clearAuthMsg();
+            const username = document.getElementById('fpUsername2').value.trim();
+            const newPw = document.getElementById('fpNewPassword').value;
+            const newPw2 = document.getElementById('fpNewPassword2').value;
+            if (!username || !newPw) { showAuthMsg('Fill in your username and new password', 'error'); return; }
+            if (newPw !== newPw2) { showAuthMsg('New passwords do not match', 'error'); return; }
+            const btn = this;
+            btn.disabled = true;
+            try {
+                await rpc('rep_set_password_after_approval', { p_username: username, p_new_password: newPw });
+                showAuthMsg('Password updated! You can now sign in.', 'success');
+                document.getElementById('fpNewPassword').value = '';
+                document.getElementById('fpNewPassword2').value = '';
+                setTimeout(function() {
+                    authTabSignIn.click();
+                    document.getElementById('siUsername').value = username;
+                }, 1200);
+            } catch (err) {
+                showAuthMsg(err.message, 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        const logoutConfirmModal = document.getElementById('logoutConfirmModal');
+        logoutBtn.addEventListener('click', function() {
+            logoutConfirmModal.classList.add('active');
+        });
+        document.getElementById('cancelLogoutBtn').addEventListener('click', function() {
+            logoutConfirmModal.classList.remove('active');
+        });
+        document.getElementById('confirmLogoutBtn').addEventListener('click', function() {
+            localStorage.removeItem(SESSION_KEY);
+            location.reload();
+        });
+
+        async function bootstrapAuth() {
+            const saved = localStorage.getItem(SESSION_KEY);
+            if (!saved) { tryCredentialAutofill(); return; }
+            try {
+                const parsed = JSON.parse(saved);
+                const fresh = await rpc('rep_session_check', { p_id: parsed.id });
+                currentUser = fresh;
+                localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+                startApp();
+            } catch (err) {
+                localStorage.removeItem(SESSION_KEY);
+                tryCredentialAutofill();
+            }
+        }
+
+        // ================= ADMIN NOTIFICATION BELL =================
+        let notifPollTimer = null;
+
+        function updateNotifBadge(count) {
+            const bell = document.getElementById('notifBellBtn');
+            const dot = document.getElementById('notifDot');
+            const numEl = document.getElementById('notifCount');
+            const navCount = document.getElementById('notifNavCount');
+            if (!bell) return;
+            if (count > 0) {
+                numEl.textContent = count > 99 ? '99+' : String(count);
+                numEl.style.display = 'flex';
+                dot.style.display = 'none';
+                bell.classList.add('has-alert');
+                bell.title = `${count} item(s) need admin attention`;
+                navCount.textContent = count > 99 ? '99+' : String(count);
+                navCount.style.display = 'inline-flex';
+            } else {
+                numEl.style.display = 'none';
+                dot.style.display = 'block';
+                bell.classList.remove('has-alert');
+                bell.title = 'All caught up — no pending admin items';
+                navCount.style.display = 'none';
+            }
+        }
+
+        async function pollAdminNotifications() {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            try {
+                const [pending, pwreq] = await Promise.all([
+                    rpc('rep_admin_list_pending', { p_admin_id: currentUser.id }),
+                    rpc('rep_admin_list_password_requests', { p_admin_id: currentUser.id })
+                ]);
+                // Keep these in sync here too (not just when the Admin
+                // dashboard is opened) so the notification bell/panel work
+                // fully on their own, with no PIN or dashboard visit needed.
+                pendingReqData = pending || [];
+                pwReqData = pwreq || [];
+                updateNotifBadge(pendingReqData.length + pwReqData.length);
+            } catch (err) { console.warn('Notification check failed:', err); }
+        }
+
+        const notifOverlay = document.getElementById('notifOverlay');
+        const notifPanel = document.getElementById('notifPanel');
+
+        async function openNotifPanel() {
+            notifPanel.classList.add('active');
+            notifOverlay.classList.add('active');
+            const list = document.getElementById('notifPanelList');
+            list.innerHTML = '<div class="notif-empty"><i class="fas fa-circle-notch fa-spin"></i><div style="margin-top:0.5rem;">Loading…</div></div>';
+            await pollAdminNotifications(); // always fetch fresh — no PIN or dashboard visit required
+            renderNotifPanel();
+        }
+        function closeNotifPanel() {
+            notifPanel.classList.remove('active');
+            notifOverlay.classList.remove('active');
+        }
+        document.getElementById('notifBellBtn').addEventListener('click', openNotifPanel);
+        document.getElementById('notifNavBtn').addEventListener('click', function() {
+            document.getElementById('navMenu').classList.remove('active');
+            document.getElementById('navOverlay').classList.remove('active');
+            openNotifPanel();
+        });
+        document.getElementById('closeNotifBtn').addEventListener('click', closeNotifPanel);
+        notifOverlay.addEventListener('click', closeNotifPanel);
+
+        function renderNotifPanel() {
+            const list = document.getElementById('notifPanelList');
+            const items = [];
+            (pendingReqData || []).forEach(function(r) { items.push({ type: 'signup', id: r.id, name: r.full_name, time: r.created_at }); });
+            (pwReqData || []).forEach(function(r) { items.push({ type: 'password', id: r.id, name: r.full_name, time: r.requested_at }); });
+            items.sort(function(a, b) { return new Date(b.time) - new Date(a.time); });
+            if (items.length === 0) {
+                list.innerHTML = '<div class="notif-empty"><i class="fas fa-check-circle" style="font-size:1.4rem; color:#2a7a4d;"></i><div style="margin-top:0.5rem;">All caught up — no pending items.</div></div>';
+                return;
+            }
+            list.innerHTML = items.map(function(item) {
+                const icon = item.type === 'signup' ? 'fa-user-clock' : 'fa-key';
+                const iconClass = item.type === 'signup' ? '' : 'pw';
+                const text = item.type === 'signup'
+                    ? `<strong>${escapeHtml(item.name)}</strong> requested an account`
+                    : `<strong>${escapeHtml(item.name)}</strong> requested a password reset`;
+                return `<div class="notif-item" data-notif-type="${item.type}" data-notif-id="${item.id}">
+                    <div class="notif-icon ${iconClass}"><i class="fas ${icon}"></i></div>
+                    <div>
+                        <div class="notif-text">${text}</div>
+                        <div class="notif-time">${formatDate(item.time)}</div>
+                    </div>
+                </div>`;
+            }).join('');
+            list.querySelectorAll('.notif-item').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    const type = this.dataset.notifType;
+                    const id = this.dataset.notifId;
+                    closeNotifPanel();
+                    goToNotification(type, id);
+                });
+            });
+        }
+
+        function goToNotification(type, id) {
+            if (typeof window.switchPage === 'function') window.switchPage('adminSection');
+            if (!adminUnlocked) return; // switchPage already scrolled to the password field
+            setTimeout(function() {
+                const subpageId = type === 'signup' ? 'adminRequestsPage' : 'adminPwReqPage';
+                const subBtn = document.querySelector(`#adminSubnav button[data-subpage="${subpageId}"]`);
+                if (subBtn) subBtn.click();
+                setTimeout(function() {
+                    const selector = type === 'signup' ? `[data-approve="${id}"]` : `[data-pw-approve="${id}"]`;
+                    const actionBtn = document.querySelector(selector);
+                    const tr = actionBtn ? actionBtn.closest('tr') : null;
+                    if (tr) {
+                        tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        highlightRow(tr);
+                    }
+                }, 150);
+            }, 150);
+        }
+
+        // ================= ADMIN: ACCOUNT MANAGEMENT =================
+        let pwReqData = [];
+        let pendingReqData = [];
+        let activeRepsData = [];
+        let deletedRepsData = [];
+        let selectedRepRecycleIds = new Set();
+        let repDeleteTargetId = null;
+        let repPermDeleteTargetId = null;
+        let repPermDeleteBulkIds = null;
+
+        function escapeHtml(s) {
+            return (s || '').toString().replace(/[&<>"']/g, function(c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
+        }
+
+        async function loadAccountAdminData() {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            try {
+                pendingReqData = await rpc('rep_admin_list_pending', { p_admin_id: currentUser.id }) || [];
+                renderPendingRequests();
+            } catch (err) { console.warn('Could not load pending requests:', err); }
+            try {
+                activeRepsData = await rpc('rep_admin_list_active', { p_admin_id: currentUser.id }) || [];
+                renderActiveReps();
+                renderRepSummary();
+            } catch (err) { console.warn('Could not load representatives:', err); }
+            try {
+                deletedRepsData = await rpc('rep_admin_list_deleted', { p_admin_id: currentUser.id }) || [];
+                renderDeletedReps();
+            } catch (err) { console.warn('Could not load deleted accounts:', err); }
+            try {
+                const logs = await rpc('rep_admin_login_log', { p_admin_id: currentUser.id, p_limit: 200 }) || [];
+                renderLoginLog(logs);
+            } catch (err) { console.warn('Could not load login log:', err); }
+            try {
+                pwReqData = await rpc('rep_admin_list_password_requests', { p_admin_id: currentUser.id }) || [];
+                renderPwRequests();
+            } catch (err) { console.warn('Could not load password requests:', err); }
+            updateNotifBadge(pendingReqData.length + pwReqData.length);
+        }
+
+        function renderPendingRequests() {
+            const tbody = document.getElementById('reqTableBody');
+            const badge = document.getElementById('pendingReqCount');
+            document.getElementById('reqRowCount').textContent = pendingReqData.length;
+            if (pendingReqData.length > 0) { badge.style.display = 'inline-block'; badge.textContent = pendingReqData.length; }
+            else { badge.style.display = 'none'; }
+            if (pendingReqData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#8a9bb0;">No pending requests.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = pendingReqData.map(function(r) {
+                return `<tr>
+                    <td>${escapeHtml(r.full_name)}</td>
+                    <td>${escapeHtml(r.username)}</td>
+                    <td>${formatDate(r.created_at)}</td>
+                    <td>
+                        <button class="btn btn-success" style="font-size:0.72rem; padding:0.35rem 0.6rem;" data-approve="${r.id}"><i class="fas fa-check"></i> Approve</button>
+                        <button class="btn btn-outline" style="font-size:0.72rem; padding:0.35rem 0.6rem;" data-deny="${r.id}"><i class="fas fa-xmark"></i> Deny</button>
+                    </td>
+                </tr>`;
+            }).join('');
+            tbody.querySelectorAll('[data-approve]').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    btn.disabled = true;
+                    try { await rpc('rep_admin_approve', { p_admin_id: currentUser.id, p_target_id: btn.dataset.approve }); showToast('Account approved', 'success'); await loadAccountAdminData(); }
+                    catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
+                });
+            });
+            tbody.querySelectorAll('[data-deny]').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    if (!confirm('Deny this account request?')) return;
+                    btn.disabled = true;
+                    try { await rpc('rep_admin_deny', { p_admin_id: currentUser.id, p_target_id: btn.dataset.deny }); showToast('Request denied', 'info'); await loadAccountAdminData(); }
+                    catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
+                });
+            });
+        }
+
+        function renderPwRequests() {
+            const tbody = document.getElementById('pwReqTableBody');
+            const badge = document.getElementById('pendingPwReqCount');
+            document.getElementById('pwReqRowCount').textContent = pwReqData.length;
+            if (pwReqData.length > 0) { badge.style.display = 'inline-block'; badge.textContent = pwReqData.length; }
+            else { badge.style.display = 'none'; }
+            if (pwReqData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#8a9bb0;">No pending password requests.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = pwReqData.map(function(r) {
+                return `<tr>
+                    <td>${escapeHtml(r.full_name)}</td>
+                    <td>${escapeHtml(r.username)}</td>
+                    <td>${formatDate(r.requested_at)}</td>
+                    <td>
+                        <button class="btn btn-success" style="font-size:0.72rem; padding:0.35rem 0.6rem;" data-pw-approve="${r.id}"><i class="fas fa-check"></i> Approve</button>
+                        <button class="btn btn-outline" style="font-size:0.72rem; padding:0.35rem 0.6rem;" data-pw-deny="${r.id}"><i class="fas fa-xmark"></i> Deny</button>
+                    </td>
+                </tr>`;
+            }).join('');
+            tbody.querySelectorAll('[data-pw-approve]').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    btn.disabled = true;
+                    try { await rpc('rep_admin_approve_password_request', { p_admin_id: currentUser.id, p_request_id: btn.dataset.pwApprove }); showToast('Reset approved — they can now set a new password', 'success'); await loadAccountAdminData(); }
+                    catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
+                });
+            });
+            tbody.querySelectorAll('[data-pw-deny]').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    if (!confirm('Deny this password reset request?')) return;
+                    btn.disabled = true;
+                    try { await rpc('rep_admin_deny_password_request', { p_admin_id: currentUser.id, p_request_id: btn.dataset.pwDeny }); showToast('Request denied', 'info'); await loadAccountAdminData(); }
+                    catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
+                });
+            });
+        }
+
+        const PROTECTED_MANAGER_USERNAME = 'kennis';
+        function isProtectedManager(r) {
+            if (!r) return false;
+            const uname = (r.username || '').trim().toLowerCase();
+            const fname = (r.full_name || '').trim().toLowerCase();
+            return uname === PROTECTED_MANAGER_USERNAME || fname === 'dede kennis kalu';
+        }
+
+        function renderActiveReps() {
+            const tbody = document.getElementById('repsTableBody');
+            document.getElementById('repsRowCount').textContent = activeRepsData.length;
+            if (activeRepsData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#8a9bb0;">No representatives yet.</td></tr>';
+                return;
+            }
+            const sortedReps = [...activeRepsData].sort(function(a, b) {
+                if (a.role !== b.role) return a.role === 'admin' ? -1 : 1;
+                return (a.full_name || '').localeCompare(b.full_name || '');
+            });
+            tbody.innerHTML = sortedReps.map(function(r) {
+                const isSelf = r.id === currentUser.id;
+                const isProtected = isProtectedManager(r);
+                let roleBtn;
+                if (isProtected && isSelf) {
+                    roleBtn = `<button class="delete-btn" style="color:#0a2a44;" title="Dismiss yourself from admin" data-rep-role="${r.id}" data-rep-newrole="rep" data-rep-name="${escapeHtml(r.full_name)}" data-self-dismiss="1"><i class="fas fa-user-minus"></i></button>`;
+                } else if (isProtected && !isSelf) {
+                    roleBtn = '';
+                } else if (isSelf && r.role === 'admin') {
+                    roleBtn = '';
+                } else {
+                    roleBtn = `<button class="delete-btn" style="color:#0a2a44;" title="${r.role === 'admin' ? 'Remove admin role' : 'Make admin'}" data-rep-role="${r.id}" data-rep-newrole="${r.role === 'admin' ? 'rep' : 'admin'}" data-rep-name="${escapeHtml(r.full_name)}"><i class="fas ${r.role === 'admin' ? 'fa-user-minus' : 'fa-user-shield'}"></i></button>`;
+                }
+                const deleteBtn = (isSelf || (isProtected && !isSelf)) ? '' : `<button class="delete-btn" title="Delete account" data-rep-delete="${r.id}" data-rep-name="${escapeHtml(r.full_name)}" data-rep-username="${escapeHtml(r.username)}"><i class="fas fa-trash-alt"></i></button>`;
+                return `<tr>
+                    <td>${escapeHtml(r.full_name)}</td>
+                    <td>${escapeHtml(r.username)}</td>
+                    <td><span class="pill-badge ${r.role}">${r.role}</span></td>
+                    <td>${r.last_login_at ? formatDate(r.last_login_at) : 'Never'}</td>
+                    <td>${roleBtn}${deleteBtn}${isSelf ? '<span style="color:#8a9bb0; font-size:0.72rem; display:block;">You</span>' : ''}</td>
+                </tr>`;
+            }).join('');
+            tbody.querySelectorAll('[data-rep-role]').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    if (btn.dataset.selfDismiss === '1') {
+                        document.getElementById('selfDismissPasswordInput').value = '';
+                        document.getElementById('selfDismissError').style.display = 'none';
+                        document.getElementById('selfDismissAdminModal').classList.add('active');
+                        return;
+                    }
+                    const newRole = btn.dataset.repNewrole;
+                    const label = newRole === 'admin' ? 'give admin access to' : 'remove admin access from';
+                    if (!confirm(`Are you sure you want to ${label} ${btn.dataset.repName}?`)) return;
+                    btn.disabled = true;
+                    try {
+                        await rpc('rep_admin_set_role', { p_admin_id: currentUser.id, p_target_id: btn.dataset.repRole, p_role: newRole });
+                        showToast(`${btn.dataset.repName} is now ${newRole === 'admin' ? 'an admin' : 'a representative'}`, 'success');
+                        await loadAccountAdminData();
+                    } catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
+                });
+            });
+            tbody.querySelectorAll('[data-rep-delete]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    repDeleteTargetId = btn.dataset.repDelete;
+                    document.getElementById('repDeleteNamePreview').textContent = btn.dataset.repName;
+                    document.getElementById('repDeleteUsernamePreview').textContent = btn.dataset.repUsername;
+                    document.getElementById('repDeleteModal').classList.add('active');
+                });
+            });
+        }
+
+        function renderDeletedReps() {
+            const tbody = document.getElementById('repRecycleTableBody');
+            document.getElementById('repRecycleCount').textContent = deletedRepsData.length;
+            const validIds = new Set(deletedRepsData.map(function(d) { return d.id; }));
+            [...selectedRepRecycleIds].forEach(function(id) { if (!validIds.has(id)) selectedRepRecycleIds.delete(id); });
+            if (deletedRepsData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#8a9bb0;">Recycle bin is empty.</td></tr>';
+            } else {
+                tbody.innerHTML = deletedRepsData.map(function(r) {
+                    return `<tr>
+                        <td><input type="checkbox" class="rep-recycle-checkbox" data-id="${r.id}" ${selectedRepRecycleIds.has(r.id) ? 'checked' : ''}></td>
+                        <td>${escapeHtml(r.full_name)}</td>
+                        <td>${escapeHtml(r.username)}</td>
+                        <td>${formatDate(r.deleted_at)}</td>
+                        <td>
+                            <button class="delete-btn" style="color:#2a7a4d;" title="Restore" data-rep-restore="${r.id}"><i class="fas fa-trash-restore"></i></button>
+                            <button class="delete-btn" title="Delete permanently" data-rep-perm-delete="${r.id}" data-rep-name="${escapeHtml(r.full_name)}"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+            tbody.querySelectorAll('.rep-recycle-checkbox').forEach(function(cb) {
+                cb.addEventListener('change', function() {
+                    if (this.checked) selectedRepRecycleIds.add(this.dataset.id); else selectedRepRecycleIds.delete(this.dataset.id);
+                    updateRepRecycleBulkBar();
+                });
+            });
+            tbody.querySelectorAll('[data-rep-restore]').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    btn.disabled = true;
+                    try { await rpc('rep_admin_restore', { p_admin_id: currentUser.id, p_target_id: btn.dataset.repRestore }); showToast('Account restored', 'success'); await loadAccountAdminData(); }
+                    catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
+                });
+            });
+            tbody.querySelectorAll('[data-rep-perm-delete]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    repPermDeleteTargetId = btn.dataset.repPermDelete;
+                    repPermDeleteBulkIds = null;
+                    document.getElementById('repPermDeleteWarning').textContent = `Permanently delete ${btn.dataset.repName}'s account? This cannot be undone. Enter the confirmation code to continue.`;
+                    document.getElementById('repPermDeleteCodeInput').value = '';
+                    document.getElementById('repPermDeleteModal').classList.add('active');
+                });
+            });
+            updateRepRecycleBulkBar();
+        }
+
+        function updateRepRecycleBulkBar() {
+            const bar = document.getElementById('repRecycleBulkBar');
+            const count = selectedRepRecycleIds.size;
+            document.getElementById('repRecycleBulkCount').textContent = `${count} selected`;
+            bar.classList.toggle('active', count > 0);
+            const selectAll = document.getElementById('repRecycleSelectAll');
+            if (selectAll) selectAll.checked = deletedRepsData.length > 0 && count === deletedRepsData.length;
+        }
+
+        function renderLoginLog(logs) {
+            const tbody = document.getElementById('loginLogTableBody');
+            document.getElementById('loginLogRowCount').textContent = logs.length;
+            tbody.innerHTML = logs.length
+                ? logs.map(function(l) { return `<tr><td>${formatDate(l.created_at)}</td><td>${escapeHtml(l.full_name)}</td><td>${escapeHtml(l.username)}</td></tr>`; }).join('')
+                : '<tr><td colspan="3" style="text-align:center; color:#8a9bb0;">No logins recorded yet.</td></tr>';
+        }
+
+        document.getElementById('adminSubnav').addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-subpage]');
+            if (!btn) return;
+            document.querySelectorAll('#adminSubnav button').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            document.querySelectorAll('.admin-subpage').forEach(function(p) { p.classList.remove('active'); });
+            document.getElementById(btn.dataset.subpage).classList.add('active');
+        });
+
+        document.getElementById('openRepRecycleBtn').addEventListener('click', function() {
+            const panel = document.getElementById('repRecyclePanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.getElementById('repRecycleSelectAll').addEventListener('change', function() {
+            selectedRepRecycleIds = this.checked ? new Set(deletedRepsData.map(function(d) { return d.id; })) : new Set();
+            renderDeletedReps();
+        });
+
+        document.getElementById('cancelRepDeleteBtn').addEventListener('click', function() {
+            document.getElementById('repDeleteModal').classList.remove('active');
+            repDeleteTargetId = null;
+        });
+        document.getElementById('confirmRepDeleteBtn').addEventListener('click', async function() {
+            if (!repDeleteTargetId) return;
+            const btn = this;
+            btn.disabled = true;
+            try {
+                await rpc('rep_admin_soft_delete', { p_admin_id: currentUser.id, p_target_id: repDeleteTargetId });
+                document.getElementById('repDeleteModal').classList.remove('active');
+                showToast('Account moved to recycle bin', 'success');
+                await loadAccountAdminData();
+            } catch (err) { showToast(err.message, 'error'); }
+            finally { btn.disabled = false; repDeleteTargetId = null; }
+        });
+
+        document.getElementById('repBulkRestoreBtn').addEventListener('click', async function() {
+            const ids = [...selectedRepRecycleIds];
+            if (ids.length === 0) return;
+            for (const id of ids) {
+                try { await rpc('rep_admin_restore', { p_admin_id: currentUser.id, p_target_id: id }); } catch (err) { showToast(err.message, 'error'); }
+            }
+            selectedRepRecycleIds.clear();
+            showToast(`${ids.length} account(s) restored`, 'success');
+            await loadAccountAdminData();
+        });
+
+        document.getElementById('repBulkPermDeleteBtn').addEventListener('click', function() {
+            const ids = [...selectedRepRecycleIds];
+            if (ids.length === 0) return;
+            repPermDeleteBulkIds = ids;
+            repPermDeleteTargetId = null;
+            document.getElementById('repPermDeleteWarning').textContent = `Permanently delete ${ids.length} account(s)? This cannot be undone. Enter the confirmation code to continue.`;
+            document.getElementById('repPermDeleteCodeInput').value = '';
+            document.getElementById('repPermDeleteModal').classList.add('active');
+        });
+
+        document.getElementById('cancelRepPermDeleteBtn').addEventListener('click', function() {
+            document.getElementById('repPermDeleteModal').classList.remove('active');
+            repPermDeleteTargetId = null; repPermDeleteBulkIds = null;
+        });
+        document.getElementById('confirmRepPermDeleteBtn').addEventListener('click', async function() {
+            const code = document.getElementById('repPermDeleteCodeInput').value.trim();
+            if (code !== DELETE_CODE) {
+                showToast('Incorrect confirmation code', 'error');
+                document.getElementById('repPermDeleteCodeInput').value = '';
+                return;
+            }
+            const btn = this;
+            btn.disabled = true;
+            try {
+                const ids = repPermDeleteBulkIds && repPermDeleteBulkIds.length ? repPermDeleteBulkIds : (repPermDeleteTargetId ? [repPermDeleteTargetId] : []);
+                for (const id of ids) {
+                    await rpc('rep_admin_permanent_delete', { p_admin_id: currentUser.id, p_target_id: id, p_code: code });
+                }
+                selectedRepRecycleIds.clear();
+                document.getElementById('repPermDeleteModal').classList.remove('active');
+                showToast(`${ids.length} account(s) permanently deleted`, 'success');
+                await loadAccountAdminData();
+            } catch (err) { showToast(err.message, 'error'); }
+            finally { btn.disabled = false; repPermDeleteTargetId = null; repPermDeleteBulkIds = null; }
+        });
+
+        // Load account-admin data whenever the admin dashboard is opened
+        const _origShowAdminPage = typeof showAdminPage === 'function' ? showAdminPage : null;
+        if (_origShowAdminPage) {
+            showAdminPage = function() { _origShowAdminPage(); loadAccountAdminData(); };
+        }
+
+        const changePasswordModal = document.getElementById('changePasswordModal');
+        document.getElementById('changePasswordBtn').addEventListener('click', function() {
+            document.getElementById('cpOldPassword').value = '';
+            document.getElementById('cpNewPassword').value = '';
+            document.getElementById('cpNewPassword2').value = '';
+            document.getElementById('cpError').style.display = 'none';
+            changePasswordModal.classList.add('active');
+        });
+        document.getElementById('cancelCpBtn').addEventListener('click', function() { changePasswordModal.classList.remove('active'); });
+        document.getElementById('confirmCpBtn').addEventListener('click', async function() {
+            const errEl = document.getElementById('cpError');
+            errEl.style.display = 'none';
+            const oldPw = document.getElementById('cpOldPassword').value;
+            const newPw = document.getElementById('cpNewPassword').value;
+            const newPw2 = document.getElementById('cpNewPassword2').value;
+            if (newPw !== newPw2) { errEl.textContent = 'New passwords do not match'; errEl.style.display = 'block'; return; }
+            const btn = this;
+            btn.disabled = true;
+            try {
+                await rpc('rep_change_password', { p_id: currentUser.id, p_old_password: oldPw, p_new_password: newPw });
+                changePasswordModal.classList.remove('active');
+                showToast('Password updated', 'success');
+            } catch (err) { errEl.textContent = err.message; errEl.style.display = 'block'; }
+            finally { btn.disabled = false; }
+        });
+
+        const selfDismissAdminModal = document.getElementById('selfDismissAdminModal');
+        document.getElementById('cancelSelfDismissBtn').addEventListener('click', function() {
+            selfDismissAdminModal.classList.remove('active');
+            document.getElementById('selfDismissPasswordInput').value = '';
+        });
+        document.getElementById('confirmSelfDismissBtn').addEventListener('click', async function() {
+            const errEl = document.getElementById('selfDismissError');
+            errEl.style.display = 'none';
+            const password = document.getElementById('selfDismissPasswordInput').value;
+            if (!password) { errEl.textContent = 'Enter your password to continue'; errEl.style.display = 'block'; return; }
+            const btn = this;
+            btn.disabled = true;
+            try {
+                await rpc('rep_login', { p_username: currentUser.username, p_password: password });
+                await rpc('rep_admin_set_role', { p_admin_id: currentUser.id, p_target_id: currentUser.id, p_role: 'rep' });
+                selfDismissAdminModal.classList.remove('active');
+                document.getElementById('selfDismissPasswordInput').value = '';
+                currentUser.role = 'rep';
+                localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+                applyLoggedInUI();
+                if (typeof window.switchPage === 'function') window.switchPage('alumniSection');
+                showToast('You are no longer an admin', 'success');
+            } catch (err) {
+                errEl.textContent = err.message === 'Invalid credentials' || /password|credential/i.test(err.message) ? 'Incorrect password' : err.message;
+                errEl.style.display = 'block';
+            } finally { btn.disabled = false; }
+        });
+
+        bootstrapAuth();
     })();
 </script>
 </body>
