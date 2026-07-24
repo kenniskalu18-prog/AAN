@@ -245,9 +245,12 @@
         .user-badge .role-pill { background:#0a2a44; color:white; font-size:0.62rem; text-transform:uppercase; padding:0.15rem 0.5rem; border-radius:20px; font-weight:700; letter-spacing:0.3px; }
         .user-badge button { background:none; border:none; color:#b91c1c; cursor:pointer; font-size:0.85rem; padding:0.3rem 0.4rem; border-radius:50%; }
         .user-badge button:hover { background:#fee2e2; }
-        .admin-subnav { display:flex; gap:0.4rem; background:#eef2f6; border-radius:10px; padding:0.3rem; margin-bottom:1.2rem; flex-wrap:wrap; }
-        .admin-subnav button { border:none; background:none; padding:0.55rem 0.7rem; border-radius:8px; font-size:0.8rem; font-weight:600; color:#5b6f86; cursor:pointer; font-family:inherit; }
-        .admin-subnav button.active { background:#0a2a44; color:white; }
+        .admin-subnav { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; background:#eef2f6; border-radius:12px; padding:0.5rem; margin-bottom:1.2rem; }
+        .admin-subnav button { border:none; background:white; padding:0.7rem 0.6rem; border-radius:9px; font-size:0.8rem; font-weight:600; color:#5b6f86; cursor:pointer; font-family:inherit; text-align:center; box-shadow:0 1px 2px rgba(0,0,0,0.04); display:flex; align-items:center; justify-content:center; gap:0.4rem; flex-wrap:wrap; line-height:1.25; }
+        .admin-subnav button.admin-subnav-full { grid-column:1 / -1; padding:0.85rem 0.7rem; font-size:0.88rem; }
+        .admin-subnav button.active { background:#0a2a44; color:white; box-shadow:none; }
+        .admin-subnav button.active i { color:#7fd6a0; }
+        #pendingReqCount, #pendingNameReqCount, #pendingPwReqCount { background:#b91c1c; color:white; font-size:0.68rem; font-weight:700; min-width:18px; height:18px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; padding:0 5px; }
         .admin-subpage { display:none; }
         .admin-subpage.active { display:block; }
         .pill-badge { font-size:0.68rem; font-weight:700; padding:0.15rem 0.5rem; border-radius:20px; text-transform:uppercase; letter-spacing:0.3px; }
@@ -307,6 +310,10 @@
             <p style="font-size:0.8rem; color:#4a5a6a; margin:-0.2rem 0 0.3rem;">Step 1: request a reset. An admin will review it.</p>
             <label>Username</label>
             <input type="text" id="fpUsername" autocomplete="username">
+            <div id="fpCurrentPasswordWrap" style="display:none;">
+                <label>Current Password</label>
+                <input type="password" id="fpCurrentPassword" autocomplete="current-password">
+            </div>
             <button type="button" class="btn btn-outline" id="fpRequestBtn" style="justify-content:center;"><i class="fas fa-paper-plane"></i> Request Reset</button>
 
             <p style="font-size:0.8rem; color:#4a5a6a; margin:0.9rem 0 0.3rem; border-top:1px solid #eef2f6; padding-top:0.9rem;">Step 2: once an admin approves your request, set your new password here.</p>
@@ -359,6 +366,8 @@
                 <i class="fas fa-user-circle"></i>
                 <span id="userBadgeName">—</span>
                 <span class="role-pill" id="userBadgeRole" style="display:none;">Admin</span>
+                <button id="changeUsernameBtn" title="Change username" style="color:#0a2a44;"><i class="fas fa-at"></i></button>
+                <button id="requestNameChangeBtn" title="Request a full name change" style="color:#0a2a44;"><i class="fas fa-signature"></i></button>
                 <button id="changePasswordBtn" title="Change password" style="color:#0a2a44;"><i class="fas fa-key"></i></button>
                 <button id="logoutBtn" title="Log out"><i class="fas fa-right-from-bracket"></i></button>
             </span>
@@ -575,11 +584,13 @@
             </div>
 
             <div class="admin-subnav" id="adminSubnav">
-                <button class="active" data-subpage="adminOverviewPage"><i class="fas fa-chart-line"></i> Overview</button>
+                <button class="active admin-subnav-full" data-subpage="adminOverviewPage"><i class="fas fa-chart-line"></i> Overview</button>
                 <button data-subpage="adminRequestsPage"><i class="fas fa-user-clock"></i> Account Requests <span id="pendingReqCount" style="display:none;"></span></button>
                 <button data-subpage="adminRepsPage"><i class="fas fa-users-cog"></i> Representatives</button>
+                <button data-subpage="adminNameReqPage"><i class="fas fa-signature"></i> Name Requests <span id="pendingNameReqCount" style="display:none;"></span></button>
                 <button data-subpage="adminPwReqPage"><i class="fas fa-key"></i> Password Requests <span id="pendingPwReqCount" style="display:none;"></span></button>
                 <button data-subpage="adminLoginLogPage"><i class="fas fa-clipboard-list"></i> Login Log</button>
+                <button data-subpage="adminActionLogPage"><i class="fas fa-user-shield"></i> Admin Log</button>
             </div>
 
             <div class="admin-subpage active" id="adminOverviewPage">
@@ -642,11 +653,25 @@
                 </div>
                 <div class="table-wrapper">
                     <table id="reqTable">
-                        <thead><tr><th>Full Name</th><th>Username</th><th>Requested</th><th style="width:170px;">Action</th></tr></thead>
+                        <thead><tr><th>Full Name</th><th>Requested</th><th style="width:170px;">Action</th></tr></thead>
                         <tbody id="reqTableBody"></tbody>
                     </table>
                 </div>
                 <div class="footer"><span><span class="count" id="reqRowCount">0</span> pending request(s)</span></div>
+            </div>
+
+            <div class="admin-subpage" id="adminNameReqPage">
+                <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+                    <h2 style="font-size:0.95rem;"><i class="fas fa-signature"></i> Name Change Requests</h2>
+                    <p class="section-sub">Someone wants their full name corrected or updated.</p>
+                </div>
+                <div class="table-wrapper">
+                    <table id="nameReqTable">
+                        <thead><tr><th>Current Name</th><th>Requested Name</th><th>Requested</th><th style="width:170px;">Action</th></tr></thead>
+                        <tbody id="nameReqTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="footer"><span><span class="count" id="nameReqRowCount">0</span> pending request(s)</span></div>
             </div>
 
             <div class="admin-subpage" id="adminRepsPage">
@@ -656,7 +681,7 @@
                 </div>
                 <div class="table-wrapper">
                     <table id="repsTable">
-                        <thead><tr><th>Full Name</th><th>Username</th><th>Role</th><th>Last Login</th><th style="width:90px;">Action</th></tr></thead>
+                        <thead><tr><th>Full Name</th><th>Role</th><th>Last Login</th><th style="width:90px;">Action</th></tr></thead>
                         <tbody id="repsTableBody"></tbody>
                     </table>
                 </div>
@@ -673,7 +698,7 @@
                     </div>
                     <div class="table-wrapper">
                         <table id="repRecycleTable">
-                            <thead><tr><th style="width:30px;"><input type="checkbox" id="repRecycleSelectAll"></th><th>Full Name</th><th>Username</th><th>Deleted</th><th style="width:110px;">Action</th></tr></thead>
+                            <thead><tr><th style="width:30px;"><input type="checkbox" id="repRecycleSelectAll"></th><th>Full Name</th><th>Deleted</th><th style="width:110px;">Action</th></tr></thead>
                             <tbody id="repRecycleTableBody"></tbody>
                         </table>
                     </div>
@@ -687,21 +712,90 @@
                 </div>
                 <div class="table-wrapper">
                     <table id="pwReqTable">
-                        <thead><tr><th>Full Name</th><th>Username</th><th>Requested</th><th style="width:170px;">Action</th></tr></thead>
+                        <thead><tr><th>Full Name</th><th>Requested</th><th style="width:170px;">Action</th></tr></thead>
                         <tbody id="pwReqTableBody"></tbody>
                     </table>
                 </div>
                 <div class="footer"><span><span class="count" id="pwReqRowCount">0</span> pending request(s)</span></div>
             </div>
 
+            <div class="admin-subpage" id="adminActionLogPage">
+                <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
+                    <h2 style="font-size:0.95rem;"><i class="fas fa-user-shield"></i> Admin Log</h2>
+                    <p class="section-sub">What each admin approved, denied, or deleted, and when.</p>
+                </div>
+                <div class="tab-switcher" id="actionLogPeriodToggle" style="margin-bottom:0.6rem;">
+                    <button class="active" data-period="all">All Time</button>
+                    <button data-period="today">Today</button>
+                    <button data-period="week">This Week</button>
+                    <button data-period="month">This Month</button>
+                </div>
+                <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:0.8rem;">
+                    <div class="search-box" style="flex:1; min-width:180px; margin-bottom:0;">
+                        <i class="fas fa-search" style="color:#5b6f86;"></i>
+                        <input type="text" id="actionLogSearch" placeholder="Search by admin name or action...">
+                    </div>
+                    <select id="actionLogTypeFilter" style="padding:0.55rem 0.6rem; border-radius:8px; border:1px solid #cbd5e0; font-family:inherit; font-size:0.85rem;">
+                        <option value="">All action types</option>
+                        <option value="approve_signup">Approve Signup</option>
+                        <option value="deny_signup">Deny Signup</option>
+                        <option value="set_role">Role Change</option>
+                        <option value="soft_delete_rep">Delete Account</option>
+                        <option value="restore_rep">Restore Account</option>
+                        <option value="permanent_delete_rep">Permanent Delete</option>
+                        <option value="approve_password_request">Approve Password Reset</option>
+                        <option value="deny_password_request">Deny Password Reset</option>
+                    </select>
+                </div>
+                <div class="bulk-action-bar" id="actionLogBulkBar">
+                    <span id="actionLogBulkCount">0 selected</span>
+                    <button class="btn btn-outline" id="actionLogBulkDeleteBtn" style="font-size:0.75rem;"><i class="fas fa-box-archive"></i> Archive Selected</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="actionLogTable">
+                        <thead><tr id="actionLogHeadRow"><th>Time</th><th>Admin</th><th>Type</th><th>Details</th></tr></thead>
+                        <tbody id="actionLogTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="footer"><span><span class="count" id="actionLogRowCount">0</span> entries</span></div>
+
+                <div id="actionLogOwnerControls" style="display:none;">
+                    <div style="display:flex; justify-content:flex-end; margin:1rem 0 0.5rem;">
+                        <button class="btn btn-outline" id="openActionLogRecycleBtn"><i class="fas fa-box-archive"></i> Archived Entries (<span id="actionLogRecycleCount">0</span>)</button>
+                    </div>
+                    <div id="actionLogRecyclePanel" style="display:none;">
+                        <div class="bulk-action-bar" id="actionLogRecycleBulkBar">
+                            <span id="actionLogRecycleBulkCount">0 selected</span>
+                            <button class="btn btn-outline" id="actionLogBulkRestoreBtn" style="font-size:0.75rem;"><i class="fas fa-trash-restore"></i> Restore Selected</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table id="actionLogRecycleTable">
+                                <thead><tr><th style="width:30px;"><input type="checkbox" id="actionLogRecycleSelectAll"></th><th>Time</th><th>Admin</th><th>Type</th><th>Details</th></tr></thead>
+                                <tbody id="actionLogRecycleTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="admin-subpage" id="adminLoginLogPage">
                 <div class="section-divider" style="margin-top:0; padding-top:0; border-top:none;">
                     <h2 style="font-size:0.95rem;"><i class="fas fa-clipboard-list"></i> Login Log</h2>
-                    <p class="section-sub">A record of who signed in and when.</p>
+                    <p class="section-sub">A record of who signed in and out, and when.</p>
+                </div>
+                <div class="tab-switcher" id="loginLogPeriodToggle" style="margin-bottom:0.6rem;">
+                    <button class="active" data-period="all">All Time</button>
+                    <button data-period="today">Today</button>
+                    <button data-period="week">This Week</button>
+                    <button data-period="month">This Month</button>
+                </div>
+                <div class="search-box" style="margin-bottom:0.8rem;">
+                    <i class="fas fa-search" style="color:#5b6f86;"></i>
+                    <input type="text" id="loginLogSearch" placeholder="Search by name...">
                 </div>
                 <div class="table-wrapper">
                     <table id="loginLogTable">
-                        <thead><tr><th>Time</th><th>Full Name</th><th>Username</th></tr></thead>
+                        <thead><tr><th>Time</th><th>Full Name</th></tr></thead>
                         <tbody id="loginLogTableBody"></tbody>
                     </table>
                 </div>
@@ -717,7 +811,6 @@
         <h3><i class="fas fa-exclamation-triangle" style="color:#b91c1c;"></i> Delete Account?</h3>
         <div class="confirm-summary">
             <div class="confirm-summary-name" id="repDeleteNamePreview"></div>
-            <div class="confirm-summary-row"><span class="label">Username</span><span id="repDeleteUsernamePreview">—</span></div>
         </div>
         <p>This moves the account to the recycle bin. They will not be able to sign in while deleted.</p>
         <div class="modal-actions">
@@ -742,6 +835,20 @@
 
 <!-- CHANGE MY OWN PASSWORD MODAL -->
 <!-- CONFIRM LOGOUT MODAL -->
+<!-- CONFIRM STEPPING DOWN AS ADMIN -->
+<div class="modal-overlay" id="selfDismissAdminModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-user-minus" style="color:#b91c1c;"></i> Step Down as Admin?</h3>
+        <p>You'll become an ordinary representative and lose access to the Admin dashboard. Enter your password to confirm.</p>
+        <input type="password" id="selfDismissPasswordInput" placeholder="Your password" autocomplete="current-password" style="letter-spacing:normal;">
+        <p id="selfDismissError" style="color:#b91c1c; font-size:0.8rem; display:none; margin-top:0.6rem;"></p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelSelfDismissBtn">Cancel</button>
+            <button class="btn btn-danger" id="confirmSelfDismissBtn"><i class="fas fa-user-minus"></i> Step Down</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal-overlay" id="logoutConfirmModal">
     <div class="modal-box">
         <h3><i class="fas fa-right-from-bracket" style="color:#b91c1c;"></i> Log Out?</h3>
@@ -749,6 +856,34 @@
         <div class="modal-actions">
             <button class="btn btn-outline" id="cancelLogoutBtn">Cancel</button>
             <button class="btn btn-danger" id="confirmLogoutBtn"><i class="fas fa-right-from-bracket"></i> Log Out</button>
+        </div>
+    </div>
+</div>
+
+<!-- CHANGE MY USERNAME (no approval needed) -->
+<div class="modal-overlay" id="changeUsernameModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-at" style="color:#0a2a44;"></i> Change Username</h3>
+        <p style="font-size:0.8rem; color:#5b6f86;">You can change this anytime — no admin approval needed. Remember it for your next sign-in.</p>
+        <input type="text" id="cuNewUsername" placeholder="New username" autocomplete="username" style="letter-spacing:normal;">
+        <p id="cuError" style="color:#b91c1c; font-size:0.8rem; display:none; margin-top:0.6rem;"></p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelCuBtn">Cancel</button>
+            <button class="btn btn-primary" id="confirmCuBtn"><i class="fas fa-check"></i> Update Username</button>
+        </div>
+    </div>
+</div>
+
+<!-- REQUEST A FULL NAME CHANGE (needs admin approval) -->
+<div class="modal-overlay" id="requestNameChangeModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-signature" style="color:#0a2a44;"></i> Request Name Change</h3>
+        <p style="font-size:0.8rem; color:#5b6f86;">Your full name shows up throughout the app, so this needs an admin to approve it first.</p>
+        <input type="text" id="rncNewName" placeholder="Your correct full name" autocomplete="name">
+        <p id="rncError" style="color:#b91c1c; font-size:0.8rem; display:none; margin-top:0.6rem;"></p>
+        <div class="modal-actions">
+            <button class="btn btn-outline" id="cancelRncBtn">Cancel</button>
+            <button class="btn btn-primary" id="confirmRncBtn"><i class="fas fa-paper-plane"></i> Send Request</button>
         </div>
     </div>
 </div>
@@ -763,20 +898,6 @@
         <div class="modal-actions">
             <button class="btn btn-outline" id="cancelCpBtn">Cancel</button>
             <button class="btn btn-primary" id="confirmCpBtn"><i class="fas fa-check"></i> Update Password</button>
-        </div>
-    </div>
-</div>
-
-<!-- SELF DISMISS FROM ADMIN MODAL -->
-<div class="modal-overlay" id="selfDismissAdminModal">
-    <div class="modal-box">
-        <h3><i class="fas fa-user-minus" style="color:#0a2a44;"></i> Dismiss Yourself as Admin?</h3>
-        <p>Enter your password to confirm. You'll lose admin access immediately.</p>
-        <input type="password" id="selfDismissPasswordInput" placeholder="Your password" autocomplete="current-password" style="letter-spacing:normal;">
-        <p id="selfDismissError" style="color:#b91c1c; font-size:0.8rem; display:none; margin-top:0.6rem;"></p>
-        <div class="modal-actions">
-            <button class="btn btn-outline" id="cancelSelfDismissBtn">Cancel</button>
-            <button class="btn btn-danger" id="confirmSelfDismissBtn"><i class="fas fa-user-minus"></i> Dismiss Me</button>
         </div>
     </div>
 </div>
@@ -3066,7 +3187,10 @@
             const tbody = document.getElementById('repSummaryTableBody');
             tbody.innerHTML = '';
             // Uses real representative accounts (not old free-typed names)
-            const reps = (activeRepsData || []).slice().sort((a, b) => a.full_name.localeCompare(b.full_name));
+            const reps = (activeRepsData || []).slice().sort((a, b) => {
+                if (a.role !== b.role) return a.role === 'admin' ? -1 : 1;
+                return a.full_name.localeCompare(b.full_name);
+            });
             if (reps.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#8a9bb0;">No representative accounts yet.</td></tr>';
                 return;
@@ -3086,7 +3210,10 @@
         function renderLiveActivity() {
             const tbody = document.getElementById('liveActivityTableBody');
             const rows = filterRowsByPeriod(liveActivityRawData, adminActivityPeriod);
-            renderActivityRows(tbody, rows, null, true);
+            const canDelete = !!(currentUser && currentUser.is_protected);
+            renderActivityRows(tbody, rows, null, canDelete);
+            const selectAllTh = document.getElementById('activitySelectAll');
+            if (selectAllTh) selectAllTh.closest('th').style.display = canDelete ? '' : 'none';
             renderNotificationSummary();
         }
 
@@ -3100,43 +3227,21 @@
         async function deleteSelectedActivity() {
             const ids = [...selectedActivityIds];
             if (ids.length === 0) return;
-            const headers = { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 'Prefer': 'return=representation' };
-            const nowIso = new Date().toISOString();
+            if (!currentUser || !currentUser.is_protected) { showToast('Only the account owner can delete log entries', 'error'); return; }
             let deletedCount = 0;
-            let blockedCount = 0;
-            const softDeletedIds = [];
-            for (const id of ids) {
-                const item = liveActivityRawData.find(d => String(d.id) === String(id)) || activityLogData.find(d => String(d.id) === String(id));
-                if (!item) continue;
-                try {
-                    const result = await queueOrRun(`Remove log entry for "${item.alumni_name}"`, async () => {
-                        const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, {
-                            method: 'PATCH', headers, body: JSON.stringify({ deleted_at: nowIso })
-                        });
-                        if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
-                        const updatedRows = await response.json().catch(() => []);
-                        if (!updatedRows || updatedRows.length === 0) throw new Error('BLOCKED');
-                    });
-                    if (!result.queued) {
-                        deletedCount++;
-                    }
-                    softDeletedIds.push(String(id));
-                } catch (err) {
-                    if (err.message === 'BLOCKED') {
-                        blockedCount++;
-                        console.warn(`Delete for "${item.alumni_name}" removed nothing server-side — check delete/update permissions (RLS) on ammsul_activity_log.`);
-                    } else {
-                        console.warn('Could not delete activity entry:', err);
-                    }
-                }
+            try {
+                await rpc('rep_soft_delete_activity_log', { p_admin_id: currentUser.id, p_ids: ids });
+                deletedCount = ids.length;
+            } catch (err) {
+                showToast(err.message, 'error');
             }
+            const softDeletedIds = ids.map(String);
             selectedActivityIds.clear();
             liveActivityRawData = liveActivityRawData.filter(d => !softDeletedIds.includes(String(d.id)));
             activityLogData = activityLogData.filter(d => !softDeletedIds.includes(String(d.id)));
             renderLiveActivity();
             renderActivityTable();
             if (deletedCount > 0) showToast(`${deletedCount} log entr${deletedCount === 1 ? 'y' : 'ies'} removed. View them in the Activity Recycle Bin.`, 'success');
-            if (blockedCount > 0) showToast(`${blockedCount} entr${blockedCount === 1 ? 'y' : 'ies'} could not be deleted — the database blocked it. Check delete permissions (RLS) on ammsul_activity_log.`, 'error');
         }
 
         const ACTIVITY_RECYCLE_RETENTION_DAYS = 30;
@@ -3161,15 +3266,13 @@
             const cutoff = Date.now() - ACTIVITY_RECYCLE_RETENTION_DAYS * 24 * 60 * 60 * 1000;
             const expired = items.filter(item => item.deleted_at && new Date(item.deleted_at).getTime() < cutoff);
             if (expired.length === 0) return items;
-            const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
-            for (const item of expired) {
-                try {
-                    await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${item.id}`, { method: 'DELETE', headers });
-                } catch (err) {
-                    console.warn('Auto-purge failed for log entry', item.id, err);
-                }
+            try {
+                await rpc('rep_auto_purge_old_activity_log', {});
+                showToast(`${expired.length} log entr${expired.length === 1 ? 'y' : 'ies'} auto-purged after 30 days in the Activity Recycle Bin.`, 'info');
+            } catch (err) {
+                console.warn('Auto-purge failed:', err);
+                return items; // couldn't purge server-side, keep showing them
             }
-            if (expired.length > 0) showToast(`${expired.length} log entr${expired.length === 1 ? 'y' : 'ies'} auto-purged after 30 days in the Activity Recycle Bin.`, 'info');
             const expiredIds = new Set(expired.map(e => String(e.id)));
             return items.filter(item => !expiredIds.has(String(item.id)));
         }
@@ -3189,15 +3292,16 @@
                 updateActivityRecycleBulkBar();
                 return;
             }
+            const canDelete = !!(currentUser && currentUser.is_protected);
             tbody.innerHTML = activityRecycleData.map(item => `
                 <tr>
-                    <td style="text-align:center;"><input type="checkbox" class="activity-recycle-checkbox" data-id="${item.id}" ${selectedActivityRecycleIds.has(String(item.id)) ? 'checked' : ''}></td>
+                    <td style="text-align:center;">${canDelete ? `<input type="checkbox" class="activity-recycle-checkbox" data-id="${item.id}" ${selectedActivityRecycleIds.has(String(item.id)) ? 'checked' : ''}>` : ''}</td>
                     <td>${formatDate(item.created_at)}</td>
                     <td>${item.alumni_name || ''}</td>
                     <td>${item.action || ''}</td>
                     <td style="white-space:nowrap;">
-                        <button class="delete-btn" style="color:#2a7a4d;" title="Restore" data-restore="${item.id}"><i class="fas fa-trash-restore"></i></button>
-                        <button class="delete-btn" title="Delete permanently" data-purge="${item.id}"><i class="fas fa-trash-alt"></i></button>
+                        ${canDelete ? `<button class="delete-btn" style="color:#2a7a4d;" title="Restore" data-restore="${item.id}"><i class="fas fa-trash-restore"></i></button>
+                        <button class="delete-btn" title="Delete permanently" data-purge="${item.id}"><i class="fas fa-trash-alt"></i></button>` : ''}
                     </td>
                 </tr>
             `).join('');
@@ -3228,14 +3332,11 @@
         }
 
         async function restoreActivityEntry(id) {
+            if (!currentUser || !currentUser.is_protected) { showToast('Only the account owner can restore log entries', 'error'); return; }
             const item = activityRecycleData.find(i => String(i.id) === String(id));
             if (!item) return;
             try {
-                const headers = { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, {
-                    method: 'PATCH', headers, body: JSON.stringify({ deleted_at: null })
-                });
-                if (!response.ok) throw new Error(`Restore failed: ${response.status}`);
+                await rpc('rep_restore_activity_log', { p_admin_id: currentUser.id, p_ids: [id] });
                 activityRecycleData = activityRecycleData.filter(i => String(i.id) !== String(id));
                 selectedActivityRecycleIds.delete(String(id));
                 renderActivityRecycleTable();
@@ -3244,25 +3345,22 @@
                 await fetchLiveActivity();
                 showToast('Log entry restored.', 'success');
             } catch (err) {
-                console.error('Could not restore log entry:', err);
-                showToast('Could not restore log entry.', 'error');
+                showToast(err.message, 'error');
             }
         }
 
         async function purgeActivityEntry(id) {
+            if (!currentUser || !currentUser.is_protected) { showToast('Only the account owner can permanently delete log entries', 'error'); return; }
             if (!confirm('Permanently delete this log entry? This cannot be undone.')) return;
             try {
-                const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, { method: 'DELETE', headers });
-                if (!response.ok) throw new Error(`Permanent delete failed: ${response.status}`);
+                await rpc('rep_purge_activity_log', { p_admin_id: currentUser.id, p_ids: [id] });
                 activityRecycleData = activityRecycleData.filter(i => String(i.id) !== String(id));
                 selectedActivityRecycleIds.delete(String(id));
                 renderActivityRecycleTable();
                 updateActivityRecycleCount();
                 showToast('Log entry permanently cleared.', 'success');
             } catch (err) {
-                console.error('Could not permanently delete log entry:', err);
-                showToast('Could not permanently delete log entry.', 'error');
+                showToast(err.message, 'error');
             }
         }
 
@@ -3274,14 +3372,13 @@
         async function bulkPurgeActivityRecycle() {
             const ids = [...selectedActivityRecycleIds];
             if (ids.length === 0) return;
+            if (!currentUser || !currentUser.is_protected) { showToast('Only the account owner can permanently delete log entries', 'error'); return; }
             if (!confirm(`Permanently delete ${ids.length} log entr${ids.length === 1 ? 'y' : 'ies'}? This cannot be undone.`)) return;
-            const headers = { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` };
-            for (const id of ids) {
-                try {
-                    await fetch(`${SUPABASE_URL}/rest/v1/ammsul_activity_log?id=eq.${id}`, { method: 'DELETE', headers });
-                } catch (err) {
-                    console.warn('Could not permanently delete log entry:', id, err);
-                }
+            try {
+                await rpc('rep_purge_activity_log', { p_admin_id: currentUser.id, p_ids: ids });
+            } catch (err) {
+                showToast(err.message, 'error');
+                return;
             }
             activityRecycleData = activityRecycleData.filter(i => !ids.includes(String(i.id)));
             selectedActivityRecycleIds.clear();
@@ -3518,23 +3615,23 @@
                 navItems.forEach(function(item) { item.classList.toggle('active', item.dataset.target === targetId); });
                 tabButtons.forEach(function(btn) { btn.classList.toggle('active', btn.dataset.target === targetId); });
                 closeNav();
-                setTimeout(function() {
-                    const targetSection = document.getElementById(targetId);
-                    if (targetSection) targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 50);
                 if (targetId === 'recycleSection') loadRecycleBin();
                 if (targetId === 'activitySection') loadActivityLog();
-                if (targetId === 'adminSection') {
-                    showAdminPage();
-                    if (!adminUnlocked) {
-                        setTimeout(function() {
-                            const lockedBox = document.getElementById('adminLocked');
-                            if (lockedBox) lockedBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            const pwInput = document.getElementById('adminPasswordInput');
-                            if (pwInput) pwInput.focus({ preventScroll: true });
-                        }, 150);
+                if (targetId === 'adminSection') { showAdminPage(); } else { stopLiveActivityPolling(); stopAdminAutoRefresh(); }
+
+                // Land directly on the section's content (not just page top),
+                // and jump straight into the admin password box if it's showing.
+                setTimeout(function() {
+                    const target = document.getElementById(targetId);
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    if (targetId === 'adminSection') {
+                        const locked = document.getElementById('adminLocked');
+                        const pwInput = document.getElementById('adminPasswordInput');
+                        if (pwInput && locked && locked.style.display !== 'none') {
+                            setTimeout(function() { pwInput.focus(); }, 350);
+                        }
                     }
-                } else { stopLiveActivityPolling(); stopAdminAutoRefresh(); }
+                }, 30);
             }
 
             window.switchPage = switchPage;
@@ -3823,6 +3920,15 @@
             userBadgeName.textContent = currentUser.full_name;
             const notifBellBtn = document.getElementById('notifBellBtn');
             const notifNavBtn = document.getElementById('notifNavBtn');
+            const canDeleteActivity = !!(currentUser && currentUser.is_protected);
+            const activityBulkDeleteBtn = document.getElementById('activityBulkDeleteBtn');
+            const openActivityRecycleBtn = document.getElementById('openActivityRecycleBtn');
+            const activityRecycleRestoreBtn = document.getElementById('activityRecycleRestoreBtn');
+            const activityRecyclePermDeleteBtn = document.getElementById('activityRecyclePermDeleteBtn');
+            if (activityBulkDeleteBtn) activityBulkDeleteBtn.style.display = canDeleteActivity ? '' : 'none';
+            if (openActivityRecycleBtn) openActivityRecycleBtn.style.display = canDeleteActivity ? '' : 'none';
+            if (activityRecycleRestoreBtn) activityRecycleRestoreBtn.style.display = canDeleteActivity ? '' : 'none';
+            if (activityRecyclePermDeleteBtn) activityRecyclePermDeleteBtn.style.display = canDeleteActivity ? '' : 'none';
             if (currentUser.role === 'admin') {
                 userBadgeRole.style.display = 'inline-block';
                 document.getElementById('adminNavBtn').style.display = '';
@@ -3911,15 +4017,33 @@
             }
         });
 
+        // Show the "Current Password" field only when the typed username
+        // turns out to belong to the protected account — checked with a
+        // short debounce so it doesn't fire on every keystroke.
+        let fpUsernameCheckTimer = null;
+        document.getElementById('fpUsername').addEventListener('input', function() {
+            const username = this.value.trim();
+            clearTimeout(fpUsernameCheckTimer);
+            const wrap = document.getElementById('fpCurrentPasswordWrap');
+            if (!username) { wrap.style.display = 'none'; return; }
+            fpUsernameCheckTimer = setTimeout(async function() {
+                try {
+                    const needsPassword = await rpc('rep_username_requires_current_password', { p_username: username });
+                    wrap.style.display = needsPassword ? 'block' : 'none';
+                } catch (err) { /* fail quiet — not critical */ }
+            }, 400);
+        });
+
         document.getElementById('fpRequestBtn').addEventListener('click', async function() {
             clearAuthMsg();
             const username = document.getElementById('fpUsername').value.trim();
+            const currentPw = document.getElementById('fpCurrentPassword').value;
             if (!username) { showAuthMsg('Enter your username first', 'error'); return; }
             const btn = this;
             btn.disabled = true;
             try {
-                await rpc('rep_request_password_reset', { p_username: username });
-                showAuthMsg('If that account exists, your request has been sent to an admin. Come back here once it\'s approved to set a new password.', 'success');
+                await rpc('rep_request_password_reset', { p_username: username, p_current_password: currentPw || null });
+                showAuthMsg('If that account exists and no request is already pending, it has been sent to an admin. Once approved, come back here and set a new password in Step 2.', 'success');
             } catch (err) {
                 showAuthMsg(err.message, 'error');
             } finally {
@@ -3959,7 +4083,9 @@
         document.getElementById('cancelLogoutBtn').addEventListener('click', function() {
             logoutConfirmModal.classList.remove('active');
         });
-        document.getElementById('confirmLogoutBtn').addEventListener('click', function() {
+        document.getElementById('confirmLogoutBtn').addEventListener('click', async function() {
+            const btn = this;
+            btn.disabled = true;
             localStorage.removeItem(SESSION_KEY);
             location.reload();
         });
@@ -4008,16 +4134,18 @@
         async function pollAdminNotifications() {
             if (!currentUser || currentUser.role !== 'admin') return;
             try {
-                const [pending, pwreq] = await Promise.all([
+                const [pending, pwreq, namereq] = await Promise.all([
                     rpc('rep_admin_list_pending', { p_admin_id: currentUser.id }),
-                    rpc('rep_admin_list_password_requests', { p_admin_id: currentUser.id })
+                    rpc('rep_admin_list_password_requests', { p_admin_id: currentUser.id }),
+                    rpc('rep_admin_list_name_requests', { p_admin_id: currentUser.id })
                 ]);
                 // Keep these in sync here too (not just when the Admin
                 // dashboard is opened) so the notification bell/panel work
                 // fully on their own, with no PIN or dashboard visit needed.
                 pendingReqData = pending || [];
                 pwReqData = pwreq || [];
-                updateNotifBadge(pendingReqData.length + pwReqData.length);
+                nameReqData = namereq || [];
+                updateNotifBadge(pendingReqData.length + pwReqData.length + nameReqData.length);
             } catch (err) { console.warn('Notification check failed:', err); }
         }
 
@@ -4050,17 +4178,19 @@
             const items = [];
             (pendingReqData || []).forEach(function(r) { items.push({ type: 'signup', id: r.id, name: r.full_name, time: r.created_at }); });
             (pwReqData || []).forEach(function(r) { items.push({ type: 'password', id: r.id, name: r.full_name, time: r.requested_at }); });
+            (nameReqData || []).forEach(function(r) { items.push({ type: 'name', id: r.id, name: r.old_full_name, newName: r.new_full_name, time: r.requested_at }); });
             items.sort(function(a, b) { return new Date(b.time) - new Date(a.time); });
             if (items.length === 0) {
                 list.innerHTML = '<div class="notif-empty"><i class="fas fa-check-circle" style="font-size:1.4rem; color:#2a7a4d;"></i><div style="margin-top:0.5rem;">All caught up — no pending items.</div></div>';
                 return;
             }
             list.innerHTML = items.map(function(item) {
-                const icon = item.type === 'signup' ? 'fa-user-clock' : 'fa-key';
+                const icon = item.type === 'signup' ? 'fa-user-clock' : (item.type === 'password' ? 'fa-key' : 'fa-signature');
                 const iconClass = item.type === 'signup' ? '' : 'pw';
-                const text = item.type === 'signup'
-                    ? `<strong>${escapeHtml(item.name)}</strong> requested an account`
-                    : `<strong>${escapeHtml(item.name)}</strong> requested a password reset`;
+                let text;
+                if (item.type === 'signup') text = `<strong>${escapeHtml(item.name)}</strong> requested an account`;
+                else if (item.type === 'password') text = `<strong>${escapeHtml(item.name)}</strong> requested a password reset`;
+                else text = `<strong>${escapeHtml(item.name)}</strong> wants to be renamed to "${escapeHtml(item.newName)}"`;
                 return `<div class="notif-item" data-notif-type="${item.type}" data-notif-id="${item.id}">
                     <div class="notif-icon ${iconClass}"><i class="fas ${icon}"></i></div>
                     <div>
@@ -4081,13 +4211,12 @@
 
         function goToNotification(type, id) {
             if (typeof window.switchPage === 'function') window.switchPage('adminSection');
-            if (!adminUnlocked) return; // switchPage already scrolled to the password field
             setTimeout(function() {
-                const subpageId = type === 'signup' ? 'adminRequestsPage' : 'adminPwReqPage';
+                const subpageId = type === 'signup' ? 'adminRequestsPage' : (type === 'password' ? 'adminPwReqPage' : 'adminNameReqPage');
                 const subBtn = document.querySelector(`#adminSubnav button[data-subpage="${subpageId}"]`);
                 if (subBtn) subBtn.click();
                 setTimeout(function() {
-                    const selector = type === 'signup' ? `[data-approve="${id}"]` : `[data-pw-approve="${id}"]`;
+                    const selector = type === 'signup' ? `[data-approve="${id}"]` : (type === 'password' ? `[data-pw-approve="${id}"]` : `[data-name-approve="${id}"]`);
                     const actionBtn = document.querySelector(selector);
                     const tr = actionBtn ? actionBtn.closest('tr') : null;
                     if (tr) {
@@ -4100,7 +4229,18 @@
 
         // ================= ADMIN: ACCOUNT MANAGEMENT =================
         let pwReqData = [];
+        let loginLogRawData = [];
+        let loginLogPeriod = 'all';
+        let loginLogSearchTerm = '';
+        let actionLogData = [];
+        let actionLogPeriod = 'all';
+        let actionLogSearchTerm = '';
+        let actionLogTypeFilterValue = '';
+        let deletedActionLogData = [];
+        let selectedActionLogIds = new Set();
+        let selectedActionLogRecycleIds = new Set();
         let pendingReqData = [];
+        let nameReqData = [];
         let activeRepsData = [];
         let deletedRepsData = [];
         let selectedRepRecycleIds = new Set();
@@ -4121,6 +4261,10 @@
                 renderPendingRequests();
             } catch (err) { console.warn('Could not load pending requests:', err); }
             try {
+                nameReqData = await rpc('rep_admin_list_name_requests', { p_admin_id: currentUser.id }) || [];
+                renderNameRequests();
+            } catch (err) { console.warn('Could not load name change requests:', err); }
+            try {
                 activeRepsData = await rpc('rep_admin_list_active', { p_admin_id: currentUser.id }) || [];
                 renderActiveReps();
                 renderRepSummary();
@@ -4130,30 +4274,39 @@
                 renderDeletedReps();
             } catch (err) { console.warn('Could not load deleted accounts:', err); }
             try {
-                const logs = await rpc('rep_admin_login_log', { p_admin_id: currentUser.id, p_limit: 200 }) || [];
-                renderLoginLog(logs);
+                loginLogRawData = await rpc('rep_admin_login_log', { p_admin_id: currentUser.id, p_limit: 300 }) || [];
+                renderLoginLog();
             } catch (err) { console.warn('Could not load login log:', err); }
             try {
                 pwReqData = await rpc('rep_admin_list_password_requests', { p_admin_id: currentUser.id }) || [];
                 renderPwRequests();
             } catch (err) { console.warn('Could not load password requests:', err); }
-            updateNotifBadge(pendingReqData.length + pwReqData.length);
+            try {
+                actionLogData = await rpc('rep_admin_list_action_log', { p_admin_id: currentUser.id, p_limit: 300 }) || [];
+                renderActionLog();
+            } catch (err) { console.warn('Could not load admin action log:', err); }
+            if (currentUser.is_protected) {
+                try {
+                    deletedActionLogData = await rpc('rep_admin_list_deleted_action_log', { p_admin_id: currentUser.id }) || [];
+                    renderActionLogRecycle();
+                } catch (err) { console.warn('Could not load admin log recycle bin:', err); }
+            }
+            updateNotifBadge(pendingReqData.length + pwReqData.length + nameReqData.length);
         }
 
         function renderPendingRequests() {
             const tbody = document.getElementById('reqTableBody');
             const badge = document.getElementById('pendingReqCount');
             document.getElementById('reqRowCount').textContent = pendingReqData.length;
-            if (pendingReqData.length > 0) { badge.style.display = 'inline-block'; badge.textContent = pendingReqData.length; }
+            if (pendingReqData.length > 0) { badge.style.display = 'inline-flex'; badge.textContent = pendingReqData.length; }
             else { badge.style.display = 'none'; }
             if (pendingReqData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#8a9bb0;">No pending requests.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#8a9bb0;">No pending requests.</td></tr>';
                 return;
             }
             tbody.innerHTML = pendingReqData.map(function(r) {
                 return `<tr>
                     <td>${escapeHtml(r.full_name)}</td>
-                    <td>${escapeHtml(r.username)}</td>
                     <td>${formatDate(r.created_at)}</td>
                     <td>
                         <button class="btn btn-success" style="font-size:0.72rem; padding:0.35rem 0.6rem;" data-approve="${r.id}"><i class="fas fa-check"></i> Approve</button>
@@ -4178,23 +4331,64 @@
             });
         }
 
+        function renderNameRequests() {
+            const tbody = document.getElementById('nameReqTableBody');
+            const badge = document.getElementById('pendingNameReqCount');
+            document.getElementById('nameReqRowCount').textContent = nameReqData.length;
+            if (nameReqData.length > 0) { badge.style.display = 'inline-flex'; badge.textContent = nameReqData.length; }
+            else { badge.style.display = 'none'; }
+            if (nameReqData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#8a9bb0;">No pending name change requests.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = nameReqData.map(function(r) {
+                return `<tr>
+                    <td>${escapeHtml(r.old_full_name)}</td>
+                    <td>${escapeHtml(r.new_full_name)}</td>
+                    <td>${formatDate(r.requested_at)}</td>
+                    <td>
+                        <button class="btn btn-success" style="font-size:0.72rem; padding:0.35rem 0.6rem;" data-name-approve="${r.id}"><i class="fas fa-check"></i> Approve</button>
+                        <button class="btn btn-outline" style="font-size:0.72rem; padding:0.35rem 0.6rem;" data-name-deny="${r.id}"><i class="fas fa-xmark"></i> Deny</button>
+                    </td>
+                </tr>`;
+            }).join('');
+            tbody.querySelectorAll('[data-name-approve]').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    btn.disabled = true;
+                    try { await rpc('rep_admin_approve_name_change', { p_admin_id: currentUser.id, p_request_id: btn.dataset.nameApprove }); showToast('Name change approved', 'success'); await loadAccountAdminData(); }
+                    catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
+                });
+            });
+            tbody.querySelectorAll('[data-name-deny]').forEach(function(btn) {
+                btn.addEventListener('click', async function() {
+                    if (!confirm('Deny this name change request?')) return;
+                    btn.disabled = true;
+                    try { await rpc('rep_admin_deny_name_change', { p_admin_id: currentUser.id, p_request_id: btn.dataset.nameDeny }); showToast('Request denied', 'info'); await loadAccountAdminData(); }
+                    catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
+                });
+            });
+        }
+
         function renderPwRequests() {
             const tbody = document.getElementById('pwReqTableBody');
             const badge = document.getElementById('pendingPwReqCount');
             document.getElementById('pwReqRowCount').textContent = pwReqData.length;
-            if (pwReqData.length > 0) { badge.style.display = 'inline-block'; badge.textContent = pwReqData.length; }
+            if (pwReqData.length > 0) { badge.style.display = 'inline-flex'; badge.textContent = pwReqData.length; }
             else { badge.style.display = 'none'; }
             if (pwReqData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#8a9bb0;">No pending password requests.</td></tr>';
                 return;
             }
             tbody.innerHTML = pwReqData.map(function(r) {
+                const progress = r.status === 'pending_second'
+                    ? '<div style="font-size:0.7rem; color:#8a5a06; margin-top:0.2rem;"><i class="fas fa-user-check"></i> 1 of 2 admins approved</div>'
+                    : '';
+                const approveDisabled = r.first_approved_by_me ? 'disabled title="You already approved this — a different admin must confirm it"' : '';
                 return `<tr>
-                    <td>${escapeHtml(r.full_name)}</td>
-                    <td>${escapeHtml(r.username)}</td>
+                    <td>${escapeHtml(r.full_name)}${progress}</td>
                     <td>${formatDate(r.requested_at)}</td>
                     <td>
-                        <button class="btn btn-success" style="font-size:0.72rem; padding:0.35rem 0.6rem;" data-pw-approve="${r.id}"><i class="fas fa-check"></i> Approve</button>
+                        <button class="btn btn-success" style="font-size:0.72rem; padding:0.35rem 0.6rem;" data-pw-approve="${r.id}" ${approveDisabled}><i class="fas fa-check"></i> ${r.status === 'pending_second' ? 'Confirm' : 'Approve'}</button>
                         <button class="btn btn-outline" style="font-size:0.72rem; padding:0.35rem 0.6rem;" data-pw-deny="${r.id}"><i class="fas fa-xmark"></i> Deny</button>
                     </td>
                 </tr>`;
@@ -4202,8 +4396,12 @@
             tbody.querySelectorAll('[data-pw-approve]').forEach(function(btn) {
                 btn.addEventListener('click', async function() {
                     btn.disabled = true;
-                    try { await rpc('rep_admin_approve_password_request', { p_admin_id: currentUser.id, p_request_id: btn.dataset.pwApprove }); showToast('Reset approved — they can now set a new password', 'success'); await loadAccountAdminData(); }
-                    catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
+                    try {
+                        const result = await rpc('rep_admin_approve_password_request', { p_admin_id: currentUser.id, p_request_id: btn.dataset.pwApprove });
+                        const fullyApproved = result && result.fully_approved;
+                        showToast(fullyApproved ? 'Approved — they can now set a new password' : 'Your approval is recorded. A second, different admin still needs to confirm.', 'success');
+                        await loadAccountAdminData();
+                    } catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
                 });
             });
             tbody.querySelectorAll('[data-pw-deny]').forEach(function(btn) {
@@ -4216,65 +4414,57 @@
             });
         }
 
-        const PROTECTED_MANAGER_USERNAME = 'kennis';
-        function isProtectedManager(r) {
-            if (!r) return false;
-            const uname = (r.username || '').trim().toLowerCase();
-            const fname = (r.full_name || '').trim().toLowerCase();
-            return uname === PROTECTED_MANAGER_USERNAME || fname === 'dede kennis kalu';
-        }
-
         function renderActiveReps() {
             const tbody = document.getElementById('repsTableBody');
             document.getElementById('repsRowCount').textContent = activeRepsData.length;
             if (activeRepsData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#8a9bb0;">No representatives yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#8a9bb0;">No representatives yet.</td></tr>';
                 return;
             }
-            const sortedReps = [...activeRepsData].sort(function(a, b) {
-                const roleA = (isProtectedManager(a) && a.id !== currentUser.id) ? 'rep' : a.role;
-                const roleB = (isProtectedManager(b) && b.id !== currentUser.id) ? 'rep' : b.role;
-                if (roleA !== roleB) return roleA === 'admin' ? -1 : 1;
-                return (a.full_name || '').localeCompare(b.full_name || '');
+            const sorted = activeRepsData.slice().sort(function(a, b) {
+                if (a.role !== b.role) return a.role === 'admin' ? -1 : 1; // admins first
+                return a.full_name.localeCompare(b.full_name);
             });
-            tbody.innerHTML = sortedReps.map(function(r) {
+            tbody.innerHTML = sorted.map(function(r) {
                 const isSelf = r.id === currentUser.id;
-                const isProtected = isProtectedManager(r);
-                const displayRole = (isProtected && !isSelf) ? 'rep' : r.role;
-                let roleBtn;
-                if (isProtected && isSelf) {
-                    roleBtn = `<button class="delete-btn" style="color:#0a2a44;" title="Dismiss yourself from admin" data-rep-role="${r.id}" data-rep-newrole="rep" data-rep-name="${escapeHtml(r.full_name)}" data-self-dismiss="1"><i class="fas fa-user-minus"></i></button>`;
-                } else if (isProtected && !isSelf) {
+                const isProtectedSelf = isSelf && currentUser.is_protected;
+                const isOtherProtected = !isSelf && r.is_protected; // don't even show the buttons
+                let roleBtn = '';
+                if (isOtherProtected) {
                     roleBtn = '';
-                } else if (isSelf && r.role === 'admin') {
-                    roleBtn = '';
-                } else {
-                    roleBtn = `<button class="delete-btn" style="color:#0a2a44;" title="${r.role === 'admin' ? 'Remove admin role' : 'Make admin'}" data-rep-role="${r.id}" data-rep-newrole="${r.role === 'admin' ? 'rep' : 'admin'}" data-rep-name="${escapeHtml(r.full_name)}"><i class="fas ${r.role === 'admin' ? 'fa-user-minus' : 'fa-user-shield'}"></i></button>`;
+                } else if (!(isSelf && r.role === 'admin') || isProtectedSelf) {
+                    const label = isProtectedSelf ? 'Step down as admin' : (r.role === 'admin' ? 'Remove admin role' : 'Make admin');
+                    roleBtn = `<button class="delete-btn" style="color:#0a2a44;" title="${label}" data-rep-role="${r.id}" data-rep-newrole="${r.role === 'admin' ? 'rep' : 'admin'}" data-rep-name="${escapeHtml(r.full_name)}" data-rep-self="${isSelf ? '1' : '0'}"><i class="fas ${r.role === 'admin' ? 'fa-user-minus' : 'fa-user-shield'}"></i></button>`;
                 }
-                const deleteBtn = (isSelf || (isProtected && !isSelf)) ? '' : `<button class="delete-btn" title="Delete account" data-rep-delete="${r.id}" data-rep-name="${escapeHtml(r.full_name)}" data-rep-username="${escapeHtml(r.username)}"><i class="fas fa-trash-alt"></i></button>`;
+                const deleteBtn = (isSelf || isOtherProtected) ? '' : `<button class="delete-btn" title="Delete account" data-rep-delete="${r.id}" data-rep-name="${escapeHtml(r.full_name)}"><i class="fas fa-trash-alt"></i></button>`;
                 return `<tr>
                     <td>${escapeHtml(r.full_name)}</td>
-                    <td>${escapeHtml(r.username)}</td>
-                    <td><span class="pill-badge ${displayRole}">${displayRole}</span></td>
+                    <td><span class="pill-badge ${r.role}">${r.role}</span></td>
                     <td>${r.last_login_at ? formatDate(r.last_login_at) : 'Never'}</td>
                     <td>${roleBtn}${deleteBtn}${isSelf ? '<span style="color:#8a9bb0; font-size:0.72rem; display:block;">You</span>' : ''}</td>
                 </tr>`;
             }).join('');
             tbody.querySelectorAll('[data-rep-role]').forEach(function(btn) {
                 btn.addEventListener('click', async function() {
-                    if (btn.dataset.selfDismiss === '1') {
+                    const newRole = btn.dataset.repNewrole;
+                    const isSelfBtn = btn.dataset.repSelf === '1';
+                    if (isSelfBtn) {
                         document.getElementById('selfDismissPasswordInput').value = '';
                         document.getElementById('selfDismissError').style.display = 'none';
                         document.getElementById('selfDismissAdminModal').classList.add('active');
                         return;
                     }
-                    const newRole = btn.dataset.repNewrole;
-                    const label = newRole === 'admin' ? 'give admin access to' : 'remove admin access from';
-                    if (!confirm(`Are you sure you want to ${label} ${btn.dataset.repName}?`)) return;
+                    const label = newRole === 'admin' ? `give admin access to ${btn.dataset.repName}` : `remove admin access from ${btn.dataset.repName}`;
+                    if (!confirm(`Are you sure you want to ${label}?`)) return;
                     btn.disabled = true;
                     try {
                         await rpc('rep_admin_set_role', { p_admin_id: currentUser.id, p_target_id: btn.dataset.repRole, p_role: newRole });
-                        showToast(`${btn.dataset.repName} is now ${newRole === 'admin' ? 'an admin' : 'a representative'}`, 'success');
+                        showToast(isSelfBtn ? 'You are now a representative' : `${btn.dataset.repName} is now ${newRole === 'admin' ? 'an admin' : 'a representative'}`, 'success');
+                        if (isSelfBtn) {
+                            currentUser.role = 'rep';
+                            localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+                            applyLoggedInUI();
+                        }
                         await loadAccountAdminData();
                     } catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
                 });
@@ -4283,7 +4473,6 @@
                 btn.addEventListener('click', function() {
                     repDeleteTargetId = btn.dataset.repDelete;
                     document.getElementById('repDeleteNamePreview').textContent = btn.dataset.repName;
-                    document.getElementById('repDeleteUsernamePreview').textContent = btn.dataset.repUsername;
                     document.getElementById('repDeleteModal').classList.add('active');
                 });
             });
@@ -4295,18 +4484,18 @@
             const validIds = new Set(deletedRepsData.map(function(d) { return d.id; }));
             [...selectedRepRecycleIds].forEach(function(id) { if (!validIds.has(id)) selectedRepRecycleIds.delete(id); });
             if (deletedRepsData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#8a9bb0;">Recycle bin is empty.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#8a9bb0;">Recycle bin is empty.</td></tr>';
             } else {
                 tbody.innerHTML = deletedRepsData.map(function(r) {
+                    const actions = r.is_protected
+                        ? ''
+                        : `<button class="delete-btn" style="color:#2a7a4d;" title="Restore" data-rep-restore="${r.id}"><i class="fas fa-trash-restore"></i></button>
+                           <button class="delete-btn" title="Delete permanently" data-rep-perm-delete="${r.id}" data-rep-name="${escapeHtml(r.full_name)}"><i class="fas fa-trash-alt"></i></button>`;
                     return `<tr>
                         <td><input type="checkbox" class="rep-recycle-checkbox" data-id="${r.id}" ${selectedRepRecycleIds.has(r.id) ? 'checked' : ''}></td>
                         <td>${escapeHtml(r.full_name)}</td>
-                        <td>${escapeHtml(r.username)}</td>
                         <td>${formatDate(r.deleted_at)}</td>
-                        <td>
-                            <button class="delete-btn" style="color:#2a7a4d;" title="Restore" data-rep-restore="${r.id}"><i class="fas fa-trash-restore"></i></button>
-                            <button class="delete-btn" title="Delete permanently" data-rep-perm-delete="${r.id}" data-rep-name="${escapeHtml(r.full_name)}"><i class="fas fa-trash-alt"></i></button>
-                        </td>
+                        <td>${actions}</td>
                     </tr>`;
                 }).join('');
             }
@@ -4344,13 +4533,221 @@
             if (selectAll) selectAll.checked = deletedRepsData.length > 0 && count === deletedRepsData.length;
         }
 
-        function renderLoginLog(logs) {
+        function renderLoginLog() {
+            let logs = filterRowsByPeriod(loginLogRawData, loginLogPeriod);
+            if (loginLogSearchTerm) {
+                const term = loginLogSearchTerm.toLowerCase();
+                logs = logs.filter(function(l) { return (l.full_name || '').toLowerCase().includes(term); });
+            }
             const tbody = document.getElementById('loginLogTableBody');
             document.getElementById('loginLogRowCount').textContent = logs.length;
             tbody.innerHTML = logs.length
-                ? logs.map(function(l) { return `<tr><td>${formatDate(l.created_at)}</td><td>${escapeHtml(l.full_name)}</td><td>${escapeHtml(l.username)}</td></tr>`; }).join('')
-                : '<tr><td colspan="3" style="text-align:center; color:#8a9bb0;">No logins recorded yet.</td></tr>';
+                ? logs.map(function(l) {
+                    return `<tr><td>${formatDate(l.created_at)}</td><td>${escapeHtml(l.full_name)}</td></tr>`;
+                }).join('')
+                : '<tr><td colspan="2" style="text-align:center; color:#8a9bb0;">No logins match this filter.</td></tr>';
         }
+        document.getElementById('loginLogSearch').addEventListener('input', function() {
+            loginLogSearchTerm = this.value.trim();
+            renderLoginLog();
+        });
+        document.getElementById('loginLogPeriodToggle').addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-period]');
+            if (!btn) return;
+            loginLogPeriod = btn.dataset.period;
+            this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b === btn); });
+            renderLoginLog();
+        });
+
+        function updateActionLogBulkBar() {
+            const bar = document.getElementById('actionLogBulkBar');
+            const count = selectedActionLogIds.size;
+            document.getElementById('actionLogBulkCount').textContent = `${count} selected`;
+            bar.classList.toggle('active', count > 0);
+        }
+
+        const ACTION_TYPE_LABELS = {
+            approve_signup: 'Approve Signup',
+            deny_signup: 'Deny Signup',
+            set_role: 'Role Change',
+            soft_delete_rep: 'Delete Account',
+            restore_rep: 'Restore Account',
+            permanent_delete_rep: 'Permanent Delete',
+            approve_password_request: 'Approve Password Reset',
+            deny_password_request: 'Deny Password Reset'
+        };
+
+        function renderActionLog() {
+            const tbody = document.getElementById('actionLogTableBody');
+            const headRow = document.getElementById('actionLogHeadRow');
+            const isOwner = !!(currentUser && currentUser.is_protected);
+
+            let filtered = filterRowsByPeriod(actionLogData, actionLogPeriod);
+            if (actionLogTypeFilterValue) {
+                filtered = filtered.filter(function(l) { return l.action_type === actionLogTypeFilterValue; });
+            }
+            if (actionLogSearchTerm) {
+                const term = actionLogSearchTerm.toLowerCase();
+                filtered = filtered.filter(function(l) {
+                    return (l.admin_full_name || '').toLowerCase().includes(term) || (l.description || '').toLowerCase().includes(term);
+                });
+            }
+
+            document.getElementById('actionLogRowCount').textContent = filtered.length;
+            document.getElementById('actionLogOwnerControls').style.display = isOwner ? 'block' : 'none';
+            if (!isOwner) document.getElementById('actionLogBulkBar').classList.remove('active');
+
+            const validIds = new Set(actionLogData.map(function(l) { return l.id; }));
+            [...selectedActionLogIds].forEach(function(id) { if (!validIds.has(id)) selectedActionLogIds.delete(id); });
+
+            headRow.innerHTML = isOwner
+                ? '<th style="width:30px;"><input type="checkbox" id="actionLogSelectAll"></th><th>Time</th><th>Admin</th><th>Type</th><th>Details</th><th style="width:44px;"></th>'
+                : '<th>Time</th><th>Admin</th><th>Type</th><th>Details</th>';
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${isOwner ? 6 : 4}" style="text-align:center; color:#8a9bb0;">No admin actions match this filter.</td></tr>`;
+            } else {
+                tbody.innerHTML = filtered.map(function(l) {
+                    const checkboxCell = isOwner ? `<td><input type="checkbox" class="action-log-checkbox" data-id="${l.id}" ${selectedActionLogIds.has(l.id) ? 'checked' : ''}></td>` : '';
+                    const deleteCell = isOwner ? `<td><button class="delete-btn" style="color:#8a5a06;" title="Archive entry" data-log-delete="${l.id}"><i class="fas fa-box-archive"></i></button></td>` : '';
+                    const typeLabel = ACTION_TYPE_LABELS[l.action_type] || l.action_type || '';
+                    return `<tr>${checkboxCell}<td>${formatDate(l.created_at)}</td><td>${escapeHtml(l.admin_full_name)}</td><td>${escapeHtml(typeLabel)}</td><td>${escapeHtml(l.description)}</td>${deleteCell}</tr>`;
+                }).join('');
+            }
+
+            if (isOwner) {
+                const selectAll = document.getElementById('actionLogSelectAll');
+                if (selectAll) {
+                    selectAll.checked = filtered.length > 0 && filtered.every(function(l) { return selectedActionLogIds.has(l.id); });
+                    selectAll.addEventListener('change', function() {
+                        if (this.checked) filtered.forEach(function(l) { selectedActionLogIds.add(l.id); });
+                        else filtered.forEach(function(l) { selectedActionLogIds.delete(l.id); });
+                        renderActionLog();
+                    });
+                }
+                tbody.querySelectorAll('.action-log-checkbox').forEach(function(cb) {
+                    cb.addEventListener('change', function() {
+                        if (this.checked) selectedActionLogIds.add(this.dataset.id); else selectedActionLogIds.delete(this.dataset.id);
+                        updateActionLogBulkBar();
+                    });
+                });
+                tbody.querySelectorAll('[data-log-delete]').forEach(function(btn) {
+                    btn.addEventListener('click', async function() {
+                        if (!confirm('Archive this log entry? It can be restored later.')) return;
+                        btn.disabled = true;
+                        try { await rpc('rep_admin_delete_action_log_entries', { p_admin_id: currentUser.id, p_ids: [btn.dataset.logDelete] }); showToast('Entry archived', 'success'); await loadAccountAdminData(); }
+                        catch (err) { showToast(err.message, 'error'); btn.disabled = false; }
+                    });
+                });
+                updateActionLogBulkBar();
+            }
+        }
+
+        document.getElementById('actionLogSearch').addEventListener('input', function() {
+            actionLogSearchTerm = this.value.trim();
+            renderActionLog();
+        });
+        document.getElementById('actionLogTypeFilter').addEventListener('change', function() {
+            actionLogTypeFilterValue = this.value;
+            renderActionLog();
+        });
+        document.getElementById('actionLogPeriodToggle').addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-period]');
+            if (!btn) return;
+            actionLogPeriod = btn.dataset.period;
+            this.querySelectorAll('button').forEach(function(b) { b.classList.toggle('active', b === btn); });
+            renderActionLog();
+        });
+
+        document.getElementById('actionLogBulkDeleteBtn').addEventListener('click', async function() {
+            const ids = [...selectedActionLogIds];
+            if (ids.length === 0) return;
+            if (!confirm(`Archive ${ids.length} log entr${ids.length === 1 ? 'y' : 'ies'}? They can be restored later.`)) return;
+            try {
+                await rpc('rep_admin_delete_action_log_entries', { p_admin_id: currentUser.id, p_ids: ids });
+                selectedActionLogIds.clear();
+                showToast('Entry archived', 'success');
+                await loadAccountAdminData();
+            } catch (err) { showToast(err.message, 'error'); }
+        });
+
+        function updateActionLogRecycleBulkBar() {
+            const bar = document.getElementById('actionLogRecycleBulkBar');
+            const count = selectedActionLogRecycleIds.size;
+            document.getElementById('actionLogRecycleBulkCount').textContent = `${count} selected`;
+            bar.classList.toggle('active', count > 0);
+            const selectAll = document.getElementById('actionLogRecycleSelectAll');
+            if (selectAll) selectAll.checked = deletedActionLogData.length > 0 && count === deletedActionLogData.length;
+        }
+
+        function renderActionLogRecycle() {
+            document.getElementById('actionLogRecycleCount').textContent = deletedActionLogData.length;
+            const tbody = document.getElementById('actionLogRecycleTableBody');
+            const validIds = new Set(deletedActionLogData.map(function(l) { return l.id; }));
+            [...selectedActionLogRecycleIds].forEach(function(id) { if (!validIds.has(id)) selectedActionLogRecycleIds.delete(id); });
+            tbody.innerHTML = deletedActionLogData.length
+                ? deletedActionLogData.map(function(l) {
+                    const typeLabel = ACTION_TYPE_LABELS[l.action_type] || l.action_type || '';
+                    return `<tr>
+                        <td><input type="checkbox" class="action-log-recycle-checkbox" data-id="${l.id}" ${selectedActionLogRecycleIds.has(l.id) ? 'checked' : ''}></td>
+                        <td>${formatDate(l.created_at)}</td>
+                        <td>${escapeHtml(l.admin_full_name)}</td>
+                        <td>${escapeHtml(typeLabel)}</td>
+                        <td>${escapeHtml(l.description)}</td>
+                    </tr>`;
+                }).join('')
+                : '<tr><td colspan="5" style="text-align:center; color:#8a9bb0;">Nothing here.</td></tr>';
+            tbody.querySelectorAll('.action-log-recycle-checkbox').forEach(function(cb) {
+                cb.addEventListener('change', function() {
+                    if (this.checked) selectedActionLogRecycleIds.add(this.dataset.id); else selectedActionLogRecycleIds.delete(this.dataset.id);
+                    updateActionLogRecycleBulkBar();
+                });
+            });
+            updateActionLogRecycleBulkBar();
+        }
+
+        document.getElementById('openActionLogRecycleBtn').addEventListener('click', function() {
+            const panel = document.getElementById('actionLogRecyclePanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+        document.getElementById('actionLogRecycleSelectAll').addEventListener('change', function() {
+            selectedActionLogRecycleIds = this.checked ? new Set(deletedActionLogData.map(function(l) { return l.id; })) : new Set();
+            renderActionLogRecycle();
+        });
+        document.getElementById('actionLogBulkRestoreBtn').addEventListener('click', async function() {
+            const ids = [...selectedActionLogRecycleIds];
+            if (ids.length === 0) return;
+            try {
+                await rpc('rep_admin_restore_action_log_entries', { p_admin_id: currentUser.id, p_ids: ids });
+                selectedActionLogRecycleIds.clear();
+                showToast(`${ids.length} entr${ids.length === 1 ? 'y' : 'ies'} restored`, 'success');
+                await loadAccountAdminData();
+            } catch (err) { showToast(err.message, 'error'); }
+        });
+        document.getElementById('cancelSelfDismissBtn').addEventListener('click', function() {
+            document.getElementById('selfDismissAdminModal').classList.remove('active');
+        });
+        document.getElementById('confirmSelfDismissBtn').addEventListener('click', async function() {
+            const errEl = document.getElementById('selfDismissError');
+            errEl.style.display = 'none';
+            const pw = document.getElementById('selfDismissPasswordInput').value;
+            if (!pw) { errEl.textContent = 'Enter your password to confirm'; errEl.style.display = 'block'; return; }
+            const btn = this;
+            btn.disabled = true;
+            try {
+                const ok = await rpc('rep_verify_password', { p_id: currentUser.id, p_password: pw });
+                if (!ok) { errEl.textContent = 'Incorrect password'; errEl.style.display = 'block'; btn.disabled = false; return; }
+                await rpc('rep_admin_set_role', { p_admin_id: currentUser.id, p_target_id: currentUser.id, p_role: 'rep' });
+                document.getElementById('selfDismissAdminModal').classList.remove('active');
+                currentUser.role = 'rep';
+                localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+                applyLoggedInUI();
+                showToast('You are now a representative', 'success');
+                if (typeof window.switchPage === 'function') window.switchPage('alumniSection');
+            } catch (err) {
+                errEl.textContent = err.message; errEl.style.display = 'block';
+            } finally { btn.disabled = false; }
+        });
 
         document.getElementById('adminSubnav').addEventListener('click', function(e) {
             const btn = e.target.closest('button[data-subpage]');
@@ -4441,6 +4838,52 @@
             showAdminPage = function() { _origShowAdminPage(); loadAccountAdminData(); };
         }
 
+        const changeUsernameModal = document.getElementById('changeUsernameModal');
+        document.getElementById('changeUsernameBtn').addEventListener('click', function() {
+            document.getElementById('cuNewUsername').value = currentUser.username || '';
+            document.getElementById('cuError').style.display = 'none';
+            changeUsernameModal.classList.add('active');
+        });
+        document.getElementById('cancelCuBtn').addEventListener('click', function() { changeUsernameModal.classList.remove('active'); });
+        document.getElementById('confirmCuBtn').addEventListener('click', async function() {
+            const errEl = document.getElementById('cuError');
+            errEl.style.display = 'none';
+            const newUsername = document.getElementById('cuNewUsername').value.trim();
+            const btn = this;
+            btn.disabled = true;
+            try {
+                await rpc('rep_change_username', { p_id: currentUser.id, p_new_username: newUsername });
+                currentUser.username = newUsername;
+                localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
+                changeUsernameModal.classList.remove('active');
+                showToast('Username updated — use it next time you sign in', 'success');
+            } catch (err) {
+                errEl.textContent = err.message; errEl.style.display = 'block';
+            } finally { btn.disabled = false; }
+        });
+
+        const requestNameChangeModal = document.getElementById('requestNameChangeModal');
+        document.getElementById('requestNameChangeBtn').addEventListener('click', function() {
+            document.getElementById('rncNewName').value = '';
+            document.getElementById('rncError').style.display = 'none';
+            requestNameChangeModal.classList.add('active');
+        });
+        document.getElementById('cancelRncBtn').addEventListener('click', function() { requestNameChangeModal.classList.remove('active'); });
+        document.getElementById('confirmRncBtn').addEventListener('click', async function() {
+            const errEl = document.getElementById('rncError');
+            errEl.style.display = 'none';
+            const newName = document.getElementById('rncNewName').value.trim();
+            const btn = this;
+            btn.disabled = true;
+            try {
+                await rpc('rep_request_name_change', { p_id: currentUser.id, p_new_full_name: newName });
+                requestNameChangeModal.classList.remove('active');
+                showToast('Request sent — an admin will review it', 'success');
+            } catch (err) {
+                errEl.textContent = err.message; errEl.style.display = 'block';
+            } finally { btn.disabled = false; }
+        });
+
         const changePasswordModal = document.getElementById('changePasswordModal');
         document.getElementById('changePasswordBtn').addEventListener('click', function() {
             document.getElementById('cpOldPassword').value = '';
@@ -4465,34 +4908,6 @@
                 showToast('Password updated', 'success');
             } catch (err) { errEl.textContent = err.message; errEl.style.display = 'block'; }
             finally { btn.disabled = false; }
-        });
-
-        const selfDismissAdminModal = document.getElementById('selfDismissAdminModal');
-        document.getElementById('cancelSelfDismissBtn').addEventListener('click', function() {
-            selfDismissAdminModal.classList.remove('active');
-            document.getElementById('selfDismissPasswordInput').value = '';
-        });
-        document.getElementById('confirmSelfDismissBtn').addEventListener('click', async function() {
-            const errEl = document.getElementById('selfDismissError');
-            errEl.style.display = 'none';
-            const password = document.getElementById('selfDismissPasswordInput').value;
-            if (!password) { errEl.textContent = 'Enter your password to continue'; errEl.style.display = 'block'; return; }
-            const btn = this;
-            btn.disabled = true;
-            try {
-                await rpc('rep_login', { p_username: currentUser.username, p_password: password });
-                await rpc('rep_admin_set_role', { p_admin_id: currentUser.id, p_target_id: currentUser.id, p_role: 'rep' });
-                selfDismissAdminModal.classList.remove('active');
-                document.getElementById('selfDismissPasswordInput').value = '';
-                currentUser.role = 'rep';
-                localStorage.setItem(SESSION_KEY, JSON.stringify(currentUser));
-                applyLoggedInUI();
-                if (typeof window.switchPage === 'function') window.switchPage('alumniSection');
-                showToast('You are no longer an admin', 'success');
-            } catch (err) {
-                errEl.textContent = err.message === 'Invalid credentials' || /password|credential/i.test(err.message) ? 'Incorrect password' : err.message;
-                errEl.style.display = 'block';
-            } finally { btn.disabled = false; }
         });
 
         bootstrapAuth();
