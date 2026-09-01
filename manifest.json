@@ -1,0 +1,30 @@
+{
+  "name": "AMSUL Alumni Onboarding Database",
+  "short_name": "AMSUL Alumni",
+  "description": "Onboarding and alumni tracking database for the Association of Medical Students, University of Lagos.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0b3d34",
+  "theme_color": "#0b3d34",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
