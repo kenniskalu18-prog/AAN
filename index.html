@@ -26,7 +26,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { overscroll-behavior-y: auto; overflow-x: hidden; }
+        html, body { overscroll-behavior-y: contain; overflow-x: hidden; }
         :root {
             --navy:#0b3d34; --navy-light:#12b886; --navy-dark:#0b3d34;
             --teal:#1a5f7a; --green:#2a7a4d; --green-light:#7fd6a0;
@@ -45,14 +45,14 @@
             font-family:'Inter','Segoe UI',Roboto,Arial,sans-serif; padding:0; margin:0; color:#1e2a3a; min-height:100vh; min-height:100dvh;
         }
         .logo-img { height:52px; width:auto; object-fit:contain; }
-        .header-logo-row { display:flex; justify-content:center; margin-top:2.7rem; margin-bottom:0.9rem; width:100%; }
+        .header-logo-row { display:flex; justify-content:center; margin-top:4.6rem; margin-bottom:0.9rem; width:100%; }
         .logo-img-hero { height:64px; width:auto; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(10,42,68,0.18)); }
         .header-title-row { display:flex; justify-content:center; align-items:center; width:100%; text-align:center; margin-bottom:0.9rem; }
         .header-toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.7rem; width:100%; }
         .header-downloads { display:flex; gap:0.6rem; flex-wrap:nowrap; }
         .header-downloads .btn { white-space:nowrap; }
         @media (max-width:420px) { .header-downloads .btn { padding:0.5rem 0.6rem; font-size:0.74rem; } .header-downloads .btn i { font-size:0.85rem; } }
-        .container { max-width:100%; margin:0; background:var(--surface); border-radius:0; box-shadow:none; padding:calc(1.6rem + env(safe-area-inset-top, 0px)) 1.9rem calc(78px + 3rem + env(safe-area-inset-bottom, 0px)); border:none; min-height:100vh; min-height:100dvh; position:relative; z-index:10; transition:transform 0.32s cubic-bezier(.25,.8,.25,1); }
+        .container { max-width:100%; margin:0; background:var(--surface); border-radius:0; box-shadow:none; padding:calc(1.6rem + env(safe-area-inset-top, 0px)) 1.9rem calc(78px + 5rem + env(safe-area-inset-bottom, 0px)); border:none; min-height:100vh; min-height:100dvh; position:relative; z-index:10; transition:transform 0.32s cubic-bezier(.25,.8,.25,1); }
         /* Pushed left to reveal the profile pane parked behind it, like
            sliding to another page — see nav-menu / nav-overlay below. */
         body.nav-push-active .container { transform:translateX(var(--nav-push-amount, 280px)); will-change:transform; }
@@ -97,21 +97,23 @@
         #installBannerDismissBtn { background:transparent; color:#b9c8d8; padding:0.5rem 0.6rem; }
         @media (max-width:480px) { #installBanner .install-text small { display:none; } }
         .header { position:relative; overflow:visible; display:flex; flex-direction:column; border-bottom:none; padding-bottom:1.1rem; margin-bottom:1.6rem; }
-        /* Solid bar that always sits behind the fixed profile/notification
-           icons, sized to the icon height + their top offset + the safe
-           area. Without this, whatever section heading has scrolled up
-           underneath the icons shows straight through them, since the
-           icons themselves have no background of their own.
-           Faded bottom edge (not a hard cutoff) so it blends into the
-           aurora glow below instead of reading as a floating rectangle. */
+        /* Frosted-glass bar behind the fixed profile/notification icons —
+           blurs and dims whatever content has scrolled up underneath them
+           rather than painting a flat, mismatched color block over it.
+           This is what keeps it from ever looking like a floating box
+           that breaks the page's own color scheme: it always shows a
+           soft version of whatever is actually behind it. */
         .fixed-topbar-backdrop {
             position:fixed; top:0; left:0; right:0;
             height:calc(3.6rem + env(safe-area-inset-top, 0px));
-            background:linear-gradient(to bottom, var(--surface) 78%, transparent 100%);
+            background:rgba(0,0,0,0.05);
+            backdrop-filter:blur(18px) saturate(140%);
+            -webkit-backdrop-filter:blur(18px) saturate(140%);
+            -webkit-mask-image:linear-gradient(to bottom, black 55%, transparent 100%);
+            mask-image:linear-gradient(to bottom, black 55%, transparent 100%);
             z-index:1199; pointer-events:none;
         }
-        body.dark-mode .fixed-topbar-backdrop { background:linear-gradient(to bottom, #0f1620 78%, transparent 100%); }
-        body.black-mode .fixed-topbar-backdrop { background:linear-gradient(to bottom, #000000 78%, transparent 100%); }
+        body.dark-mode .fixed-topbar-backdrop, body.black-mode .fixed-topbar-backdrop { background:rgba(0,0,0,0.18); }
         /* IMPORTANT: header-top-row must NOT get position/z-index from the
            ".header > *" rule below. That rule creates a stacking context
            on this element, which traps its position:fixed children (the
@@ -13046,10 +13048,13 @@
             spinner.classList.add('ptr-spinning');
             spinner.style.opacity = '1';
             spinner.style.transform = 'translateX(-50%) translateY(30px)';
+            const pageContainer = document.querySelector('.container');
+            if (pageContainer) { pageContainer.style.transition = 'opacity 0.28s ease'; pageContainer.style.opacity = '0.35'; }
             const startedAt = Date.now();
             try { await pullToRefreshReload(); } catch (e) { console.warn('Pull-to-refresh failed:', e); }
             const elapsed = Date.now() - startedAt;
             if (elapsed < MIN_VISIBLE_MS) await new Promise(function(r) { setTimeout(r, MIN_VISIBLE_MS - elapsed); });
+            if (pageContainer) pageContainer.style.opacity = '1';
             spinner.classList.remove('ptr-spinning');
             spinner.style.opacity = '0';
             spinner.style.transform = 'translateX(-50%) translateY(0px)';
