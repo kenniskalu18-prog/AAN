@@ -26,7 +26,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { overscroll-behavior-y: auto; overflow-x: hidden; }
+        html, body { overscroll-behavior-y: contain; overflow-x: hidden; }
         :root {
             --navy:#0b3d34; --navy-light:#12b886; --navy-dark:#0b3d34;
             --teal:#1a5f7a; --green:#2a7a4d; --green-light:#7fd6a0;
@@ -45,14 +45,14 @@
             font-family:'Inter','Segoe UI',Roboto,Arial,sans-serif; padding:0; margin:0; color:#1e2a3a; min-height:100vh; min-height:100dvh;
         }
         .logo-img { height:52px; width:auto; object-fit:contain; }
-        .header-logo-row { display:flex; justify-content:center; margin-top:2.7rem; margin-bottom:0.9rem; width:100%; }
+        .header-logo-row { display:flex; justify-content:center; margin-top:3.6rem; margin-bottom:0.9rem; width:100%; }
         .logo-img-hero { height:64px; width:auto; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(10,42,68,0.18)); }
         .header-title-row { display:flex; justify-content:center; align-items:center; width:100%; text-align:center; margin-bottom:0.9rem; }
         .header-toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.7rem; width:100%; }
         .header-downloads { display:flex; gap:0.6rem; flex-wrap:nowrap; }
         .header-downloads .btn { white-space:nowrap; }
         @media (max-width:420px) { .header-downloads .btn { padding:0.5rem 0.6rem; font-size:0.74rem; } .header-downloads .btn i { font-size:0.85rem; } }
-        .container { max-width:100%; margin:0; background:var(--surface); border-radius:0; box-shadow:none; padding:calc(1.6rem + env(safe-area-inset-top, 0px)) 1.9rem calc(78px + 2.2rem + env(safe-area-inset-bottom, 0px)); border:none; min-height:100vh; min-height:100dvh; position:relative; z-index:10; transition:transform 0.32s cubic-bezier(.25,.8,.25,1); }
+        .container { max-width:100%; margin:0; background:var(--surface); border-radius:0; box-shadow:none; padding:calc(1.6rem + env(safe-area-inset-top, 0px)) 1.9rem calc(78px + 3.4rem + env(safe-area-inset-bottom, 0px)); border:none; min-height:100vh; min-height:100dvh; position:relative; z-index:10; transition:transform 0.32s cubic-bezier(.25,.8,.25,1); }
         /* Pushed left to reveal the profile pane parked behind it, like
            sliding to another page — see nav-menu / nav-overlay below. */
         body.nav-push-active .container { transform:translateX(var(--nav-push-amount, 280px)); will-change:transform; }
@@ -97,6 +97,18 @@
         #installBannerDismissBtn { background:transparent; color:#b9c8d8; padding:0.5rem 0.6rem; }
         @media (max-width:480px) { #installBanner .install-text small { display:none; } }
         .header { position:relative; overflow:visible; display:flex; flex-direction:column; border-bottom:none; padding-bottom:1.1rem; margin-bottom:1.6rem; }
+        /* Solid bar that always sits behind the fixed profile/notification
+           icons, at the exact height they occupy (icon height + their
+           top offset + the safe area). Without this, whatever section
+           heading has scrolled up underneath the icons shows straight
+           through them since the icons themselves have no background. */
+        .fixed-topbar-backdrop {
+            position:fixed; top:0; left:0; right:0;
+            height:calc(3.3rem + env(safe-area-inset-top, 0px));
+            background:var(--surface); z-index:1199; pointer-events:none;
+        }
+        body.dark-mode .fixed-topbar-backdrop { background:#0f1620; }
+        body.black-mode .fixed-topbar-backdrop { background:#000000; }
         /* Flowing aurora — layered wave-like bands using the site's own
            accent colors, drifting horizontally and vertically like real
            aurora curtains. Deliberately NOT clipped to the header's own
@@ -373,7 +385,7 @@
         .showing-count { font-size:0.78rem; color:#5b6f86; margin:-0.3rem 0 0.5rem; font-weight:500; }
         .table-wrapper { overflow-x:auto; overflow-y:auto; max-height:420px; margin-top:0.5rem; border:1px solid #edf2f6; border-radius:8px; scroll-behavior:smooth; }
         .table-wrapper th { position:sticky; top:0; z-index:5; }
-        table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+        table { width:100%; min-width:640px; border-collapse:collapse; font-size:0.85rem; }
         th { background:var(--surface-alt); text-align:left; padding:0.8rem 0.7rem; font-weight:700; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.4px; color:var(--navy); border-bottom:2px solid var(--border); white-space:nowrap; }
         td { padding:0.7rem 0.7rem; border-bottom:1px solid #edf2f6; vertical-align:middle; }
         tbody tr { transition:background 0.12s; }
@@ -1749,6 +1761,7 @@
 </nav>
 
 <div class="container">
+    <div class="fixed-topbar-backdrop"></div>
     <div class="header">
         <div class="header-aurora"></div>
         <div class="header-top-row">
@@ -3695,6 +3708,11 @@
                     clearPressTimer(); // real movement of any kind cancels the long-press
                     horizontal = Math.abs(dx) > Math.abs(dy) * 1.3;
                     if (!horizontal) { dragging = false; return; }
+                    // If this row's table has columns wider than the screen,
+                    // a horizontal drag should scroll the table sideways,
+                    // not trigger the archive/delete swipe underneath it.
+                    const scrollWrapper = tr.closest('.table-wrapper');
+                    if (scrollWrapper && scrollWrapper.scrollWidth > scrollWrapper.clientWidth + 1) { dragging = false; return; }
                 }
                 const clamped = Math.max(-130, Math.min(130, dx));
                 tr.style.transform = `translateX(${clamped}px)`;
