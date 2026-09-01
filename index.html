@@ -185,7 +185,7 @@
         /* Since the profile trigger is now removed from the flex flow
            (fixed position), push the top-right actions there directly
            instead of relying on space-between with an "empty" left side. */
-        .header-top-row { justify-content:flex-end; }
+        .header-top-row { justify-content:flex-end; position:static; z-index:auto; }
         .header-actions-top {
             display:flex; align-items:center; gap:0.5rem; flex-shrink:0;
             position:fixed; top:calc(0.8rem + env(safe-area-inset-top, 0px)); right:0.9rem; z-index:1200;
