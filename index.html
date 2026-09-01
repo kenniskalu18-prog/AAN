@@ -26,7 +26,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        html, body { overscroll-behavior-y: contain; overflow-x: hidden; }
+        html, body { overscroll-behavior-y: auto; overflow-x: hidden; }
         :root {
             --navy:#0b3d34; --navy-light:#12b886; --navy-dark:#0b3d34;
             --teal:#1a5f7a; --green:#2a7a4d; --green-light:#7fd6a0;
@@ -45,14 +45,14 @@
             font-family:'Inter','Segoe UI',Roboto,Arial,sans-serif; padding:0; margin:0; color:#1e2a3a; min-height:100vh; min-height:100dvh;
         }
         .logo-img { height:52px; width:auto; object-fit:contain; }
-        .header-logo-row { display:flex; justify-content:center; margin-top:3.6rem; margin-bottom:0.9rem; width:100%; }
+        .header-logo-row { display:flex; justify-content:center; margin-top:2.7rem; margin-bottom:0.9rem; width:100%; }
         .logo-img-hero { height:64px; width:auto; object-fit:contain; filter:drop-shadow(0 4px 10px rgba(10,42,68,0.18)); }
         .header-title-row { display:flex; justify-content:center; align-items:center; width:100%; text-align:center; margin-bottom:0.9rem; }
         .header-toolbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.7rem; width:100%; }
         .header-downloads { display:flex; gap:0.6rem; flex-wrap:nowrap; }
         .header-downloads .btn { white-space:nowrap; }
         @media (max-width:420px) { .header-downloads .btn { padding:0.5rem 0.6rem; font-size:0.74rem; } .header-downloads .btn i { font-size:0.85rem; } }
-        .container { max-width:100%; margin:0; background:var(--surface); border-radius:0; box-shadow:none; padding:calc(1.6rem + env(safe-area-inset-top, 0px)) 1.9rem calc(78px + 3.4rem + env(safe-area-inset-bottom, 0px)); border:none; min-height:100vh; min-height:100dvh; position:relative; z-index:10; transition:transform 0.32s cubic-bezier(.25,.8,.25,1); }
+        .container { max-width:100%; margin:0; background:var(--surface); border-radius:0; box-shadow:none; padding:calc(1.6rem + env(safe-area-inset-top, 0px)) 1.9rem calc(78px + 2.2rem + env(safe-area-inset-bottom, 0px)); border:none; min-height:100vh; min-height:100dvh; position:relative; z-index:10; transition:transform 0.32s cubic-bezier(.25,.8,.25,1); }
         /* Pushed left to reveal the profile pane parked behind it, like
            sliding to another page — see nav-menu / nav-overlay below. */
         body.nav-push-active .container { transform:translateX(var(--nav-push-amount, 280px)); will-change:transform; }
@@ -97,18 +97,6 @@
         #installBannerDismissBtn { background:transparent; color:#b9c8d8; padding:0.5rem 0.6rem; }
         @media (max-width:480px) { #installBanner .install-text small { display:none; } }
         .header { position:relative; overflow:visible; display:flex; flex-direction:column; border-bottom:none; padding-bottom:1.1rem; margin-bottom:1.6rem; }
-        /* Solid bar that always sits behind the fixed profile/notification
-           icons, at the exact height they occupy (icon height + their
-           top offset + the safe area). Without this, whatever section
-           heading has scrolled up underneath the icons shows straight
-           through them since the icons themselves have no background. */
-        .fixed-topbar-backdrop {
-            position:fixed; top:0; left:0; right:0;
-            height:calc(3.3rem + env(safe-area-inset-top, 0px));
-            background:var(--surface); z-index:1199; pointer-events:none;
-        }
-        body.dark-mode .fixed-topbar-backdrop { background:#0f1620; }
-        body.black-mode .fixed-topbar-backdrop { background:#000000; }
         /* Flowing aurora — layered wave-like bands using the site's own
            accent colors, drifting horizontally and vertically like real
            aurora curtains. Deliberately NOT clipped to the header's own
@@ -185,7 +173,7 @@
         /* Since the profile trigger is now removed from the flex flow
            (fixed position), push the top-right actions there directly
            instead of relying on space-between with an "empty" left side. */
-        .header-top-row { justify-content:flex-end; position:static; z-index:auto; }
+        .header-top-row { justify-content:flex-end; }
         .header-actions-top {
             display:flex; align-items:center; gap:0.5rem; flex-shrink:0;
             position:fixed; top:calc(0.8rem + env(safe-area-inset-top, 0px)); right:0.9rem; z-index:1200;
@@ -385,7 +373,7 @@
         .showing-count { font-size:0.78rem; color:#5b6f86; margin:-0.3rem 0 0.5rem; font-weight:500; }
         .table-wrapper { overflow-x:auto; overflow-y:auto; max-height:420px; margin-top:0.5rem; border:1px solid #edf2f6; border-radius:8px; scroll-behavior:smooth; }
         .table-wrapper th { position:sticky; top:0; z-index:5; }
-        table { width:100%; min-width:640px; border-collapse:collapse; font-size:0.85rem; }
+        table { width:100%; border-collapse:collapse; font-size:0.85rem; }
         th { background:var(--surface-alt); text-align:left; padding:0.8rem 0.7rem; font-weight:700; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.4px; color:var(--navy); border-bottom:2px solid var(--border); white-space:nowrap; }
         td { padding:0.7rem 0.7rem; border-bottom:1px solid #edf2f6; vertical-align:middle; }
         tbody tr { transition:background 0.12s; }
@@ -1761,7 +1749,6 @@
 </nav>
 
 <div class="container">
-    <div class="fixed-topbar-backdrop"></div>
     <div class="header">
         <div class="header-aurora"></div>
         <div class="header-top-row">
@@ -3708,11 +3695,6 @@
                     clearPressTimer(); // real movement of any kind cancels the long-press
                     horizontal = Math.abs(dx) > Math.abs(dy) * 1.3;
                     if (!horizontal) { dragging = false; return; }
-                    // If this row's table has columns wider than the screen,
-                    // a horizontal drag should scroll the table sideways,
-                    // not trigger the archive/delete swipe underneath it.
-                    const scrollWrapper = tr.closest('.table-wrapper');
-                    if (scrollWrapper && scrollWrapper.scrollWidth > scrollWrapper.clientWidth + 1) { dragging = false; return; }
                 }
                 const clamped = Math.max(-130, Math.min(130, dx));
                 tr.style.transform = `translateX(${clamped}px)`;
@@ -12976,6 +12958,97 @@
             });
         });
     }
+
+    // ---------- PULL TO REFRESH ----------
+    // Custom implementation: only activates when already scrolled to the
+    // very top, shows a spinner while pulling, and on release re-fetches
+    // the live data (not a page reload) so you stay on whatever tab/page
+    // you were viewing and see the change immediately.
+    (function() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .ptr-spinner {
+                position:fixed; left:50%; top:calc(0.6rem + env(safe-area-inset-top, 0px));
+                width:34px; height:34px; margin-left:-17px;
+                border-radius:50%; background:var(--surface); box-shadow:0 2px 10px rgba(0,0,0,0.25);
+                display:flex; align-items:center; justify-content:center;
+                opacity:0; transform:translateY(-40px) scale(0.7);
+                transition:opacity 0.18s ease; z-index:5000; pointer-events:none;
+            }
+            .ptr-spinner i { color:var(--teal); font-size:1rem; }
+            .ptr-spinner.ptr-spinning i { animation:ptrSpin 0.7s linear infinite; }
+            @keyframes ptrSpin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+        `;
+        document.head.appendChild(style);
+
+        const spinner = document.createElement('div');
+        spinner.className = 'ptr-spinner';
+        spinner.innerHTML = '<i class="fas fa-rotate-right"></i>';
+        document.body.appendChild(spinner);
+
+        const THRESHOLD = 70;
+        let startY = null, pulling = false, refreshing = false;
+
+        document.addEventListener('touchstart', function(e) {
+            if (refreshing) return;
+            if ((window.scrollY || document.documentElement.scrollTop || 0) > 0) return;
+            if (e.target.closest('.modal-overlay, .modal-box, input, textarea, select')) return;
+            startY = e.touches[0].clientY;
+            pulling = false;
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function(e) {
+            if (refreshing || startY === null) return;
+            const dy = e.touches[0].clientY - startY;
+            if (dy <= 0) return;
+            if ((window.scrollY || document.documentElement.scrollTop || 0) > 0) { startY = null; return; }
+            pulling = true;
+            const pull = Math.min(dy * 0.5, 90);
+            spinner.style.opacity = Math.min(pull / THRESHOLD, 1);
+            spinner.style.transform = `translateY(${pull - 40}px) scale(${0.7 + 0.3 * Math.min(pull / THRESHOLD, 1)}) rotate(${pull * 3}deg)`;
+        }, { passive: true });
+
+        document.addEventListener('touchend', async function() {
+            if (!pulling || refreshing) { startY = null; pulling = false; return; }
+            const pulledEnough = spinner.style.opacity === '1';
+            pulling = false;
+            startY = null;
+            if (!pulledEnough) {
+                spinner.style.opacity = '0';
+                spinner.style.transform = 'translateY(-40px) scale(0.7)';
+                return;
+            }
+            refreshing = true;
+            spinner.classList.add('ptr-spinning');
+            spinner.style.opacity = '1';
+            spinner.style.transform = 'translateY(30px) scale(1) rotate(0deg)';
+            try { await pullToRefreshReload(); } catch (e) { console.warn('Pull-to-refresh failed:', e); }
+            spinner.classList.remove('ptr-spinning');
+            spinner.style.opacity = '0';
+            spinner.style.transform = 'translateY(-40px) scale(0.7)';
+            refreshing = false;
+        }, { passive: true });
+
+        // Re-fetches live data in place — same tab, same scroll position,
+        // no navigation, nothing torn down and rebuilt.
+        window.pullToRefreshReload = async function() {
+            if (typeof setStatusBadge === 'function') setStatusBadge('syncing');
+            const tasks = [];
+            if (typeof loadFromSupabase === 'function') tasks.push(loadFromSupabase().catch(function(e) { console.warn(e); }));
+            if (typeof loadPendingFromSupabase === 'function') tasks.push(loadPendingFromSupabase().catch(function(e) { console.warn(e); }));
+            if (typeof loadRecycleBin === 'function') tasks.push(loadRecycleBin().catch(function(e) { console.warn(e); }));
+            if (typeof loadActivityLog === 'function') tasks.push(loadActivityLog().catch(function(e) { console.warn(e); }));
+            if (typeof loadActivityRecycleBin === 'function') tasks.push(loadActivityRecycleBin().catch(function(e) { console.warn(e); }));
+            if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'admin') {
+                if (typeof refreshAdminData === 'function') tasks.push(refreshAdminData().catch(function(e) { console.warn(e); }));
+                if (typeof loadAccountAdminData === 'function') tasks.push(loadAccountAdminData().catch(function(e) { console.warn(e); }));
+            }
+            if (typeof pollAdminNotifications === 'function') tasks.push(pollAdminNotifications().catch(function(e) { console.warn(e); }));
+            await Promise.all(tasks);
+            if (typeof setStatusBadge === 'function') setStatusBadge('synced');
+            if (typeof showToast === 'function') showToast('Refreshed', 'success');
+        };
+    })();
 </script>
 </body>
 </html>
